@@ -81,6 +81,8 @@ async function handleCpCommand(interaction, question) {
     let userMsg;
     if (status === 429) {
       userMsg = '⚠️ Rate limit Gemini tercapai. Coba lagi sebentar lagi.';
+    } else if (status === 503 || status === 500) {
+      userMsg = '⚠️ Server Gemini sedang sibuk/overload. Ini sementara — coba lagi beberapa saat lagi.';
     } else if (status === 404) {
       userMsg = `⚠️ Model "${GEMINI_MODEL}" tidak ditemukan/sudah dipensiunkan. Set env GEMINI_MODEL ke model yang aktif.`;
     } else {
@@ -90,24 +92,38 @@ async function handleCpCommand(interaction, question) {
   }
 }
 
-// Fungsi dengan Retry Logic untuk menangani 429
-async function askGemini(question, retries = 0) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-  
+// Status yang layak di-retry: rate limit (429) + error sementara di sisi server Google (500/503).
+const RETRYABLE_STATUS = [429, 500, 503];
+// Model cadangan kalau model utama overload. Bisa di-override via env GEMINI_FALLBACK_MODEL.
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-2.0-flash';
+
+// Fungsi dengan Retry Logic + Exponential Backoff
+async function askGemini(question, retries = 0, model = GEMINI_MODEL) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
   try {
     const { data } = await axios.post(url, {
       contents: [{ role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\nPertanyaan: ${question}` }] }]
     }, { timeout: 15000 });
-    
+
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada jawaban.';
   } catch (err) {
-    // Jika 429 (Too Many Requests), coba lagi dengan jeda (Exponential Backoff)
-    if (err.response?.status === 429 && retries < 5) {
+    const status = err.response?.status;
+
+    // 429/500/503 -> coba lagi dengan jeda yang makin panjang (max 5x).
+    if (RETRYABLE_STATUS.includes(status) && retries < 5) {
       const waitTime = (Math.pow(2, retries) * 2000) + (Math.random() * 1000);
-      console.log(`[askGemini] 429 Terdeteksi, retry ke-${retries + 1} dalam ${Math.round(waitTime)}ms`);
+      console.log(`[askGemini] ${status} terdeteksi (model=${model}), retry ke-${retries + 1} dalam ${Math.round(waitTime)}ms`);
       await sleep(waitTime);
-      return askGemini(question, retries + 1);
+      return askGemini(question, retries + 1, model);
     }
+
+    // Kalau model utama tetap overload (503/500) setelah habis retry, coba sekali ke model cadangan.
+    if ([500, 503].includes(status) && model === GEMINI_MODEL && FALLBACK_MODEL !== GEMINI_MODEL) {
+      console.log(`[askGemini] Model utama (${model}) overload, beralih ke fallback ${FALLBACK_MODEL}`);
+      return askGemini(question, 0, FALLBACK_MODEL);
+    }
+
     throw err;
   }
 }

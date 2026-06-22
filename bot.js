@@ -8,8 +8,17 @@
 // Wajib aktifkan "MESSAGE CONTENT INTENT" di Discord Developer Portal:
 //   Applications -> (bot kamu) -> Bot -> Privileged Gateway Intents -> Message Content Intent.
 
+const http = require('http');
 const { Client, GatewayIntentBits, Partials, AttachmentBuilder } = require('discord.js');
 const { isImageRequest, askGemini, generateImage, formatAnswer, friendlyError } = require('./lib/ai');
+
+// Health server kecil: Railway/Render mendeteksi service sebagai "hidup" lewat PORT.
+// Bot Gateway sebenarnya tidak butuh HTTP, tapi ini mencegah platform menandai crash.
+const port = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is running');
+}).listen(port, () => console.log(`[bot] Health server di port ${port}`));
 
 const client = new Client({
   intents: [

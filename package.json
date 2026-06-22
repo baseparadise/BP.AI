@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "Discord bot - /cp command menjawab pertanyaan pakai Gemini AI",
   "main": "api/index.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
   "dependencies": {
+    "@vercel/functions": "^1.0.0",
     "axios": "1.7.7",
     "discord-interactions": "3.4.0",
-    "tweetnacl": "1.0.3",
-    "@vercel/functions": "^1.0.0"
+    "discord.js": "^14.26.4",
+    "form-data": "^4.0.6",
+    "tweetnacl": "1.0.3"
   }
 }

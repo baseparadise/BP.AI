@@ -18,7 +18,9 @@ const { InteractionType, InteractionResponseType } = require('discord-interactio
 const { waitUntil } = require('@vercel/functions');
 
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash'; // Disarankan 1.5-flash
+// CATATAN: gemini-1.5-flash SUDAH DIPENSIUNKAN Google (retired 2025) -> request balik 404.
+// Pakai model yang masih aktif. 'gemini-2.5-flash' stabil & murah. Bisa override via env GEMINI_MODEL.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const SYSTEM_PROMPT = 'Kamu adalah asisten AI yang ramah dan membantu di server Discord. Jawab singkat, jelas, dan dalam Bahasa Indonesia.';
 
 // Fungsi delay untuk retry logic
@@ -71,8 +73,20 @@ async function handleCpCommand(interaction, question) {
     const answer = await askGemini(question);
     await axios.post(webhookUrl, { content: answer });
   } catch (err) {
-    console.error('[handleCpCommand] Gagal:', err.message);
-    await axios.post(webhookUrl, { content: '⚠️ Gagal memproses jawaban AI. (Rate limit atau error API)' });
+    // Tampilkan penyebab asli supaya gampang dilacak (status + pesan dari Google API).
+    const status = err.response?.status;
+    const apiMsg = err.response?.data?.error?.message || err.message;
+    console.error('[handleCpCommand] Gagal:', status, apiMsg);
+
+    let userMsg;
+    if (status === 429) {
+      userMsg = '⚠️ Rate limit Gemini tercapai. Coba lagi sebentar lagi.';
+    } else if (status === 404) {
+      userMsg = `⚠️ Model "${GEMINI_MODEL}" tidak ditemukan/sudah dipensiunkan. Set env GEMINI_MODEL ke model yang aktif.`;
+    } else {
+      userMsg = `⚠️ Gagal memproses jawaban AI. (${status || 'error'}: ${apiMsg})`;
+    }
+    await axios.post(webhookUrl, { content: userMsg });
   }
 }
 

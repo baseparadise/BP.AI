@@ -11,45 +11,53 @@
 //    dan Discord stuck "thinking..." selamanya.
 // 3. Logging detail di setiap tahap supaya kalau gagal, gampang dilacak dari Vercel Logs.
 
+// api/index.js
 const nacl = require('tweetnacl');
 const axios = require('axios');
 const { InteractionType, InteractionResponseType } = require('discord-interactions');
-const { waitUntil } = require('@vercel/functions'); // WAJIB: Library untuk menjaga proses tetap hidup
+const { waitUntil } = require('@vercel/functions');
 
 const PUBLIC_KEY = process.env.PUBLIC_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash'; // Disarankan 1.5-flash
 const SYSTEM_PROMPT = 'Kamu adalah asisten AI yang ramah dan membantu di server Discord. Jawab singkat, jelas, dan dalam Bahasa Indonesia.';
 
+// Fungsi delay untuk retry logic
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 module.exports = async (req, res) => {
+  // 1. Baca Raw Body (Wajib untuk verifikasi Discord)
   const rawBody = await readRawBody(req);
   const signature = req.headers['x-signature-ed25519'];
   const timestamp = req.headers['x-signature-timestamp'];
 
+  // 2. Verifikasi Keamanan
   if (!verifyDiscordRequest(rawBody, signature, timestamp, PUBLIC_KEY)) {
     return res.status(401).end('Invalid request signature');
   }
 
   const interaction = JSON.parse(rawBody.toString());
 
+  // 3. Jawab PING (Discord handshake)
   if (interaction.type === InteractionType.PING) {
     return res.json({ type: InteractionResponseType.PONG });
   }
 
+  // 4. Handle Slash Command /cp
   if (interaction.type === InteractionType.APPLICATION_COMMAND && interaction.data?.name === 'cp') {
-    const userQuestion = interaction.data.options[0].value;
+    const userQuestion = interaction.data.options?.[0]?.value || 'Halo';
 
-    // 1. Kirim ACK segera
+    // Segera kirim ACK agar tidak timeout
     res.status(200).json({
       type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
     });
 
-    // 2. Gunakan waitUntil agar proses AI di latar belakang tidak dimatikan Vercel
+    // Jalankan di latar belakang dengan waitUntil agar tidak terbunuh Vercel
     waitUntil(
       handleCpCommand(interaction, userQuestion)
         .catch(err => console.error('[index] Error background:', err))
     );
     
-    return; 
+    return;
   }
 
   res.status(404).end('Unknown interaction');
@@ -63,26 +71,44 @@ async function handleCpCommand(interaction, question) {
     const answer = await askGemini(question);
     await axios.post(webhookUrl, { content: answer });
   } catch (err) {
-    console.error(err);
-    await axios.post(webhookUrl, { content: 'Gagal memproses jawaban AI.' });
+    console.error('[handleCpCommand] Gagal:', err.message);
+    await axios.post(webhookUrl, { content: '⚠️ Gagal memproses jawaban AI. (Rate limit atau error API)' });
   }
 }
 
-async function askGemini(question) {
+// Fungsi dengan Retry Logic untuk menangani 429
+async function askGemini(question, retries = 0) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-  const { data } = await axios.post(url, {
-    contents: [{ role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\n${question}` }] }]
-  }, { timeout: 15000 });
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada jawaban.';
+  
+  try {
+    const { data } = await axios.post(url, {
+      contents: [{ role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\nPertanyaan: ${question}` }] }]
+    }, { timeout: 15000 });
+    
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada jawaban.';
+  } catch (err) {
+    // Jika 429 (Too Many Requests), coba lagi dengan jeda (Exponential Backoff)
+    if (err.response?.status === 429 && retries < 5) {
+      const waitTime = (Math.pow(2, retries) * 2000) + (Math.random() * 1000);
+      console.log(`[askGemini] 429 Terdeteksi, retry ke-${retries + 1} dalam ${Math.round(waitTime)}ms`);
+      await sleep(waitTime);
+      return askGemini(question, retries + 1);
+    }
+    throw err;
+  }
 }
 
 function verifyDiscordRequest(rawBody, signature, timestamp, publicKey) {
   if (!signature || !timestamp || !publicKey) return false;
-  return nacl.sign.detached.verify(
-    Buffer.from(timestamp + rawBody),
-    Buffer.from(signature, 'hex'),
-    Buffer.from(publicKey, 'hex')
-  );
+  try {
+    return nacl.sign.detached.verify(
+      Buffer.from(timestamp + rawBody),
+      Buffer.from(signature, 'hex'),
+      Buffer.from(publicKey, 'hex')
+    );
+  } catch {
+    return false;
+  }
 }
 
 function readRawBody(req) {

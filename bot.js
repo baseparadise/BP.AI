@@ -9,7 +9,7 @@
 //   Applications -> (bot kamu) -> Bot -> Privileged Gateway Intents -> Message Content Intent.
 
 const http = require('http');
-const { Client, GatewayIntentBits, Partials, AttachmentBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, AttachmentBuilder, MessageFlags } = require('discord.js');
 const { isImageRequest, askGemini, generateImage, formatAnswer, friendlyError } = require('./lib/ai');
 
 // Health server kecil: Railway/Render mendeteksi service sebagai "hidup" lewat PORT.
@@ -73,7 +73,11 @@ client.on('messageCreate', async (message) => {
 
     // Mode teks + pencarian + sumber.
     const { text, sources } = await askGemini(question);
-    await message.reply(formatAnswer(text, sources));
+    await message.reply({
+      content: formatAnswer(text, sources),
+      // Matikan preview link supaya tidak memenuhi layar.
+      flags: MessageFlags.SuppressEmbeds,
+    });
   } catch (err) {
     await message.reply(friendlyError(err)).catch(() => {});
   }

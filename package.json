@@ -1,0 +1,11 @@
+{
+  "name": "discord-gemini-bot",
+  "version": "1.0.0",
+  "description": "Discord bot - /cp command menjawab pertanyaan pakai Gemini AI",
+  "main": "api/index.js",
+  "dependencies": {
+    "axios": "1.7.7",
+    "discord-interactions": "3.4.0",
+    "tweetnacl": "1.0.3"
+  }
+}

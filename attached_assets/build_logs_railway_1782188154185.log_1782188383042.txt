@@ -1,0 +1,232 @@
+2026-06-23T04:14:58.045931037Z [info] scheduling build on Metal builder "production-builderv3-us-west1-7p87"
+2026-06-23T04:14:58.836920855Z [info] unpacking archive
+2026-06-23T04:14:58.892430114Z [info] using build driver railpack-v0.30.0
+2026-06-23T04:14:58.893152799Z [info] uploading snapshot
+2026-06-23T04:14:59.003417969Z [info]                    
+2026-06-23T04:14:59.003422373Z [info] ╭─────────────────╮
+2026-06-23T04:14:59.003423603Z [info] │ Railpack 0.30.0 │
+2026-06-23T04:14:59.003424427Z [info] ╰─────────────────╯
+2026-06-23T04:14:59.003424904Z [info] 
+2026-06-23T04:14:59.003425513Z [info]   ↳ Detected Node
+2026-06-23T04:14:59.003426018Z [info]   ↳ Custom start command detected, skipping Caddy start
+2026-06-23T04:14:59.003426457Z [info]   ↳ Custom start command detected, skipping Caddy start
+2026-06-23T04:14:59.003427644Z [info]   ↳ Using pnpm package manager
+2026-06-23T04:14:59.003428116Z [info]   ↳ Found workspace with 7 packages
+2026-06-23T04:14:59.003428510Z [info]   ↳ Custom start command detected, skipping Caddy start
+2026-06-23T04:14:59.003429302Z [info]   ↳ Installing pnpm@10.26.1 with Corepack
+2026-06-23T04:14:59.003430029Z [info]             
+2026-06-23T04:14:59.003430582Z [info]   Packages  
+2026-06-23T04:14:59.003431211Z [info]   ──────────
+2026-06-23T04:14:59.003433215Z [info]   node  │  22.22.3  │  railpack default (22)
+2026-06-23T04:14:59.003434142Z [info]   pnpm  │  10.26.1  │  package.json > packageManager (10.26.1)
+2026-06-23T04:14:59.003434627Z [info]             
+2026-06-23T04:14:59.003435032Z [info]   Steps     
+2026-06-23T04:14:59.003436089Z [info]   ──────────
+2026-06-23T04:14:59.003437197Z [info]   ▸ install
+2026-06-23T04:14:59.003438082Z [info]     $ npm i -g corepack@latest && corepack enable && corepack prepare --activate
+2026-06-23T04:14:59.003438693Z [info]     $ pnpm install --frozen-lockfile --prefer-offline
+2026-06-23T04:14:59.003439365Z [info]          
+2026-06-23T04:14:59.003439936Z [info]   ▸ build
+2026-06-23T04:14:59.003440515Z [info]     $ pnpm run build
+2026-06-23T04:14:59.003441054Z [info]             
+2026-06-23T04:14:59.003441601Z [info]   Deploy    
+2026-06-23T04:14:59.003443398Z [info]   ──────────
+2026-06-23T04:14:59.003444867Z [info]     $ node start.js
+2026-06-23T04:14:59.003445393Z [info] 
+2026-06-23T04:14:59.060180730Z [info] resolve image config for docker-image://ghcr.io/railwayapp/railpack-frontend:v0.30.0
+2026-06-23T04:15:05.995589853Z [info] resolve image config for docker-image://ghcr.io/railwayapp/railpack-frontend:v0.30.0
+2026-06-23T04:15:05.995739709Z [info] docker-image://ghcr.io/railwayapp/railpack-frontend:v0.30.0@sha256:8120546d9e67be53c7edebec900ed69ef724fbde890d43cb24455dfca4aebcc0
+2026-06-23T04:15:05.995742555Z [info] docker-image://ghcr.io/railwayapp/railpack-frontend:v0.30.0@sha256:8120546d9e67be53c7edebec900ed69ef724fbde890d43cb24455dfca4aebcc0
+2026-06-23T04:15:05.995743130Z [info] docker-image://ghcr.io/railwayapp/railpack-frontend:v0.30.0@sha256:8120546d9e67be53c7edebec900ed69ef724fbde890d43cb24455dfca4aebcc0
+2026-06-23T04:15:06.313551797Z [info] load build definition from ./railpack-plan.json
+2026-06-23T04:15:06.313590290Z [info] load build definition from ./railpack-plan.json
+2026-06-23T04:15:06.314495885Z [info] load build definition from ./railpack-plan.json
+2026-06-23T04:15:06.348658082Z [info] load build definition from ./railpack-plan.json
+2026-06-23T04:15:06.389844996Z [info] copy /usr/local/bin/mise
+2026-06-23T04:15:06.389846306Z [info] copy /mise/installs
+2026-06-23T04:15:06.389847072Z [info] copy /mise/shims
+2026-06-23T04:15:06.389847608Z [info] install mise packages: node
+2026-06-23T04:15:06.389848186Z [info] create mise config
+2026-06-23T04:15:06.389848726Z [info] mkdir /etc/mise
+2026-06-23T04:15:06.389849273Z [info] install apt packages: libatomic1
+2026-06-23T04:15:06.389849784Z [info] docker-image://ghcr.io/railwayapp/railpack-runtime:mise-2026.6.12
+2026-06-23T04:15:06.389850881Z [info] docker-image://ghcr.io/railwayapp/railpack-runtime:mise-2026.6.12
+2026-06-23T04:15:06.389851563Z [info] docker-image://ghcr.io/railwayapp/railpack-builder:mise-2026.6.12
+2026-06-23T04:15:06.389852191Z [info] docker-image://ghcr.io/railwayapp/railpack-builder:mise-2026.6.12
+2026-06-23T04:15:06.389861660Z [info] copy package.json
+2026-06-23T04:15:06.389862279Z [info] copy / /app
+2026-06-23T04:15:06.389862831Z [info] loading .
+2026-06-23T04:15:06.389863315Z [info] copy /root/.local/state/mise
+2026-06-23T04:15:06.389864142Z [info] copy /etc/mise/config.toml
+2026-06-23T04:15:06.389902759Z [info] copy /mise/shims
+2026-06-23T04:15:06.389905863Z [info] copy /mise/installs
+2026-06-23T04:15:06.389906522Z [info] copy /opt/corepack
+2026-06-23T04:15:06.389907032Z [info] copy /app
+2026-06-23T04:15:06.389907456Z [info] copy /root/.cache
+2026-06-23T04:15:06.389907949Z [info] copy /app/node_modules
+2026-06-23T04:15:06.389908357Z [info] pnpm run build
+2026-06-23T04:15:06.389908766Z [info] [railpack] secrets hash
+2026-06-23T04:15:06.389909169Z [info] copy / /app
+2026-06-23T04:15:06.389909726Z [info] pnpm install --frozen-lockfile --prefer-offline
+2026-06-23T04:15:06.389910598Z [info] mkdir -p /app/node_modules/.cache
+2026-06-23T04:15:06.389911304Z [info] npm i -g corepack@latest && corepack enable && corepack prepare --activate
+2026-06-23T04:15:06.390062678Z [info] [railpack] secrets hash
+2026-06-23T04:15:06.390149929Z [info] loading .
+2026-06-23T04:15:06.392906818Z [info] install apt packages: libatomic1
+2026-06-23T04:15:06.392974911Z [info] mkdir /etc/mise
+2026-06-23T04:15:06.392975947Z [info] create mise config
+2026-06-23T04:15:06.392976610Z [info] loading .
+2026-06-23T04:15:06.392977096Z [info] [railpack] secrets hash
+2026-06-23T04:15:06.399541354Z [info] create mise config
+2026-06-23T04:15:06.399786465Z [info] install mise packages: node
+2026-06-23T04:15:06.496377239Z [info] loading .
+2026-06-23T04:15:06.533818976Z [info] [railpack] secrets hash
+2026-06-23T04:15:06.955555784Z [info] mise node@22.22.3    [1/3] install
+
+2026-06-23T04:15:06.956936281Z [info] mise node@22.22.3    [1/3] download node-v22.22.3-linux-x64.tar.gz
+
+2026-06-23T04:15:07.906119674Z [info] mise node@22.22.3    [2/3] generate checksum node-v22.22.3-linux-x64.tar.gz
+
+2026-06-23T04:15:07.925566154Z [info] mise node@22.22.3    [3/3] extract node-v22.22.3-linux-x64.tar.gz
+
+2026-06-23T04:15:08.609133781Z [info] mise node@22.22.3    [3/3] node -v
+
+2026-06-23T04:15:08.614135385Z [info] mise node@22.22.3    [3/3] v22.22.3
+
+2026-06-23T04:15:08.615690463Z [info] mise node@22.22.3    [3/3] npm -v
+
+2026-06-23T04:15:08.725920607Z [info] mise node@22.22.3    [3/3] 10.9.8
+
+2026-06-23T04:15:08.730274544Z [info] mise node@22.22.3    [3/3] enable corepack shims
+
+2026-06-23T04:15:08.806865751Z [info] mise node@22.22.3  ✓ installed
+
+2026-06-23T04:15:09.388244331Z [info] install mise packages: node
+2026-06-23T04:15:09.398360994Z [info] copy / /app
+2026-06-23T04:15:09.579743233Z [info] copy / /app
+2026-06-23T04:15:09.587317411Z [info] copy package.json
+2026-06-23T04:15:09.653176105Z [info] copy package.json
+2026-06-23T04:15:09.704294439Z [info] npm i -g corepack@latest && corepack enable && corepack prepare --activate
+2026-06-23T04:15:09.773403025Z [info] copy /mise/shims
+2026-06-23T04:15:09.852708842Z [info] copy /mise/shims
+2026-06-23T04:15:09.935879946Z [info] npm warn config production Use `--omit=dev` instead.
+
+2026-06-23T04:15:10.092625600Z [info] copy /mise/installs
+2026-06-23T04:15:10.485089213Z [info] 
+changed 1 package in 571ms
+
+2026-06-23T04:15:10.519049659Z [info] Reshimming mise 22.22.3...
+
+2026-06-23T04:15:10.670617553Z [info] copy /mise/installs
+2026-06-23T04:15:10.682184562Z [info] Preparing pnpm@10.26.1 for immediate activation...
+
+2026-06-23T04:15:10.683088049Z [info] copy /usr/local/bin/mise
+2026-06-23T04:15:10.858189835Z [info] copy /usr/local/bin/mise
+2026-06-23T04:15:10.866553160Z [info] copy /etc/mise/config.toml
+2026-06-23T04:15:10.952630433Z [info] copy /etc/mise/config.toml
+2026-06-23T04:15:10.960554147Z [info] copy /root/.local/state/mise
+2026-06-23T04:15:11.038683372Z [info] copy /root/.local/state/mise
+2026-06-23T04:15:11.470721509Z [info] npm i -g corepack@latest && corepack enable && corepack prepare --activate
+2026-06-23T04:15:11.477592234Z [info] mkdir -p /app/node_modules/.cache
+2026-06-23T04:15:11.631311147Z [info] mkdir -p /app/node_modules/.cache
+2026-06-23T04:15:11.638553759Z [info] pnpm install --frozen-lockfile --prefer-offline
+2026-06-23T04:15:12.206956203Z [info] Scope: all 8 workspace projects
+
+2026-06-23T04:15:12.255100734Z [info] Lockfile is up to date, resolution step is skipped
+
+2026-06-23T04:15:12.277865688Z [info] Progress: resolved 1, reused 0, downloaded 0, added 0
+
+2026-06-23T04:15:12.316314885Z [info] Packages: +511
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+2026-06-23T04:15:13.278854547Z [info] Progress: resolved 511, reused 0, downloaded 501, added 367
+
+2026-06-23T04:15:13.825665094Z [info] Progress: resolved 511, reused 0, downloaded 511, added 511, done
+
+2026-06-23T04:15:13.981192056Z [info] .../esbuild@0.27.3/node_modules/esbuild postinstall$ node install.js
+
+2026-06-23T04:15:14.051171432Z [info] .../esbuild@0.27.3/node_modules/esbuild postinstall: Done
+
+2026-06-23T04:15:14.315005170Z [info] 
+devDependencies:
++ prettier 3.8.3
++ typescript 5.9.3
+
+
+2026-06-23T04:15:14.336075221Z [info] . preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+
+2026-06-23T04:15:14.378748152Z [info] . preinstall: Done
+
+2026-06-23T04:15:14.549489730Z [info] Done in 2.6s using pnpm v10.26.1
+
+2026-06-23T04:15:14.901321156Z [info] pnpm install --frozen-lockfile --prefer-offline
+2026-06-23T04:15:14.909494244Z [info] copy / /app
+2026-06-23T04:15:15.207991056Z [info] copy / /app
+2026-06-23T04:15:15.216304537Z [info] pnpm run build
+2026-06-23T04:15:15.756155699Z [info] 
+> workspace@0.0.0 build /app
+> pnpm run typecheck && pnpm -r --if-present run build
+
+
+2026-06-23T04:15:16.004324315Z [info] 
+> workspace@0.0.0 typecheck /app
+> pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filter "./scripts" --if-present run typecheck
+
+
+2026-06-23T04:15:16.254952022Z [info] 
+> workspace@0.0.0 typecheck:libs /app
+> tsc --build
+
+
+2026-06-23T04:15:17.902652038Z [info] Scope: 3 of 8 workspace projects
+
+2026-06-23T04:15:17.907567790Z [info] artifacts/api-server typecheck$ tsc -p tsconfig.json --noEmit
+
+2026-06-23T04:15:17.908077681Z [info] artifacts/mockup-sandbox typecheck$ tsc -p tsconfig.json --noEmit
+
+2026-06-23T04:15:17.908385308Z [info] scripts typecheck$ tsc -p tsconfig.json --noEmit
+
+2026-06-23T04:15:18.438048333Z [info] scripts typecheck: Done
+
+2026-06-23T04:15:18.618368004Z [info] artifacts/api-server typecheck: Done
+
+2026-06-23T04:15:21.238277974Z [info] artifacts/mockup-sandbox typecheck: Done
+
+2026-06-23T04:15:21.526392718Z [info] Scope: 7 of 8 workspace projects
+
+2026-06-23T04:15:21.531672721Z [info] artifacts/mockup-sandbox build$ vite build
+
+2026-06-23T04:15:22.169552651Z [info] artifacts/mockup-sandbox build: failed to load config from /app/artifacts/mockup-sandbox/vite.config.ts
+
+2026-06-23T04:15:22.170740545Z [info] artifacts/mockup-sandbox build: error during build:
+
+2026-06-23T04:15:22.171008256Z [info] artifacts/mockup-sandbox build: Error: PORT environment variable is required but was not provided.
+
+2026-06-23T04:15:22.171256661Z [info] artifacts/mockup-sandbox build:     at file:///app/artifacts/mockup-sandbox/node_modules/.vite-temp/vite.config.ts.timestamp-1782188121922-65f10fd596c6f.mjs:145:9
+
+2026-06-23T04:15:22.171542744Z [info] artifacts/mockup-sandbox build:     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+
+2026-06-23T04:15:22.171779864Z [info] artifacts/mockup-sandbox build:     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+
+2026-06-23T04:15:22.172006177Z [info] artifacts/mockup-sandbox build:     at async loadConfigFromBundledFile (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35936:12)
+
+2026-06-23T04:15:22.172444297Z [info] artifacts/mockup-sandbox build:     at async bundleAndLoadConfigFile (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35824:17)
+
+2026-06-23T04:15:22.172618689Z [info] artifacts/mockup-sandbox build:     at async loadConfigFromFile (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35791:42)
+
+2026-06-23T04:15:22.172727612Z [info] artifacts/mockup-sandbox build:     at async resolveConfig (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:35440:22)
+
+2026-06-23T04:15:22.172854922Z [info] artifacts/mockup-sandbox build:     at async createBuilder (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/chunks/config.js:33895:19)
+
+2026-06-23T04:15:22.173030820Z [info] artifacts/mockup-sandbox build:     at async CAC.<anonymous> (file:///app/node_modules/.pnpm/vite@7.3.3_@types+node@25.6.2_jiti@2.7.0_lightningcss@1.32.0_tsx@4.21.0_yaml@2.8.4/node_modules/vite/dist/node/cli.js:629:10)
+
+2026-06-23T04:15:22.187968942Z [info] artifacts/mockup-sandbox build: Failed
+
+2026-06-23T04:15:22.202393006Z [info] /app/artifacts/mockup-sandbox:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/mockup-sandbox@2.0.0 build: `vite build`
+Exit status 1
+
+2026-06-23T04:15:22.245742796Z [info]  ELIFECYCLE  Command failed with exit code 1.
+
+2026-06-23T04:15:22.335299311Z [error] pnpm run build
+2026-06-23T04:15:22.381831956Z [error] Build Failed: build daemon returned an error < failed to solve: process "pnpm run build" did not complete successfully: exit code: 1 >

@@ -1,2 +1,5 @@
+[build]
+buildCommand = "echo 'skip build'"
+
 [deploy]
 startCommand = "node start.js"

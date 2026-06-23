@@ -43,7 +43,8 @@ Contoh jawaban yang BENAR:
 
 // ── Histori percakapan per channel ──────────────────────────────────────────
 const history = new Map();
-const MAX_HISTORY = 14; // 7 pasang pesan
+const bootstrapped = new Set(); // channel yang sudah di-fetch history-nya
+const MAX_HISTORY = 40; // 20 pasang pesan
 
 function getHistory(channelId) {
   if (!history.has(channelId)) history.set(channelId, []);
@@ -54,6 +55,32 @@ function pushHistory(channelId, role, text) {
   const h = getHistory(channelId);
   h.push({ role, parts: [{ text }] });
   while (h.length > MAX_HISTORY) h.splice(0, 2);
+}
+
+// Fetch 60 pesan terakhir dari channel Discord sebagai konteks awal
+async function bootstrapHistory(channel, selfId) {
+  if (bootstrapped.has(channel.id)) return;
+  bootstrapped.add(channel.id);
+  try {
+    const fetched = await channel.messages.fetch({ limit: 60 });
+    // Urutkan dari lama ke baru
+    const msgs = [...fetched.values()].reverse();
+    const h = getHistory(channel.id);
+    for (const msg of msgs) {
+      if (!msg.content || msg.content.trim() === '') continue;
+      const name = msg.member?.displayName || msg.author.username;
+      const text = `${name}: ${msg.content.replace(/<@!?\d+>/g, '').trim()}`;
+      if (!text || text.length < 3) continue;
+      // Pesan dari vtardio sendiri → role model, sisanya → role user
+      const role = msg.author.id === selfId ? 'model' : 'user';
+      h.push({ role, parts: [{ text }] });
+    }
+    // Batasi supaya tidak overflow
+    while (h.length > MAX_HISTORY) h.splice(0, 2);
+    console.log(`[userbot] bootstrap channel ${channel.id}: ${h.length} pesan dimuat`);
+  } catch (err) {
+    console.warn(`[userbot] gagal fetch history channel ${channel.id}:`, err.message);
+  }
 }
 
 // ── Panggil Gemini pakai callGemini dari lib/ai.js (rotasi key 4 putaran) ───
@@ -109,6 +136,9 @@ client.on('messageCreate', async (message) => {
 
     const question = message.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
     if (!question) return;
+
+    // Muat history channel Discord (sekali per channel sejak bot nyala)
+    await bootstrapHistory(message.channel, client.user.id);
 
     // Refresh typing setiap 8 detik selama proses Gemini
     const typingInterval = setInterval(() => {

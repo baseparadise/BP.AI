@@ -1,0 +1,105 @@
+2026-06-23T04:02:47.596895729Z [info] scheduling build on Metal builder "production-builderv3-us-west1-7p87"
+2026-06-23T04:02:48.167974954Z [info] fetched snapshot sha256:753f02c9a1ca981f78aaa9e6d30b46f6ab839c1dcd86347a824dd319d9d83d75 (34 kB bytes)
+2026-06-23T04:02:48.167976024Z [info] fetching snapshot
+2026-06-23T04:02:48.216287231Z [info] unpacking archive
+2026-06-23T04:02:48.269415229Z [info] using build driver nixpacks-v1.41.0
+2026-06-23T04:02:48.320450479Z [info] 
+2026-06-23T04:02:48.320454197Z [info] ╔═══════════ Nixpacks v1.41.0 ══════════╗
+2026-06-23T04:02:48.320454918Z [info] ║ setup      │ nodejs_24, pnpm-8_x      ║
+2026-06-23T04:02:48.320455853Z [info] ║───────────────────────────────────────║
+2026-06-23T04:02:48.320456289Z [info] ║ install    │ pnpm i --frozen-lockfile ║
+2026-06-23T04:02:48.320456932Z [info] ║───────────────────────────────────────║
+2026-06-23T04:02:48.320457291Z [info] ║ start      │ node bot.js              ║
+2026-06-23T04:02:48.320457974Z [info] ╚═══════════════════════════════════════╝
+2026-06-23T04:02:48.320458246Z [info] 
+2026-06-23T04:02:48.320934664Z [info] 
+2026-06-23T04:02:48.320936722Z [info] Saved output to:
+2026-06-23T04:02:48.320937166Z [info]   snapshot-target-unpack
+2026-06-23T04:02:48.366919971Z [info] [internal] load build definition from Dockerfile
+2026-06-23T04:02:48.366920748Z [info] [internal] load build definition from Dockerfile
+2026-06-23T04:02:48.366921652Z [info] [internal] load build definition from Dockerfile
+2026-06-23T04:02:48.406740807Z [info] [internal] load build definition from Dockerfile
+2026-06-23T04:02:48.428303023Z [info] [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+2026-06-23T04:03:01.333969808Z [info] [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+2026-06-23T04:03:01.334487740Z [info] [internal] load .dockerignore
+2026-06-23T04:03:01.334492734Z [info] [internal] load .dockerignore
+2026-06-23T04:03:01.336454983Z [info] [internal] load .dockerignore
+2026-06-23T04:03:01.383886714Z [info] [internal] load .dockerignore
+2026-06-23T04:03:01.391764123Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "DISCORD_TOKEN") (line 11)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.391766501Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "DISCORD_USER_TOKEN") (line 11)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.391766952Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 11)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.392068632Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "DISCORD_TOKEN") (line 12)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.392069419Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "DISCORD_USER_TOKEN") (line 12)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.392069890Z [warn] SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "GEMINI_API_KEY") (line 12)(https://docs.docker.com/go/dockerfile/rule/secrets-used-in-arg-or-env/)
+ details: Sensitive data should not be used in the ARG or ENV commands
+
+2026-06-23T04:03:01.392144481Z [warn] UndefinedVar: Usage of undefined variable '$NIXPACKS_PATH' (line 18)(https://docs.docker.com/go/dockerfile/rule/undefined-var/)
+ details: Variables should be defined before their use
+
+2026-06-23T04:03:01.394735514Z [info] [stage-0 8/8] COPY . /app
+2026-06-23T04:03:01.394736540Z [info] [stage-0 7/8] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+2026-06-23T04:03:01.394738117Z [info] [stage-0 6/8] RUN --mount=type=cache,id=s/9926b60d-cea3-4c71-ba42-6782687aeac4-/root/local/share/pnpm/store/v3,target=/root/.local/share/pnpm/store/v3 pnpm i --frozen-lockfile
+2026-06-23T04:03:01.394738879Z [info] [stage-0 5/8] COPY . /app/.
+2026-06-23T04:03:01.394739559Z [info] [stage-0 4/8] RUN nix-env -if .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix && nix-collect-garbage -d
+2026-06-23T04:03:01.394740875Z [info] [stage-0 3/8] COPY .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix
+2026-06-23T04:03:01.394741376Z [info] [internal] load build context
+2026-06-23T04:03:01.394741797Z [info] [stage-0 2/8] WORKDIR /app/
+2026-06-23T04:03:01.394742500Z [info] [stage-0 1/8] FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
+2026-06-23T04:03:01.394743022Z [info] [stage-0 1/8] FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
+2026-06-23T04:03:01.394745820Z [info] [internal] load build context
+2026-06-23T04:03:01.395761521Z [info] [internal] load build context
+2026-06-23T04:03:01.526975316Z [info] [internal] load build context
+2026-06-23T04:03:01.563127168Z [info] [stage-0 2/8] WORKDIR /app/
+2026-06-23T04:03:01.563127904Z [info] [stage-0 3/8] COPY .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix
+2026-06-23T04:03:01.563128431Z [info] [stage-0 4/8] RUN nix-env -if .nixpacks/nixpkgs-23f9169c4ccce521379e602cc82ed873a1f1b52b.nix && nix-collect-garbage -d
+2026-06-23T04:03:01.563229758Z [info] [stage-0 5/8] COPY . /app/.
+2026-06-23T04:03:05.032087160Z [info] [stage-0 5/8] COPY . /app/.
+2026-06-23T04:03:05.057368407Z [info] [stage-0 6/8] RUN --mount=type=cache,id=s/9926b60d-cea3-4c71-ba42-6782687aeac4-/root/local/share/pnpm/store/v3,target=/root/.local/share/pnpm/store/v3 pnpm i --frozen-lockfile
+2026-06-23T04:03:06.336220519Z [info] (node:1) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+2026-06-23T04:03:06.352925909Z [info] Lockfile is up to date, resolution step is skipped
+
+2026-06-23T04:03:06.365925272Z [info] Progress: resolved 1, reused 0, downloaded 0, added 0
+
+2026-06-23T04:03:06.410127804Z [info] Packages: +113
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+2026-06-23T04:03:07.367021863Z [info] Progress: resolved 113, reused 113, downloaded 0, added 111
+
+2026-06-23T04:03:07.659610576Z [info] Progress: resolved 113, reused 113, downloaded 0, added 113, done
+
+2026-06-23T04:03:07.727977394Z [info] 
+dependencies:
++ @vercel/functions 1.6.0
++ axios 1.7.7
++ discord-interactions 3.4.0
++ discord.js 14.26.4
++ discord.js-selfbot-v13 3.7.1
++ form-data 4.0.6
++ tweetnacl 1.0.3
+
+
+2026-06-23T04:03:07.730767212Z [info] Done in 1.9s
+
+2026-06-23T04:03:07.906944901Z [info] [stage-0 6/8] RUN --mount=type=cache,id=s/9926b60d-cea3-4c71-ba42-6782687aeac4-/root/local/share/pnpm/store/v3,target=/root/.local/share/pnpm/store/v3 pnpm i --frozen-lockfile
+2026-06-23T04:03:07.918511142Z [info] [stage-0 7/8] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+2026-06-23T04:03:08.185685072Z [info] [stage-0 7/8] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+2026-06-23T04:03:08.204560037Z [info] [stage-0 8/8] COPY . /app
+2026-06-23T04:03:08.324199187Z [info] [stage-0 8/8] COPY . /app
+2026-06-23T04:03:08.355159676Z [info] exporting to docker image format
+2026-06-23T04:03:09.969659683Z [info] exporting to docker image format
+2026-06-23T04:03:10.034420450Z [info] containerimage.digest: sha256:ce5a7bd855a035551b451e47d6280dac5cfc335dad904781d48deb6ef16e3ac9
+2026-06-23T04:03:10.034422929Z [info] containerimage.descriptor: eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQub2NpLmltYWdlLm1hbmlmZXN0LnYxK2pzb24iLCJkaWdlc3QiOiJzaGEyNTY6Y2U1YTdiZDg1NWEwMzU1NTFiNDUxZTQ3ZDYyODBkYWM1Y2ZjMzM1ZGFkOTA0NzgxZDQ4ZGViNmVmMTZlM2FjOSIsInNpemUiOjIzODMsImFubm90YXRpb25zIjp7Im9yZy5vcGVuY29udGFpbmVycy5pbWFnZS5jcmVhdGVkIjoiMjAyNi0wNi0yM1QwNDowMzowOFoifSwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19
+2026-06-23T04:03:10.034424178Z [info] containerimage.config.digest: sha256:13f0c831ab633e9a9d4ebf1ed1ed0e180ec3d2b92addd406ef17e299fa435690
+2026-06-23T04:03:18.296364405Z [info] image push

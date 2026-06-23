@@ -4,7 +4,9 @@
   "description": "Discord bot - /cp command menjawab pertanyaan pakai Gemini AI",
   "main": "api/index.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "start:bot": "node bot.js",
+    "start:user": "node userbot.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -14,6 +16,7 @@
     "axios": "1.7.7",
     "discord-interactions": "3.4.0",
     "discord.js": "^14.26.4",
+    "discord.js-selfbot-v13": "^3.7.1",
     "form-data": "^4.0.6",
     "tweetnacl": "1.0.3"
   }

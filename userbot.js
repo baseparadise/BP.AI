@@ -78,25 +78,32 @@ async function replyAsHuman(channelId, authorName, question) {
     },
   };
 
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
   let lastErr;
-  for (let i = 0; i < API_KEYS.length; i++) {
-    const key = API_KEYS[keyCursor % API_KEYS.length];
-    keyCursor++;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
-    try {
-      const { data } = await axios.post(url, body, { timeout: 20000 });
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
-      // Hanya simpan ke histori kalau berhasil
-      pushHistory(channelId, 'user', userText);
-      pushHistory(channelId, 'model', text);
+  // Coba semua key dua putaran dengan backoff antar putaran
+  for (let round = 0; round < 2; round++) {
+    for (let i = 0; i < API_KEYS.length; i++) {
+      const key = API_KEYS[keyCursor % API_KEYS.length];
+      keyCursor++;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
+      try {
+        const { data } = await axios.post(url, body, { timeout: 20000 });
+        const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
-      return stripLinks(text);
-    } catch (err) {
-      lastErr = err;
-      if ([429, 500, 503].includes(err.response?.status)) continue;
-      throw err;
+        // Hanya simpan ke histori kalau berhasil
+        pushHistory(channelId, 'user', userText);
+        pushHistory(channelId, 'model', text);
+
+        return stripLinks(text);
+      } catch (err) {
+        lastErr = err;
+        if ([429, 500, 503].includes(err.response?.status)) continue;
+        throw err;
+      }
     }
+    // Semua key habis di putaran ini, tunggu sebelum coba lagi
+    if (round < 1) await sleep(3000 + Math.random() * 2000);
   }
   throw lastErr;
 }

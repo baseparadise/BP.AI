@@ -1,0 +1,1047 @@
+2026-06-23T04:24:52.312512192Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:24:52.312515562Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:24:52.312518852Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:24:52.312523092Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:24:52.312528192Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:24:52.312532931Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:24:52.312537641Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:24:52.312542241Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:24:52.312548091Z [err]  }
+2026-06-23T04:24:52.312552541Z [err]  
+2026-06-23T04:24:52.312556911Z [err]  Node.js v22.22.3
+2026-06-23T04:24:52.318000002Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:24:52.318006292Z [err]    throw err;
+2026-06-23T04:24:52.318009362Z [err]    ^
+2026-06-23T04:24:52.318012892Z [err]  
+2026-06-23T04:24:52.318017232Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:24:52.318022602Z [err]  Require stack:
+2026-06-23T04:24:52.318024062Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:24:52.318029052Z [err]  - /app/bot.js
+2026-06-23T04:24:52.318033872Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:24:52.318038732Z [err]  }
+2026-06-23T04:24:52.318039982Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:24:52.318044992Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:24:52.318050092Z [err]  
+2026-06-23T04:24:52.318050432Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:24:52.318057921Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:24:52.318061931Z [err]  Node.js v22.22.3
+2026-06-23T04:24:52.318064071Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:24:52.318071371Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:24:52.318072721Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:24:52.318076771Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:24:52.318080321Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:24:52.318083121Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:24:52.318086371Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:24:52.322693160Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:24:57.362262235Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:24:57.362268075Z [err]    throw err;
+2026-06-23T04:24:57.362273815Z [err]    ^
+2026-06-23T04:24:57.362281985Z [err]  
+2026-06-23T04:24:57.362287805Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:24:57.362292845Z [err]  Require stack:
+2026-06-23T04:24:57.362298155Z [err]  - /app/bot.js
+2026-06-23T04:24:57.362302785Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:24:57.362308885Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:24:57.362313385Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:24:57.362318185Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:24:57.362323215Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:24:57.362328305Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:24:57.362333585Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:24:57.362338335Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:24:57.362343865Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:24:57.362349774Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:24:57.362355434Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:24:57.362360074Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:24:57.362365414Z [err]  }
+2026-06-23T04:24:57.362370284Z [err]  
+2026-06-23T04:24:57.362375394Z [err]  Node.js v22.22.3
+2026-06-23T04:24:57.362380044Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:24:57.362384744Z [err]    throw err;
+2026-06-23T04:24:57.362389874Z [err]    ^
+2026-06-23T04:24:57.362394844Z [err]  
+2026-06-23T04:24:57.362399414Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:24:57.362498973Z [err]  Require stack:
+2026-06-23T04:24:57.362504063Z [err]  - /app/userbot.js
+2026-06-23T04:24:57.362509313Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:24:57.362514023Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:24:57.362519113Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:24:57.362524853Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:24:57.362529823Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:24:57.362534173Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:24:57.362539653Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:24:57.362544643Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:24:57.362549103Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:24:57.362553802Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:24:57.362558342Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:24:57.362563672Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:24:57.362568562Z [err]  }
+2026-06-23T04:24:57.362573422Z [err]  
+2026-06-23T04:24:57.362577652Z [err]  Node.js v22.22.3
+2026-06-23T04:24:57.362582552Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:24:57.362587072Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:02.391464213Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:02.391478772Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:02.391481592Z [err]    throw err;
+2026-06-23T04:25:02.391484852Z [err]    ^
+2026-06-23T04:25:02.391488272Z [err]  
+2026-06-23T04:25:02.391491082Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:02.391494312Z [err]  Require stack:
+2026-06-23T04:25:02.391526062Z [err]  - /app/bot.js
+2026-06-23T04:25:02.391539402Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:02.391544342Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:02.391552732Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:02.391557792Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:02.391562342Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:02.391566232Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:02.391570032Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:02.391576621Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:02.391581081Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:02.391585491Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:02.391589981Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:02.391593831Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:02.391597421Z [err]  }
+2026-06-23T04:25:02.391602151Z [err]  
+2026-06-23T04:25:02.391606571Z [err]  Node.js v22.22.3
+2026-06-23T04:25:02.391610101Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:02.391614331Z [err]    throw err;
+2026-06-23T04:25:02.391617621Z [err]    ^
+2026-06-23T04:25:02.391621101Z [err]  
+2026-06-23T04:25:02.392200776Z [err]  }
+2026-06-23T04:25:02.392212656Z [err]  
+2026-06-23T04:25:02.392218706Z [err]  Node.js v22.22.3
+2026-06-23T04:25:02.392223636Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:02.392228116Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:02.392232096Z [err]  Require stack:
+2026-06-23T04:25:02.392241126Z [err]  - /app/userbot.js
+2026-06-23T04:25:02.392245556Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:02.392249336Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:02.392253016Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:02.392257206Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:02.392261196Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:02.392264596Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:02.392268256Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:02.392273276Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:02.392277366Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:02.392280676Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:02.392284486Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:02.392287876Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:07.408793733Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:07.408800503Z [err]    throw err;
+2026-06-23T04:25:07.408803793Z [err]    ^
+2026-06-23T04:25:07.408806523Z [err]  
+2026-06-23T04:25:07.408808953Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:07.408812103Z [err]  Require stack:
+2026-06-23T04:25:07.408815003Z [err]  - /app/bot.js
+2026-06-23T04:25:07.408822283Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:07.408825023Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:07.408828303Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:07.408831293Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:07.408833763Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:07.408836403Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:07.408838743Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:07.408841333Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:07.408843993Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:07.408847393Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:07.408849843Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:07.408853143Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:07.408855793Z [err]  }
+2026-06-23T04:25:07.408858362Z [err]  
+2026-06-23T04:25:07.408860962Z [err]  Node.js v22.22.3
+2026-06-23T04:25:07.408863432Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:07.408866132Z [err]    throw err;
+2026-06-23T04:25:07.408868872Z [err]    ^
+2026-06-23T04:25:07.408871562Z [err]  
+2026-06-23T04:25:07.408873922Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:07.409216310Z [err]  Require stack:
+2026-06-23T04:25:07.409219330Z [err]  - /app/userbot.js
+2026-06-23T04:25:07.409221760Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:07.409224000Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:07.409226730Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:07.409230330Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:07.409232610Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:07.409234880Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:07.409237220Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:07.409239460Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:07.409242760Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:07.409245530Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:07.409248270Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:07.409250790Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:07.409253470Z [err]  }
+2026-06-23T04:25:07.409255880Z [err]  
+2026-06-23T04:25:07.409258490Z [err]  Node.js v22.22.3
+2026-06-23T04:25:07.409261030Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:07.414124835Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:12.528893058Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:12.528896618Z [err]    throw err;
+2026-06-23T04:25:12.528899928Z [err]    ^
+2026-06-23T04:25:12.528903378Z [err]  
+2026-06-23T04:25:12.528907168Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:12.528910528Z [err]  Require stack:
+2026-06-23T04:25:12.528913758Z [err]  - /app/bot.js
+2026-06-23T04:25:12.528917818Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:12.528921068Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:12.528924138Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:12.528927698Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:12.528931338Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:12.528934348Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:12.528937768Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:12.528944528Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:12.528947648Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:12.528951088Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:12.528954798Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:12.528958078Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:12.528960768Z [err]  }
+2026-06-23T04:25:12.528963948Z [err]  
+2026-06-23T04:25:12.528967628Z [err]  Node.js v22.22.3
+2026-06-23T04:25:12.528970768Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:12.528974258Z [err]    throw err;
+2026-06-23T04:25:12.528977678Z [err]    ^
+2026-06-23T04:25:12.528981168Z [err]  
+2026-06-23T04:25:12.528984718Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:12.529575993Z [err]  Require stack:
+2026-06-23T04:25:12.529578973Z [err]  - /app/userbot.js
+2026-06-23T04:25:12.529582663Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:12.529585983Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:12.529589223Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:12.529592183Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:12.529595273Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:12.529598583Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:12.529601683Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:12.529604683Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:12.529607803Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:12.529611273Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:12.529614752Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:12.529618012Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:12.529620962Z [err]  }
+2026-06-23T04:25:12.529624622Z [err]  
+2026-06-23T04:25:12.529627552Z [err]  Node.js v22.22.3
+2026-06-23T04:25:12.529630512Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:12.529633712Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:17.492573541Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:17.492584271Z [err]    throw err;
+2026-06-23T04:25:17.492587000Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:17.492591510Z [err]    ^
+2026-06-23T04:25:17.492597570Z [err]  
+2026-06-23T04:25:17.492600750Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:17.492605360Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:17.492608580Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:17.492615760Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:17.492616510Z [err]  Require stack:
+2026-06-23T04:25:17.492620600Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:17.492626530Z [err]  - /app/userbot.js
+2026-06-23T04:25:17.492629380Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:17.492634100Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:17.492636340Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:17.492643780Z [err]  }
+2026-06-23T04:25:17.492644420Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:17.492651620Z [err]  
+2026-06-23T04:25:17.492654210Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:17.492657970Z [err]  Node.js v22.22.3
+2026-06-23T04:25:17.492664760Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:17.492664940Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:17.492671950Z [err]    throw err;
+2026-06-23T04:25:17.492674680Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:17.492678240Z [err]    ^
+2026-06-23T04:25:17.492682300Z [err]  
+2026-06-23T04:25:17.622138583Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:17.622149763Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:17.622154833Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:17.622158572Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:17.622163492Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:17.622168132Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:17.622171982Z [err]  }
+2026-06-23T04:25:17.622176512Z [err]  
+2026-06-23T04:25:17.622180822Z [err]  Node.js v22.22.3
+2026-06-23T04:25:17.622185152Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:17.622190342Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:17.622193692Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:17.622196792Z [err]  Require stack:
+2026-06-23T04:25:17.622200412Z [err]  - /app/bot.js
+2026-06-23T04:25:17.622203472Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:17.622206392Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:17.622209672Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:17.622212572Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:17.622215292Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:17.622218182Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:22.623172755Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:22.623176335Z [err]    throw err;
+2026-06-23T04:25:22.623180375Z [err]    ^
+2026-06-23T04:25:22.623183835Z [err]  
+2026-06-23T04:25:22.623186775Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:22.623189695Z [err]  Require stack:
+2026-06-23T04:25:22.623193335Z [err]  - /app/userbot.js
+2026-06-23T04:25:22.623196724Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:22.623200564Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:22.623204314Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:22.623207404Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:22.623211044Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:22.623213954Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:22.623216914Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:22.623220144Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:22.623222984Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:22.623225914Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:22.623230974Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:22.623238344Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:22.623241154Z [err]  }
+2026-06-23T04:25:22.623244124Z [err]  
+2026-06-23T04:25:22.623247274Z [err]  Node.js v22.22.3
+2026-06-23T04:25:22.623250354Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:22.623253484Z [err]    throw err;
+2026-06-23T04:25:22.623256794Z [err]    ^
+2026-06-23T04:25:22.623260064Z [err]  
+2026-06-23T04:25:22.623582712Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:22.623585442Z [err]  Require stack:
+2026-06-23T04:25:22.623587772Z [err]  - /app/bot.js
+2026-06-23T04:25:22.623590142Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:22.623592472Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:22.623595072Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:22.623598482Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:22.623600832Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:22.623603192Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:22.623605692Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:22.623608222Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:22.623611121Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:22.623613771Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:22.623616761Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:22.623618851Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:22.623621171Z [err]  }
+2026-06-23T04:25:22.623623361Z [err]  
+2026-06-23T04:25:22.623625751Z [err]  Node.js v22.22.3
+2026-06-23T04:25:22.623627901Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:22.623630271Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:27.529845290Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:27.529848379Z [err]    throw err;
+2026-06-23T04:25:27.529851559Z [err]    ^
+2026-06-23T04:25:27.529854679Z [err]  
+2026-06-23T04:25:27.529857549Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:27.529860589Z [err]  Require stack:
+2026-06-23T04:25:27.529863529Z [err]  - /app/userbot.js
+2026-06-23T04:25:27.529866579Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:27.529869489Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:27.529873189Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:27.529876489Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:27.529879439Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:27.529882429Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:27.529885469Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:27.529888199Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:27.529891369Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:27.529895169Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:27.529898139Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:27.529901109Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:27.529903969Z [err]  }
+2026-06-23T04:25:27.529906839Z [err]  
+2026-06-23T04:25:27.529909849Z [err]  Node.js v22.22.3
+2026-06-23T04:25:27.529912499Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:27.529915339Z [err]    throw err;
+2026-06-23T04:25:27.529918719Z [err]    ^
+2026-06-23T04:25:27.529921769Z [err]  
+2026-06-23T04:25:27.530228587Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:27.530232037Z [err]  Require stack:
+2026-06-23T04:25:27.530235017Z [err]  - /app/bot.js
+2026-06-23T04:25:27.530238167Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:27.530240977Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:27.530243827Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:27.530246827Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:27.530249647Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:27.530252927Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:27.530255927Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:27.530258987Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:27.530262206Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:27.530265236Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:27.530267966Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:27.530270626Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:27.530273376Z [err]  }
+2026-06-23T04:25:27.530276936Z [err]  
+2026-06-23T04:25:27.530280576Z [err]  Node.js v22.22.3
+2026-06-23T04:25:27.536962017Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:27.536964947Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:32.567897495Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:32.567902275Z [err]    throw err;
+2026-06-23T04:25:32.567905865Z [err]    ^
+2026-06-23T04:25:32.567908965Z [err]  
+2026-06-23T04:25:32.567912095Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:32.567914955Z [err]  Require stack:
+2026-06-23T04:25:32.567919685Z [err]  - /app/userbot.js
+2026-06-23T04:25:32.567922715Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:32.567925615Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:32.567928195Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:32.567930945Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:32.567933545Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:32.567936405Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:32.567939605Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:32.567942765Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:32.567945355Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:32.567948045Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:32.567951225Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:32.567953665Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:32.567956265Z [err]  }
+2026-06-23T04:25:32.567960055Z [err]  
+2026-06-23T04:25:32.567962695Z [err]  Node.js v22.22.3
+2026-06-23T04:25:32.567965765Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:32.567968485Z [err]    throw err;
+2026-06-23T04:25:32.567971055Z [err]    ^
+2026-06-23T04:25:32.567973665Z [err]  
+2026-06-23T04:25:32.568447251Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:32.568450821Z [err]  Require stack:
+2026-06-23T04:25:32.568454221Z [err]  - /app/bot.js
+2026-06-23T04:25:32.568458411Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:32.568462981Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:32.568466661Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:32.568470431Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:32.568473741Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:32.568476981Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:32.568480351Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:32.568483541Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:32.568488251Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:32.568491851Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:32.568494911Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:32.568499141Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:32.568502371Z [err]  }
+2026-06-23T04:25:32.568505960Z [err]  
+2026-06-23T04:25:32.568509960Z [err]  Node.js v22.22.3
+2026-06-23T04:25:32.568514330Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:32.568517550Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:37.611574092Z [err]    throw err;
+2026-06-23T04:25:37.611579632Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:37.611581062Z [err]    ^
+2026-06-23T04:25:37.611583592Z [err]    throw err;
+2026-06-23T04:25:37.611585122Z [err]  
+2026-06-23T04:25:37.611586872Z [err]    ^
+2026-06-23T04:25:37.611590232Z [err]  
+2026-06-23T04:25:37.611593603Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:37.611597443Z [err]  Require stack:
+2026-06-23T04:25:37.611600523Z [err]  - /app/userbot.js
+2026-06-23T04:25:37.611605003Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:37.611608423Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:37.611611313Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:37.611614673Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:37.611618043Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:37.611621203Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:37.611624413Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:37.611627392Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:37.611631962Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:37.611635212Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:37.611638132Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:37.611640862Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:37.611643892Z [err]  }
+2026-06-23T04:25:37.611647202Z [err]  
+2026-06-23T04:25:37.611650652Z [err]  Node.js v22.22.3
+2026-06-23T04:25:37.611654042Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:37.612063588Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:37.612068488Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:37.612077368Z [err]  Node.js v22.22.3
+2026-06-23T04:25:37.612083648Z [err]  }
+2026-06-23T04:25:37.612087818Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:37.612095538Z [err]  
+2026-06-23T04:25:37.612098368Z [err]  Require stack:
+2026-06-23T04:25:37.612103968Z [err]  - /app/bot.js
+2026-06-23T04:25:37.612109898Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:37.612111778Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:37.612119068Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:37.612119378Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:37.612125438Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:37.612128198Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:37.612132958Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:37.612135088Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:37.612139538Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:37.612142048Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:37.612145517Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:37.612149697Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:42.701058165Z [err]    ^
+2026-06-23T04:25:42.701069225Z [err]  
+2026-06-23T04:25:42.701116014Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:42.701118624Z [err]    throw err;
+2026-06-23T04:25:42.701122584Z [err]    ^
+2026-06-23T04:25:42.701125524Z [err]  
+2026-06-23T04:25:42.701128314Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:42.701131144Z [err]  Require stack:
+2026-06-23T04:25:42.701133544Z [err]  - /app/userbot.js
+2026-06-23T04:25:42.701136924Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:42.701139724Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:42.701142294Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:42.701145014Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:42.701147784Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:42.701150694Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:42.701153614Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:42.701156484Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:42.701159804Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:42.701162694Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:42.701165144Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:42.701168364Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:42.701171804Z [err]  }
+2026-06-23T04:25:42.701174584Z [err]  
+2026-06-23T04:25:42.701177354Z [err]  Node.js v22.22.3
+2026-06-23T04:25:42.701179874Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:42.701182984Z [err]    throw err;
+2026-06-23T04:25:42.701246313Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:42.701251103Z [err]  Require stack:
+2026-06-23T04:25:42.701254643Z [err]  - /app/bot.js
+2026-06-23T04:25:42.701258393Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:42.701262713Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:42.701266473Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:42.701273813Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:42.701278653Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:42.701284283Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:42.701290463Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:42.701292823Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:42.701297503Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:42.701298183Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:42.701298703Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:42.701305072Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:42.701311372Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:42.701312112Z [err]  }
+2026-06-23T04:25:42.701319532Z [err]  
+2026-06-23T04:25:42.701324692Z [err]  Node.js v22.22.3
+2026-06-23T04:25:42.701329222Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:47.702164610Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:47.702166960Z [err]    throw err;
+2026-06-23T04:25:47.702169390Z [err]    ^
+2026-06-23T04:25:47.702172970Z [err]  
+2026-06-23T04:25:47.702175820Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:47.702178190Z [err]  Require stack:
+2026-06-23T04:25:47.702180520Z [err]  - /app/userbot.js
+2026-06-23T04:25:47.702183060Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:47.702186000Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:47.702188550Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:47.702192580Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:47.702195030Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:47.702197420Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:47.702200199Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:47.702202969Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:47.702205489Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:47.702207879Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:47.702210259Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:47.702212949Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:47.702215689Z [err]  }
+2026-06-23T04:25:47.702218419Z [err]  
+2026-06-23T04:25:47.702221039Z [err]  Node.js v22.22.3
+2026-06-23T04:25:47.702223109Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:47.702223499Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:47.702226129Z [err]    throw err;
+2026-06-23T04:25:47.702229359Z [err]    ^
+2026-06-23T04:25:47.702230459Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:47.702233089Z [err]  
+2026-06-23T04:25:47.702242829Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:47.702254069Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:47.702256339Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:47.702262779Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:47.702268299Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:47.702271729Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:47.702274549Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:47.702280539Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:47.702281319Z [err]  }
+2026-06-23T04:25:47.702287409Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:47.702290759Z [err]  
+2026-06-23T04:25:47.702293009Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:47.702297799Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:47.702300829Z [err]  Node.js v22.22.3
+2026-06-23T04:25:47.702304368Z [err]  Require stack:
+2026-06-23T04:25:47.702306458Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:47.702312378Z [err]  - /app/bot.js
+2026-06-23T04:25:47.702312788Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:52.805564750Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:52.805571390Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:52.805575250Z [err]  }
+2026-06-23T04:25:52.805578080Z [err]  
+2026-06-23T04:25:52.805581490Z [err]  Node.js v22.22.3
+2026-06-23T04:25:52.805585300Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:52.805589010Z [err]    throw err;
+2026-06-23T04:25:52.805591930Z [err]    ^
+2026-06-23T04:25:52.805595260Z [err]  
+2026-06-23T04:25:52.805662569Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:52.805666299Z [err]    throw err;
+2026-06-23T04:25:52.805669889Z [err]    ^
+2026-06-23T04:25:52.805674379Z [err]  
+2026-06-23T04:25:52.805678359Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:52.805681809Z [err]  Require stack:
+2026-06-23T04:25:52.805685759Z [err]  - /app/userbot.js
+2026-06-23T04:25:52.805689699Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:52.805693369Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:52.805696899Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:52.805700399Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:52.805704399Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:52.805707649Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:52.805711039Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:52.805714899Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:52.805718619Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:52.805722179Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:52.806235414Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:52.806239234Z [err]  Require stack:
+2026-06-23T04:25:52.806242804Z [err]  - /app/bot.js
+2026-06-23T04:25:52.806247674Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:52.806251334Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:52.806255274Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:52.806259214Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:52.806262514Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:52.806266114Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:52.806269484Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:52.806272833Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:52.806275903Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:52.806279573Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:52.806282843Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:52.806286163Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:52.806289623Z [err]  }
+2026-06-23T04:25:52.806293443Z [err]  
+2026-06-23T04:25:52.806298393Z [err]  Node.js v22.22.3
+2026-06-23T04:25:52.806302133Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:52.806305483Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:57.929876397Z [err]  
+2026-06-23T04:25:57.929877487Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:57.929877497Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:57.929884517Z [err]  - /app/userbot.js
+2026-06-23T04:25:57.929886297Z [err]    throw err;
+2026-06-23T04:25:57.929886447Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:57.929893637Z [err]    ^
+2026-06-23T04:25:57.929898337Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:57.929904277Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:57.929906177Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:25:57.929908967Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:57.929913387Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:57.929914097Z [err]  }
+2026-06-23T04:25:57.929916217Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:25:57.929918407Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:57.929919617Z [err]  
+2026-06-23T04:25:57.929921377Z [err]    throw err;
+2026-06-23T04:25:57.929923677Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:57.929924757Z [err]  Node.js v22.22.3
+2026-06-23T04:25:57.929925537Z [err]    ^
+2026-06-23T04:25:57.929927756Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:57.929930936Z [err]  
+2026-06-23T04:25:57.929931966Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:25:57.929935146Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:25:57.929937176Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:57.929939646Z [err]  Require stack:
+2026-06-23T04:25:57.930363542Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:25:57.930367762Z [err]  Require stack:
+2026-06-23T04:25:57.930372142Z [err]  - /app/bot.js
+2026-06-23T04:25:57.930375542Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:25:57.930379572Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:25:57.930384212Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:25:57.930388362Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:25:57.930393342Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:25:57.930393662Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:25:57.930397802Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:25:57.930403223Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:25:57.930408643Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:25:57.930414163Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:25:57.930419293Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:25:57.930423103Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:25:57.930427453Z [err]  }
+2026-06-23T04:25:57.930431173Z [err]  
+2026-06-23T04:25:57.930435223Z [err]  Node.js v22.22.3
+2026-06-23T04:25:57.930440423Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:25:57.930444813Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:02.739804854Z [err]  
+2026-06-23T04:26:02.739923013Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:02.739927743Z [err]    throw err;
+2026-06-23T04:26:02.739933073Z [err]    ^
+2026-06-23T04:26:02.739938163Z [err]  
+2026-06-23T04:26:02.739942813Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:02.739948233Z [err]  Require stack:
+2026-06-23T04:26:02.739953313Z [err]  - /app/userbot.js
+2026-06-23T04:26:02.739958163Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:02.739963063Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:02.739967073Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:02.739970913Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:02.739974473Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:02.739978633Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:02.739983563Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:02.739988273Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:02.739992833Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:02.740002153Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:02.740006772Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:02.740012952Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:02.740017672Z [err]  }
+2026-06-23T04:26:02.740022252Z [err]  
+2026-06-23T04:26:02.740026352Z [err]  Node.js v22.22.3
+2026-06-23T04:26:02.740030802Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:02.740036222Z [err]    throw err;
+2026-06-23T04:26:02.740041242Z [err]    ^
+2026-06-23T04:26:02.740499648Z [err]  }
+2026-06-23T04:26:02.740507738Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:02.740508198Z [err]  
+2026-06-23T04:26:02.740515718Z [err]  Node.js v22.22.3
+2026-06-23T04:26:02.740519118Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:02.740523398Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:02.740524568Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:02.740531177Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:02.740532467Z [err]  Require stack:
+2026-06-23T04:26:02.740533317Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:02.740540737Z [err]  - /app/bot.js
+2026-06-23T04:26:02.740542197Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:02.740548827Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:02.740551077Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:02.740555047Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:02.740559717Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:02.740562757Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:02.740566017Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:02.740572357Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:02.740576527Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:07.802041629Z [err]  
+2026-06-23T04:26:07.802049319Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:07.802049779Z [err]  Node.js v22.22.3
+2026-06-23T04:26:07.802059549Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:07.802064829Z [err]    throw err;
+2026-06-23T04:26:07.802066239Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:07.802070429Z [err]    ^
+2026-06-23T04:26:07.802072379Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:07.802077839Z [err]    throw err;
+2026-06-23T04:26:07.802085639Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:07.802087749Z [err]    ^
+2026-06-23T04:26:07.802092489Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:07.802095149Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:07.802100109Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:07.802105249Z [err]  
+2026-06-23T04:26:07.802107859Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:07.802114139Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:07.802117428Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:07.802117638Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:07.802125838Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:07.802128218Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:07.802128778Z [err]  Require stack:
+2026-06-23T04:26:07.802135808Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:07.802137738Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:07.802138688Z [err]  - /app/bot.js
+2026-06-23T04:26:07.802143748Z [err]  }
+2026-06-23T04:26:07.802149008Z [err]  
+2026-06-23T04:26:07.802490546Z [err]  }
+2026-06-23T04:26:07.802495346Z [err]  Require stack:
+2026-06-23T04:26:07.802500686Z [err]  
+2026-06-23T04:26:07.802503736Z [err]  - /app/userbot.js
+2026-06-23T04:26:07.802508376Z [err]  Node.js v22.22.3
+2026-06-23T04:26:07.802509836Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:07.802515936Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:07.802517796Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:07.802521636Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:07.802526386Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:07.802528896Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:07.802532526Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:07.802535336Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:07.802538605Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:07.802541665Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:07.802544615Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:07.802547055Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:07.802551855Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:07.802554605Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:12.805004199Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:12.805005389Z [err]    throw err;
+2026-06-23T04:26:12.805007909Z [err]    throw err;
+2026-06-23T04:26:12.805011609Z [err]    ^
+2026-06-23T04:26:12.805012389Z [err]    ^
+2026-06-23T04:26:12.805015729Z [err]  
+2026-06-23T04:26:12.805016499Z [err]  
+2026-06-23T04:26:12.805021039Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:12.805021189Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:12.805025659Z [err]  Require stack:
+2026-06-23T04:26:12.805031489Z [err]  - /app/bot.js
+2026-06-23T04:26:12.805033129Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:12.805038209Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:12.805046769Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:12.805052739Z [err]  }
+2026-06-23T04:26:12.805054419Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:12.805059379Z [err]  
+2026-06-23T04:26:12.805064979Z [err]  Node.js v22.22.3
+2026-06-23T04:26:12.805072209Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:12.805074559Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:12.805082818Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:12.805088218Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:12.805093588Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:12.805102258Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:12.805108838Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:12.805114368Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:12.805120188Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:12.805705023Z [err]  Require stack:
+2026-06-23T04:26:12.805712323Z [err]  - /app/userbot.js
+2026-06-23T04:26:12.805741153Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:12.805745783Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:12.805749443Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:12.805753293Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:12.805756953Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:12.805760783Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:12.805764753Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:12.805769123Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:12.805773063Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:12.805777543Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:12.805781733Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:12.805785963Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:12.805789983Z [err]  }
+2026-06-23T04:26:12.805794273Z [err]  
+2026-06-23T04:26:12.805819532Z [err]  Node.js v22.22.3
+2026-06-23T04:26:12.805824582Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:12.805828342Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:18.074316797Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:18.074329877Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:18.074335547Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:18.074341137Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:18.074349167Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:18.074355397Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:18.074360707Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:18.074365137Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:18.074370257Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:18.074375727Z [err]  }
+2026-06-23T04:26:18.074381657Z [err]  
+2026-06-23T04:26:18.074401587Z [err]  Node.js v22.22.3
+2026-06-23T04:26:18.074406837Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:18.074411937Z [err]    throw err;
+2026-06-23T04:26:18.074416457Z [err]    ^
+2026-06-23T04:26:18.074422996Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:18.074424996Z [err]  
+2026-06-23T04:26:18.074429096Z [err]    throw err;
+2026-06-23T04:26:18.074433046Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:18.074436736Z [err]    ^
+2026-06-23T04:26:18.074439736Z [err]  
+2026-06-23T04:26:18.074442976Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:18.074445936Z [err]  Require stack:
+2026-06-23T04:26:18.074451456Z [err]  - /app/bot.js
+2026-06-23T04:26:18.074454326Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:18.074457196Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:18.074460866Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:18.075114991Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:18.075124531Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:18.075127631Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:18.075132391Z [err]  }
+2026-06-23T04:26:18.075138771Z [err]  
+2026-06-23T04:26:18.075141761Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:18.075146581Z [err]  Node.js v22.22.3
+2026-06-23T04:26:18.075150431Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:18.075154210Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:18.075159440Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:18.075163580Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:18.075173730Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:18.075180900Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:18.075199140Z [err]  Require stack:
+2026-06-23T04:26:18.075202780Z [err]  - /app/userbot.js
+2026-06-23T04:26:18.075206570Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:18.075210200Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:18.075213850Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:18.075217620Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:22.859953371Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:22.859956711Z [err]    throw err;
+2026-06-23T04:26:22.859961091Z [err]    ^
+2026-06-23T04:26:22.859964431Z [err]  
+2026-06-23T04:26:22.859967531Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:22.859971121Z [err]  Require stack:
+2026-06-23T04:26:22.859974111Z [err]  - /app/bot.js
+2026-06-23T04:26:22.859977001Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:22.859980251Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:22.859982931Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:22.859985811Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:22.859988601Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:22.859991561Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:22.859996841Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:22.859999461Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:22.860002520Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:22.860005280Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:22.860008350Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:22.860011010Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:22.860015570Z [err]  }
+2026-06-23T04:26:22.860019800Z [err]  
+2026-06-23T04:26:22.860022350Z [err]  Node.js v22.22.3
+2026-06-23T04:26:22.860024630Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:22.860028150Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:22.860031400Z [err]    throw err;
+2026-06-23T04:26:22.860651314Z [err]    ^
+2026-06-23T04:26:22.860660974Z [err]  
+2026-06-23T04:26:22.860666604Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:22.860670594Z [err]  Require stack:
+2026-06-23T04:26:22.860673934Z [err]  - /app/userbot.js
+2026-06-23T04:26:22.860678284Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:22.860683574Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:22.860686794Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:22.860689724Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:22.860693294Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:22.860696774Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:22.860700804Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:22.860704174Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:22.860708254Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:22.860712944Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:22.860717284Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:22.860721704Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:22.860726594Z [err]  }
+2026-06-23T04:26:22.860730624Z [err]  
+2026-06-23T04:26:22.860734194Z [err]  Node.js v22.22.3
+2026-06-23T04:26:22.861247340Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:27.987362707Z [err]  
+2026-06-23T04:26:27.987373947Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:27.987378907Z [err]  Require stack:
+2026-06-23T04:26:27.987383187Z [err]  - /app/bot.js
+2026-06-23T04:26:27.987388057Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:27.987393157Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:27.987398617Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:27.987404307Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:27.987409007Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:27.987414007Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:27.987419107Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:27.987425977Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:27.987428107Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:27.987434367Z [err]    throw err;
+2026-06-23T04:26:27.987436337Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:27.987440827Z [err]    ^
+2026-06-23T04:26:27.987444847Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:27.987449937Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:27.987454837Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:27.987459667Z [err]  }
+2026-06-23T04:26:27.987464817Z [err]  
+2026-06-23T04:26:27.987473866Z [err]  Node.js v22.22.3
+2026-06-23T04:26:27.987478896Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:27.987483826Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:27.987488756Z [err]    throw err;
+2026-06-23T04:26:27.988286859Z [err]    ^
+2026-06-23T04:26:27.988292989Z [err]  
+2026-06-23T04:26:27.988302079Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:27.988306979Z [err]  Require stack:
+2026-06-23T04:26:27.988310799Z [err]  - /app/userbot.js
+2026-06-23T04:26:27.988314559Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:27.988319879Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:27.988323478Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:27.988326538Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:27.988329918Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:27.988333528Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:27.988337268Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:27.988340948Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:27.988344708Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:27.988348018Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:27.988351318Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:27.988355018Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:27.988359638Z [err]  }
+2026-06-23T04:26:27.988363138Z [err]  
+2026-06-23T04:26:27.988366768Z [err]  Node.js v22.22.3
+2026-06-23T04:26:27.988370048Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:32.913832473Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:32.913835483Z [err]    throw err;
+2026-06-23T04:26:32.913838173Z [err]    ^
+2026-06-23T04:26:32.913840733Z [err]  
+2026-06-23T04:26:32.913843543Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:32.913846083Z [err]  Require stack:
+2026-06-23T04:26:32.913848573Z [err]  - /app/bot.js
+2026-06-23T04:26:32.913851933Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:32.913855653Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:32.913859313Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:32.913862753Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:32.913866783Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:32.913870193Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:32.913872713Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:32.913875653Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:32.913878313Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:32.913881543Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:32.913884313Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:32.913887022Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:32.913889742Z [err]  }
+2026-06-23T04:26:32.913893362Z [err]  
+2026-06-23T04:26:32.913895832Z [err]  Node.js v22.22.3
+2026-06-23T04:26:32.913898462Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:32.913900812Z [err]    throw err;
+2026-06-23T04:26:32.913903462Z [err]    ^
+2026-06-23T04:26:32.913906252Z [err]  
+2026-06-23T04:26:32.913908842Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:32.915124262Z [err]  Require stack:
+2026-06-23T04:26:32.915129372Z [err]  - /app/userbot.js
+2026-06-23T04:26:32.915132642Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:32.915135482Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:32.915138822Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:32.915141602Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:32.915144042Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:32.915156002Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:32.915158302Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:32.915161401Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:32.915164621Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:32.915167901Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:32.915171191Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:32.915174491Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:32.915178031Z [err]  }
+2026-06-23T04:26:32.915181441Z [err]  
+2026-06-23T04:26:32.915184741Z [err]  Node.js v22.22.3
+2026-06-23T04:26:32.915570758Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:32.915573898Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:37.954835124Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:37.954845074Z [err]    throw err;
+2026-06-23T04:26:37.954849614Z [err]    ^
+2026-06-23T04:26:37.954854024Z [err]  
+2026-06-23T04:26:37.954857693Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:37.954861913Z [err]  Require stack:
+2026-06-23T04:26:37.954865343Z [err]  - /app/bot.js
+2026-06-23T04:26:37.954868883Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:37.954872233Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:37.954875553Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:37.954879383Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:37.954883263Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:37.954886613Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:37.954890043Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:37.954897593Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:37.954900923Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:37.954903973Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:37.954907203Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:37.954910533Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:37.954913913Z [err]  }
+2026-06-23T04:26:37.954917183Z [err]  
+2026-06-23T04:26:37.954920233Z [err]  Node.js v22.22.3
+2026-06-23T04:26:37.954930383Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:37.954933373Z [err]    throw err;
+2026-06-23T04:26:37.954936733Z [err]    ^
+2026-06-23T04:26:37.954940633Z [err]  
+2026-06-23T04:26:37.954944473Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:37.955604786Z [err]  Require stack:
+2026-06-23T04:26:37.955610146Z [err]  - /app/userbot.js
+2026-06-23T04:26:37.955613396Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:37.955615966Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:37.955620236Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:37.955625616Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:37.955629916Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:37.955634016Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:37.955635936Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:37.955639986Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:37.955642976Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:37.955645616Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:37.955648416Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:37.955651416Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:37.955654437Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:37.955657457Z [err]  }
+2026-06-23T04:26:37.955660197Z [err]  
+2026-06-23T04:26:37.955662947Z [err]  Node.js v22.22.3
+2026-06-23T04:26:37.955665807Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:42.981524139Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:42.981526779Z [err]    throw err;
+2026-06-23T04:26:42.981529439Z [err]    ^
+2026-06-23T04:26:42.981532119Z [err]  
+2026-06-23T04:26:42.981535339Z [err]  Error: Cannot find module 'discord.js-selfbot-v13'
+2026-06-23T04:26:42.981538029Z [err]  Require stack:
+2026-06-23T04:26:42.981541319Z [err]  - /app/userbot.js
+2026-06-23T04:26:42.981544049Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:42.981546469Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:42.981549019Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:42.981551439Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:42.981553589Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:42.981556869Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:42.981559369Z [err]      at require (node:internal/modules/helpers:147:16)
+2026-06-23T04:26:42.981561969Z [err]      at Object.<anonymous> (/app/userbot.js:15:20)
+2026-06-23T04:26:42.981564379Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:42.981566619Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:42.981569379Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:42.981571649Z [err]    requireStack: [ '/app/userbot.js' ]
+2026-06-23T04:26:42.981574109Z [err]  }
+2026-06-23T04:26:42.981576309Z [err]  
+2026-06-23T04:26:42.981578829Z [err]  Node.js v22.22.3
+2026-06-23T04:26:42.981581249Z [err]  node:internal/modules/cjs/loader:1433
+2026-06-23T04:26:42.981583939Z [err]    throw err;
+2026-06-23T04:26:42.981586249Z [err]    ^
+2026-06-23T04:26:42.981588789Z [err]  
+2026-06-23T04:26:42.982072115Z [err]      at Object.<anonymous> (/app/bot.js:12:82)
+2026-06-23T04:26:42.982079535Z [err]      at Module._compile (node:internal/modules/cjs/loader:1781:14)
+2026-06-23T04:26:42.982084515Z [err]      at Object..js (node:internal/modules/cjs/loader:1913:10) {
+2026-06-23T04:26:42.982088295Z [err]    code: 'MODULE_NOT_FOUND',
+2026-06-23T04:26:42.982092945Z [err]    requireStack: [ '/app/bot.js' ]
+2026-06-23T04:26:42.982099285Z [err]  }
+2026-06-23T04:26:42.982099485Z [err]  Error: Cannot find module 'discord.js'
+2026-06-23T04:26:42.982103655Z [err]  
+2026-06-23T04:26:42.982109105Z [err]  Require stack:
+2026-06-23T04:26:42.982110625Z [err]  Node.js v22.22.3
+2026-06-23T04:26:42.982116725Z [err]  - /app/bot.js
+2026-06-23T04:26:42.982116985Z [err]  [bot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:42.982121835Z [err]      at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-06-23T04:26:42.982126075Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T04:26:42.982126885Z [err]      at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-06-23T04:26:42.982130675Z [err]      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-06-23T04:26:42.982133554Z [err]      at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-06-23T04:26:42.982136124Z [err]      at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-06-23T04:26:42.982139314Z [err]      at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-06-23T04:26:42.982142324Z [err]      at require (node:internal/modules/helpers:147:16)

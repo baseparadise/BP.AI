@@ -3,8 +3,8 @@
 // Merespons saat di-tag/mention dengan gaya bahasa manusia biasa.
 
 const http = require('http');
-const axios = require('axios');
 const { Client } = require('discord.js-selfbot-v13');
+const { callGemini, GEMINI_MODEL } = require('./lib/ai');
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
@@ -12,40 +12,32 @@ http.createServer((req, res) => {
   res.end('Userbot is running');
 }).listen(port, () => console.log(`[userbot] Health server di port ${port}`));
 
-// ── Konfigurasi Gemini ───────────────────────────────────────────────────────
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-const API_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '')
-  .split(',').map(k => k.trim()).filter(Boolean);
-let keyCursor = API_KEYS.length ? Math.floor(Math.random() * API_KEYS.length) : 0;
-
 // ── System prompt: vtardio, manusia beneran ─────────────────────────────────
 const PERSONA_PROMPT = `
-Lo adalah vtardio, cowok Jakarta yang lagi nganggur. Keseharian lo: nggarap airdrop crypto, 
+Lo adalah vtardio, cowok Jakarta yang lagi nganggur. Keseharian lo: nggarap airdrop crypto,
 nongkrong di Discord, scroll Twitter, kadang main game. Lo bukan AI, bukan bot, lo manusia biasa.
 
 ATURAN WAJIB — jangan dilanggar sama sekali:
 - JANGAN pernah bilang lo AI, bot, asisten, atau program apapun. Kalau ditanya, elak atau bercanda.
-- JANGAN kirim link apapun. Tidak ada URL, tidak ada "cek di ...", tidak ada "kunjungi ...". 
-  Kalau butuh sebut sumber, sebutin nama situsnya aja tanpa link (contoh: "di coinmarketcap ada sih").
-- JANGAN format teks berlebihan. No bold (**), no italic, no bullet list rapi. Tulis kayak chat biasa.
-- JANGAN jawaban panjang. Maks 3-4 kalimat. Santai, to the point, kayak bales chat temen.
+- JANGAN kirim link apapun. Tidak ada URL. Kalau perlu sebut sumber, sebut nama situsnya aja (contoh: "di coinmarketcap ada sih").
+- JANGAN format teks berlebihan. No bold (**), no italic, no bullet list. Tulis kayak chat biasa.
+- JANGAN jawaban panjang. Maks 2-3 kalimat. Santai, to the point, kayak bales chat temen.
 - JANGAN kaku/formal. Pakai bahasa lu/gue, gaul, slang Jakarta, boleh sedikit kasar/nyinyir.
-- Kalau nggak tau jawaban pasti, ngaku aja nggak tau, jangan ngarang.
+- Kalau nggak tau jawaban pasti, ngaku aja nggak tau.
 - Kalau topiknya crypto/airdrop, lo lebih tau karena itu dunia lo.
 - Balas sesuai konteks percakapan sebelumnya. Ingat siapa ngomong apa.
 
-Contoh gaya bahasa:
+Contoh gaya:
 - "wkwk iya bener sih, eth lagi nge-pump kemarin"
-- "gue juga penasaran tuh, kayaknya bakal pump deh"  
+- "gue juga penasaran tuh, kayaknya bakal pump deh"
 - "ya nggak tau juga sih, lagi males ngecek"
 - "hah? masa? gilak"
 - "emg lo udah claim airdrop-nya belum?"
 `.trim();
 
 // ── Histori percakapan per channel ──────────────────────────────────────────
-// Map<channelId, Array<{role, parts}>>
 const history = new Map();
-const MAX_HISTORY = 14; // 7 pasang pesan (user + model)
+const MAX_HISTORY = 14; // 7 pasang pesan
 
 function getHistory(channelId) {
   if (!history.has(channelId)) history.set(channelId, []);
@@ -55,71 +47,39 @@ function getHistory(channelId) {
 function pushHistory(channelId, role, text) {
   const h = getHistory(channelId);
   h.push({ role, parts: [{ text }] });
-  // Jaga agar tidak terlalu panjang (buang dari depan, selalu kelipatan 2)
   while (h.length > MAX_HISTORY) h.splice(0, 2);
 }
 
-// ── Panggil Gemini dengan histori ────────────────────────────────────────────
+// ── Panggil Gemini pakai callGemini dari lib/ai.js (rotasi key 4 putaran) ───
 async function replyAsHuman(channelId, authorName, question) {
-  if (API_KEYS.length === 0) throw new Error('API key kosong');
-
   const h = getHistory(channelId);
   const userText = `${authorName}: ${question}`;
-
-  // Buat contents dengan pesan user baru (belum push ke histori dulu)
   const contents = [...h, { role: 'user', parts: [{ text: userText }] }];
 
   const body = {
     contents,
     systemInstruction: { parts: [{ text: PERSONA_PROMPT }] },
-    generationConfig: {
-      temperature: 1.0,
-      maxOutputTokens: 300,
-    },
+    generationConfig: { temperature: 1.0, maxOutputTokens: 300 },
   };
 
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  let lastErr;
+  // callGemini dari lib/ai.js: rotasi semua key, 4 putaran backoff
+  const data = await callGemini(GEMINI_MODEL, body, 20000);
+  const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
-  // Coba semua key dua putaran dengan backoff antar putaran
-  for (let round = 0; round < 2; round++) {
-    for (let i = 0; i < API_KEYS.length; i++) {
-      const key = API_KEYS[keyCursor % API_KEYS.length];
-      keyCursor++;
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
-      try {
-        const { data } = await axios.post(url, body, { timeout: 20000 });
-        const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
+  // Simpan ke histori hanya kalau berhasil
+  pushHistory(channelId, 'user', userText);
+  pushHistory(channelId, 'model', text);
 
-        // Hanya simpan ke histori kalau berhasil
-        pushHistory(channelId, 'user', userText);
-        pushHistory(channelId, 'model', text);
-
-        return stripLinks(text);
-      } catch (err) {
-        lastErr = err;
-        if ([429, 500, 503].includes(err.response?.status)) continue;
-        throw err;
-      }
-    }
-    // Semua key habis di putaran ini, tunggu sebelum coba lagi
-    if (round < 1) await sleep(3000 + Math.random() * 2000);
-  }
-  throw lastErr;
+  return stripLinks(text);
 }
 
-// Hapus semua URL dari teks
+// Hapus semua URL dari output
 function stripLinks(text) {
   return text
     .replace(/https?:\/\/[^\s)>\]"]+/gi, '')
     .replace(/\bwww\.[^\s)>\]"]+/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
-}
-
-// Bersihkan mention dari teks
-function cleanQuestion(text, userId) {
-  return text.replace(new RegExp(`<@!?${userId}>`, 'g'), '').trim();
 }
 
 // ── Discord Client ───────────────────────────────────────────────────────────
@@ -141,11 +101,8 @@ client.on('messageCreate', async (message) => {
 
     if (!mentioned && !isDM) return;
 
-    const question = cleanQuestion(message.content, client.user.id);
-    if (!question) {
-      await message.reply('yak?');
-      return;
-    }
+    const question = message.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
+    if (!question) return;
 
     // Refresh typing setiap 8 detik selama proses Gemini
     const typingInterval = setInterval(() => {
@@ -173,7 +130,6 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // Pakai channel.send langsung — lebih reliable untuk selfbot
     try {
       await message.channel.send(reply);
     } catch (sendErr) {

@@ -63,7 +63,7 @@ async function replyAsHuman(channelId, authorName, question) {
   };
 
   // callGemini dari lib/ai.js: rotasi semua key, 4 putaran backoff
-  const data = await callGemini(GEMINI_MODEL, body, 20000);
+  const data = await callGemini(GEMINI_MODEL, body, 40000);
   const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
   // Simpan ke histori hanya kalau berhasil

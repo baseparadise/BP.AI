@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "C1DiEdPc2uaBvkpQQGkF7"
+uri = "file://artifacts/gemini-mobile/assets/images/icon.png"
+type = "image"
+title = "gemini ai chat icon"

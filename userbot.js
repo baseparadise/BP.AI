@@ -64,13 +64,13 @@ async function replyAsHuman(channelId, authorName, question) {
   if (API_KEYS.length === 0) throw new Error('API key kosong');
 
   const h = getHistory(channelId);
-
-  // Tambahkan pesan user ke histori
   const userText = `${authorName}: ${question}`;
-  pushHistory(channelId, 'user', userText);
+
+  // Buat contents dengan pesan user baru (belum push ke histori dulu)
+  const contents = [...h, { role: 'user', parts: [{ text: userText }] }];
 
   const body = {
-    contents: [...h],
+    contents,
     systemInstruction: { parts: [{ text: PERSONA_PROMPT }] },
     generationConfig: {
       temperature: 1.0,
@@ -85,12 +85,12 @@ async function replyAsHuman(channelId, authorName, question) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
     try {
       const { data } = await axios.post(url, body, { timeout: 20000 });
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '...';
+      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
-      // Simpan balasan ke histori
+      // Hanya simpan ke histori kalau berhasil
+      pushHistory(channelId, 'user', userText);
       pushHistory(channelId, 'model', text);
 
-      // Bersihkan link dari output (jaga-jaga kalau Gemini tetap kirim)
       return stripLinks(text);
     } catch (err) {
       lastErr = err;
@@ -150,10 +150,10 @@ client.on('messageCreate', async (message) => {
       reply = await replyAsHuman(channelId, authorName, question);
     } catch (err) {
       console.error('[userbot] Gemini error:', err.response?.status, err.message);
-      reply = 'eh sorry lagi lag';
+      return; // diam kalau gagal, jangan kirim apa-apa
     }
 
-    if (!reply || !reply.trim()) reply = '...';
+    if (!reply || !reply.trim()) return; // diam kalau kosong
 
     try {
       await message.reply(reply);

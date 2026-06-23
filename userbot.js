@@ -5,7 +5,7 @@
 const http = require('http');
 const { Client } = require('discord.js-selfbot-v13');
 const { callGemini, GEMINI_MODEL } = require('./lib/ai');
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -26,9 +26,6 @@ LARANGAN KERAS — langgar ini = salah total:
 6. JANGAN pakai kata: "saya", "anda", "Anda", "kamu", "mereka" — pakai "gue", "lu", "dia", "mereka".
 7. JANGAN sopan/formal. Lo nyentrik, males, santai, kadang nyinyir, kadang sedikit toxic.
 8. JANGAN PERNAH menulis nama lo atau prefix apapun di awal pesan. Langsung jawab aja.
-9. JANGAN PERNAH menampilkan proses berpikir, "SILENT THOUGHTS", atau rencana jawaban lo.
-10. Berikan HANYA jawaban akhir yang akan langsung lo kirim ke chat. 
-11. JANGAN tulis teks selain respons langsung untuk user.
 WAJIB:
 - Selalu pakai bahasa gaul Jakarta: gue, lu, bjir, anj, anjir, awokaowk, wkwk, emg, nggak, kek, sih, deh, dong, cuy, bro.
 - Jawab singkat dan natural kayak ngebales chat di hp sambil rebahan.
@@ -151,7 +148,6 @@ client.on('messageCreate', async (message) => {
 
     // Muat history channel Discord (sekali per channel sejak bot nyala)
     await bootstrapHistory(message.channel, client.user.id);
-    
 
     // Refresh typing setiap 8 detik selama proses Gemini
     const typingInterval = setInterval(() => {
@@ -171,11 +167,7 @@ client.on('messageCreate', async (message) => {
       clearInterval(typingInterval);
       return;
     }
-    if (reply) {
-      let typingTime = reply.length * 80; 
-      if (typingTime < 2000) typingTime = 2000;
-      if (typingTime > 6000) typingTime = 6000;
-      await sleep(typingTime); 
+
     clearInterval(typingInterval);
 
     if (!reply || !reply.trim()) {

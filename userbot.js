@@ -140,7 +140,11 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    await message.channel.sendTyping().catch(() => {});
+    // Refresh typing setiap 8 detik selama proses Gemini
+    const typingInterval = setInterval(() => {
+      message.channel.sendTyping().catch(() => {});
+    }, 8000);
+    message.channel.sendTyping().catch(() => {});
 
     const channelId = message.channel.id;
     const authorName = message.member?.displayName || message.author.username;
@@ -148,18 +152,25 @@ client.on('messageCreate', async (message) => {
     let reply;
     try {
       reply = await replyAsHuman(channelId, authorName, question);
+      console.log(`[userbot] reply untuk ${authorName}: "${reply?.slice(0, 60)}"`);
     } catch (err) {
       console.error('[userbot] Gemini error:', err.response?.status, err.message);
-      return; // diam kalau gagal, jangan kirim apa-apa
+      clearInterval(typingInterval);
+      return;
     }
 
-    if (!reply || !reply.trim()) return; // diam kalau kosong
+    clearInterval(typingInterval);
 
+    if (!reply || !reply.trim()) {
+      console.warn('[userbot] reply kosong, tidak kirim');
+      return;
+    }
+
+    // Pakai channel.send langsung — lebih reliable untuk selfbot
     try {
-      await message.reply(reply);
-    } catch (replyErr) {
-      console.error('[userbot] reply error:', replyErr.message);
-      await message.channel.send(reply).catch(() => {});
+      await message.channel.send(reply);
+    } catch (sendErr) {
+      console.error('[userbot] send error:', sendErr.message);
     }
 
   } catch (err) {

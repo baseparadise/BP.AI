@@ -167,9 +167,14 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
-      await message.channel.send(`<@${message.author.id}> ${reply}`);
-    } catch (sendErr) {
-      console.error('[userbot] send error:', sendErr.message);
+      await message.reply(reply);
+    } catch (replyErr) {
+      // Fallback kalau reply gagal
+      try {
+        await message.channel.send(`<@${message.author.id}> ${reply}`);
+      } catch (sendErr) {
+        console.error('[userbot] send error:', sendErr.message);
+      }
     }
 
   } catch (err) {

@@ -20,6 +20,9 @@ const {
   extractCodeBlocks,
   stripCodeBlocks,
   EXT_MAP,
+  getDefaultBranch,
+  getGitHubFileContent,
+  commitGitHubFile,
 } = require('./lib/ai');
 
 // === Konfigurasi kirim/baca file ===
@@ -105,6 +108,87 @@ async function replyWithFiles(message, text, blocks) {
   });
 }
 
+// === Edit file repo GitHub langsung ===
+// Format yang didukung di pesan user:
+//   1) Link blob:   https://github.com/owner/repo/blob/branch/path/to/file.js
+//   2) Singkatan:   owner/repo:path/to/file.js   (branch otomatis pakai default branch repo)
+// Sisa kalimat di pesan dianggap sebagai instruksi perbaikan untuk AI.
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1],
+      repo: urlMatch[2],
+      branch: urlMatch[3],
+      path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return {
+      owner: shortMatch[1],
+      repo: shortMatch[2],
+      branch: null,
+      path: shortMatch[3],
+      raw: shortMatch[0],
+    };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path file, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan env `GITHUB_TOKEN` berisi Personal Access Token dengan scope **repo** (classic) atau permission **Contents: Read and write** (fine-grained), dan token itu punya akses ke repo tersebut.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca bot (sha mismatch). Coba kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path-nya valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt);
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa saya proses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    // Asumsikan code block terpanjang = isi file utuh yang sudah diperbaiki.
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+
+    const summary = stripCodeBlocks(text).slice(0, 600);
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, ref.path.split('/').pop())],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
 client.on('messageCreate', async (message) => {
   try {
     // Abaikan pesan dari bot lain / dirinya sendiri.
@@ -126,7 +210,15 @@ client.on('messageCreate', async (message) => {
       .slice(0, MAX_FILES_PER_MESSAGE);
 
     if (!question && fileAttachments.length === 0) {
-      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, atau minta aku buatkan gambar. 👋');
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link/format `owner/repo:path/file.js` untuk edit langsung ke GitHub, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // Mode edit file GitHub langsung — dideteksi dari link blob atau format owner/repo:path.
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      await handleGitHubEdit(message, ghRef, question);
       return;
     }
 

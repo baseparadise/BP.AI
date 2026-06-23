@@ -145,12 +145,25 @@ client.on('messageCreate', async (message) => {
     const channelId = message.channel.id;
     const authorName = message.member?.displayName || message.author.username;
 
-    const reply = await replyAsHuman(channelId, authorName, question);
-    await message.reply(reply);
+    let reply;
+    try {
+      reply = await replyAsHuman(channelId, authorName, question);
+    } catch (err) {
+      console.error('[userbot] Gemini error:', err.response?.status, err.message);
+      reply = 'eh sorry lagi lag';
+    }
+
+    if (!reply || !reply.trim()) reply = '...';
+
+    try {
+      await message.reply(reply);
+    } catch (replyErr) {
+      console.error('[userbot] reply error:', replyErr.message);
+      await message.channel.send(reply).catch(() => {});
+    }
 
   } catch (err) {
-    console.error('[userbot] error:', err.message);
-    // Gagal diam-diam, jangan kirim pesan error
+    console.error('[userbot] handler error:', err.message);
   }
 });
 

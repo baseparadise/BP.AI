@@ -1,0 +1,1002 @@
+2026-06-23T05:04:26.663801839Z [err]  }
+2026-06-23T05:04:26.663804909Z [err]  
+2026-06-23T05:04:26.663808039Z [err]  Node.js v22.22.3
+2026-06-23T05:04:26.663812729Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:32.159682149Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:32.159684919Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:32.159687209Z [err]                ^
+2026-06-23T05:04:32.159689779Z [err]  
+2026-06-23T05:04:32.159693669Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:32.159697719Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:32.159699969Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:32.159702109Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:32.159704329Z [err]  }
+2026-06-23T05:04:32.159706489Z [err]  
+2026-06-23T05:04:32.159708979Z [err]  Node.js v22.22.3
+2026-06-23T05:04:32.161105772Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:37.847290042Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:37.847292572Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:37.847294892Z [err]                ^
+2026-06-23T05:04:37.847297302Z [err]  
+2026-06-23T05:04:37.847299712Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:37.847302072Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:37.847304682Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:37.847307262Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:37.847309902Z [err]  }
+2026-06-23T05:04:37.847312322Z [err]  
+2026-06-23T05:04:37.847315012Z [err]  Node.js v22.22.3
+2026-06-23T05:04:37.847317222Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:43.212869070Z [err]  
+2026-06-23T05:04:43.212879130Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:43.212879640Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:43.212884980Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:43.212885510Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:43.212889840Z [err]                ^
+2026-06-23T05:04:43.212892350Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:43.212896760Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:43.212901439Z [err]  }
+2026-06-23T05:04:43.212907849Z [err]  
+2026-06-23T05:04:43.212912219Z [err]  Node.js v22.22.3
+2026-06-23T05:04:43.212916499Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:48.655165392Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:48.655171842Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:48.655176112Z [err]                ^
+2026-06-23T05:04:48.655179732Z [err]  
+2026-06-23T05:04:48.655182962Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:48.655230012Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:48.655233442Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:48.655237382Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:48.655240872Z [err]  }
+2026-06-23T05:04:48.655244152Z [err]  
+2026-06-23T05:04:48.655247811Z [err]  Node.js v22.22.3
+2026-06-23T05:04:48.661099173Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:54.215506301Z [err]  
+2026-06-23T05:04:54.215511932Z [err]  Node.js v22.22.3
+2026-06-23T05:04:54.215515492Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:04:54.215572272Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:54.215574762Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:54.215578042Z [err]                ^
+2026-06-23T05:04:54.215581072Z [err]  
+2026-06-23T05:04:54.215584342Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:54.215586742Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:54.215589202Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:54.215591991Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:54.215594391Z [err]  }
+2026-06-23T05:04:59.630638579Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:04:59.630657868Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:04:59.630663238Z [err]                ^
+2026-06-23T05:04:59.630667548Z [err]  
+2026-06-23T05:04:59.630671328Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:04:59.630676198Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:04:59.630679678Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:04:59.630684398Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:04:59.630717918Z [err]  }
+2026-06-23T05:04:59.630721998Z [err]  
+2026-06-23T05:04:59.630736567Z [err]  Node.js v22.22.3
+2026-06-23T05:04:59.641730670Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:05.143699385Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:05.143706085Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:05.143711075Z [err]                ^
+2026-06-23T05:05:05.143715235Z [err]  
+2026-06-23T05:05:05.143718915Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:05.143722545Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:05.143726045Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:05.143729575Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:05.143733985Z [err]  }
+2026-06-23T05:05:05.143737115Z [err]  
+2026-06-23T05:05:05.143740505Z [err]  Node.js v22.22.3
+2026-06-23T05:05:05.148490359Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:10.621701872Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:10.621711552Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:10.621718422Z [err]                ^
+2026-06-23T05:05:10.621722292Z [err]  
+2026-06-23T05:05:10.621725522Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:10.621729622Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:10.621733752Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:10.621738021Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:10.621741041Z [err]  }
+2026-06-23T05:05:10.621744731Z [err]  
+2026-06-23T05:05:10.621747931Z [err]  Node.js v22.22.3
+2026-06-23T05:05:10.626095680Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:16.108701399Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:16.108706248Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:16.108709238Z [err]                ^
+2026-06-23T05:05:16.108711698Z [err]  
+2026-06-23T05:05:16.108715988Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:16.108718528Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:16.108721348Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:16.108723998Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:16.108726358Z [err]  }
+2026-06-23T05:05:16.108728778Z [err]  
+2026-06-23T05:05:16.108731308Z [err]  Node.js v22.22.3
+2026-06-23T05:05:16.109354461Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:21.619165498Z [err]  }
+2026-06-23T05:05:21.619170768Z [err]  
+2026-06-23T05:05:21.619175338Z [err]  Node.js v22.22.3
+2026-06-23T05:05:21.619186438Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:21.619196608Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:21.619201158Z [err]                ^
+2026-06-23T05:05:21.619207727Z [err]  
+2026-06-23T05:05:21.619211567Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:21.619215387Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:21.619220177Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:21.619227547Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:21.624141440Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:27.112908106Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:27.112911506Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:27.112916086Z [err]                ^
+2026-06-23T05:05:27.112920665Z [err]  
+2026-06-23T05:05:27.112923995Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:27.112927205Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:27.112930585Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:27.112935225Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:27.112939235Z [err]  }
+2026-06-23T05:05:27.112943235Z [err]  
+2026-06-23T05:05:27.112946655Z [err]  Node.js v22.22.3
+2026-06-23T05:05:27.112950635Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:32.708812794Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:32.708815134Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:32.708817614Z [err]                ^
+2026-06-23T05:05:32.708819864Z [err]  
+2026-06-23T05:05:32.708821934Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:32.708824384Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:32.708826744Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:32.708828954Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:32.708831284Z [err]  }
+2026-06-23T05:05:32.708833694Z [err]  
+2026-06-23T05:05:32.708836264Z [err]  Node.js v22.22.3
+2026-06-23T05:05:32.708838704Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:38.094220838Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:38.094226537Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:38.094230247Z [err]                ^
+2026-06-23T05:05:38.094233317Z [err]  
+2026-06-23T05:05:38.094235897Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:38.094238607Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:38.094242727Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:38.094246967Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:38.094249367Z [err]  }
+2026-06-23T05:05:38.094251777Z [err]  
+2026-06-23T05:05:38.094254257Z [err]  Node.js v22.22.3
+2026-06-23T05:05:38.108691669Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:43.593658813Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:43.593664423Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:43.593667973Z [err]                ^
+2026-06-23T05:05:43.593672493Z [err]  
+2026-06-23T05:05:43.593675653Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:43.593679063Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:43.593682433Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:43.593685443Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:43.593688723Z [err]  }
+2026-06-23T05:05:43.593691803Z [err]  
+2026-06-23T05:05:43.593695113Z [err]  Node.js v22.22.3
+2026-06-23T05:05:43.593698423Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:49.119996822Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:49.120001482Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:49.120007001Z [err]                ^
+2026-06-23T05:05:49.120012491Z [err]  
+2026-06-23T05:05:49.120016682Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:49.120022192Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:05:49.120026512Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:49.120031012Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:49.120035212Z [err]  }
+2026-06-23T05:05:49.120039862Z [err]  
+2026-06-23T05:05:49.120043902Z [err]  Node.js v22.22.3
+2026-06-23T05:05:49.120047702Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:54.625183891Z [err]  
+2026-06-23T05:05:54.625190181Z [err]  Node.js v22.22.3
+2026-06-23T05:05:54.625194781Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:05:54.625213861Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:05:54.625224790Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:05:54.625229600Z [err]  }
+2026-06-23T05:05:54.625246980Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:05:54.625251940Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:05:54.625258440Z [err]                ^
+2026-06-23T05:05:54.625264050Z [err]  
+2026-06-23T05:05:54.625268290Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:05:54.625272880Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:00.119273053Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:00.119279043Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:00.119284203Z [err]                ^
+2026-06-23T05:06:00.119289553Z [err]  
+2026-06-23T05:06:00.119295503Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:00.119300473Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:00.119305443Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:00.119310763Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:00.119315953Z [err]  }
+2026-06-23T05:06:00.119320693Z [err]  
+2026-06-23T05:06:00.119325442Z [err]  Node.js v22.22.3
+2026-06-23T05:06:00.119331412Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:05.667568313Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:05.667571343Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:05.667573833Z [err]                ^
+2026-06-23T05:06:05.667576433Z [err]  
+2026-06-23T05:06:05.667579182Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:05.667581602Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:05.667585762Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:05.667588692Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:05.667591152Z [err]  }
+2026-06-23T05:06:05.667593212Z [err]  
+2026-06-23T05:06:05.667595382Z [err]  Node.js v22.22.3
+2026-06-23T05:06:05.667598562Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:11.137830961Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:11.137844951Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:11.137850411Z [err]                ^
+2026-06-23T05:06:11.137856181Z [err]  
+2026-06-23T05:06:11.137861311Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:11.137868101Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:11.137873751Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:11.137936550Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:11.137941620Z [err]  }
+2026-06-23T05:06:11.137944990Z [err]  
+2026-06-23T05:06:11.137948690Z [err]  Node.js v22.22.3
+2026-06-23T05:06:11.138975138Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:16.589630170Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:16.589637030Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:16.589641269Z [err]                ^
+2026-06-23T05:06:16.589645849Z [err]  
+2026-06-23T05:06:16.589652979Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:16.589656769Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:16.589660939Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:16.589664889Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:16.589668169Z [err]  }
+2026-06-23T05:06:16.589671269Z [err]  
+2026-06-23T05:06:16.589674519Z [err]  Node.js v22.22.3
+2026-06-23T05:06:16.589678419Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:22.176285398Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:22.176291877Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:22.176295537Z [err]  }
+2026-06-23T05:06:22.176302097Z [err]  
+2026-06-23T05:06:22.176305217Z [err]  Node.js v22.22.3
+2026-06-23T05:06:22.176308597Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:22.176335457Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:22.176338127Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:22.176341147Z [err]                ^
+2026-06-23T05:06:22.176343987Z [err]  
+2026-06-23T05:06:22.176346497Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:22.176348767Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:27.622217565Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:27.622230454Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:27.622237424Z [err]                ^
+2026-06-23T05:06:27.622246024Z [err]  
+2026-06-23T05:06:27.622250694Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:27.622255164Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:27.622258994Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:27.622263124Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:27.622266764Z [err]  }
+2026-06-23T05:06:27.622270414Z [err]  
+2026-06-23T05:06:27.622274494Z [err]  Node.js v22.22.3
+2026-06-23T05:06:27.624963503Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:33.084341099Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:33.084346389Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:33.084349839Z [err]                ^
+2026-06-23T05:06:33.084354009Z [err]  
+2026-06-23T05:06:33.084357159Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:33.084360239Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:33.084363229Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:33.084366439Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:33.084370769Z [err]  }
+2026-06-23T05:06:33.084373709Z [err]  
+2026-06-23T05:06:33.084376899Z [err]  Node.js v22.22.3
+2026-06-23T05:06:33.088765537Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:38.581522820Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:38.581528270Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:38.581532050Z [err]                ^
+2026-06-23T05:06:38.581535520Z [err]  
+2026-06-23T05:06:38.581538350Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:38.581541430Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:38.581544430Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:38.581547730Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:38.581550730Z [err]  }
+2026-06-23T05:06:38.581555719Z [err]  
+2026-06-23T05:06:38.581558769Z [err]  Node.js v22.22.3
+2026-06-23T05:06:38.591880150Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:44.100893431Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:44.100900561Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:44.100905121Z [err]                ^
+2026-06-23T05:06:44.100910381Z [err]  
+2026-06-23T05:06:44.100914531Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:44.100918641Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:44.100922641Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:44.100926741Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:44.100930561Z [err]  }
+2026-06-23T05:06:44.100934610Z [err]  
+2026-06-23T05:06:44.100938400Z [err]  Node.js v22.22.3
+2026-06-23T05:06:44.100942380Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:49.601338585Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:49.601341535Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:49.601344295Z [err]                ^
+2026-06-23T05:06:49.601346745Z [err]  
+2026-06-23T05:06:49.601349115Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:49.601351665Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:49.601354635Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:49.601357685Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:49.601360055Z [err]  }
+2026-06-23T05:06:49.601362565Z [err]  
+2026-06-23T05:06:49.601365035Z [err]  Node.js v22.22.3
+2026-06-23T05:06:49.601367405Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:06:55.093776780Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:06:55.093779580Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:06:55.093782190Z [err]                ^
+2026-06-23T05:06:55.093787000Z [err]  
+2026-06-23T05:06:55.093789710Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:06:55.093792790Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:06:55.093795270Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:06:55.093797810Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:06:55.093800870Z [err]  }
+2026-06-23T05:06:55.093803259Z [err]  
+2026-06-23T05:06:55.093806179Z [err]  Node.js v22.22.3
+2026-06-23T05:06:55.108071183Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:00.583036026Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:00.583042036Z [err]  }
+2026-06-23T05:07:00.583047176Z [err]  
+2026-06-23T05:07:00.583051586Z [err]  Node.js v22.22.3
+2026-06-23T05:07:00.583065565Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:00.583068615Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:00.583071795Z [err]                ^
+2026-06-23T05:07:00.583075315Z [err]  
+2026-06-23T05:07:00.583078985Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:00.583082775Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:00.583085895Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:00.588200126Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:06.096744774Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:06.096747944Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:06.096757084Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:06.096763363Z [err]                ^
+2026-06-23T05:07:06.096768023Z [err]  
+2026-06-23T05:07:06.096771713Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:06.096775473Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:06.096778983Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:06.096782273Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:06.096786253Z [err]  }
+2026-06-23T05:07:06.096790423Z [err]  
+2026-06-23T05:07:06.096793963Z [err]  Node.js v22.22.3
+2026-06-23T05:07:11.572297790Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:11.572304830Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:11.572308960Z [err]                ^
+2026-06-23T05:07:11.572312670Z [err]  
+2026-06-23T05:07:11.572316140Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:11.572320020Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:11.572323520Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:11.572328270Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:11.572331590Z [err]  }
+2026-06-23T05:07:11.572334739Z [err]  
+2026-06-23T05:07:11.572338289Z [err]  Node.js v22.22.3
+2026-06-23T05:07:11.583079395Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:17.071723324Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:17.071728414Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:17.071731804Z [err]                ^
+2026-06-23T05:07:17.071736244Z [err]  
+2026-06-23T05:07:17.071739424Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:17.071743584Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:17.071746834Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:17.071749694Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:17.071752524Z [err]  }
+2026-06-23T05:07:17.071755454Z [err]  
+2026-06-23T05:07:17.071758564Z [err]  Node.js v22.22.3
+2026-06-23T05:07:17.075721567Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:22.560789455Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:22.560793565Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:22.560797025Z [err]                ^
+2026-06-23T05:07:22.560799855Z [err]  
+2026-06-23T05:07:22.560802505Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:22.560806015Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:22.560808615Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:22.560811125Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:22.560814845Z [err]  }
+2026-06-23T05:07:22.560816995Z [err]  
+2026-06-23T05:07:22.560819375Z [err]  Node.js v22.22.3
+2026-06-23T05:07:22.565287043Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:33.266811474Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:33.266821014Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:33.266826084Z [err]  }
+2026-06-23T05:07:33.266830294Z [err]  
+2026-06-23T05:07:33.266834093Z [err]  Node.js v22.22.3
+2026-06-23T05:07:33.266908293Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:33.266912273Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:33.266916922Z [err]                ^
+2026-06-23T05:07:33.266921062Z [err]  
+2026-06-23T05:07:33.266925342Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:33.266929112Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:33.269799929Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:38.758916626Z [err]  Node.js v22.22.3
+2026-06-23T05:07:38.758927986Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:38.758928226Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:38.758938506Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:38.758943346Z [err]                ^
+2026-06-23T05:07:38.758947576Z [err]  
+2026-06-23T05:07:38.758950976Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:38.758954486Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:38.758958896Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:38.758963906Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:38.758967286Z [err]  }
+2026-06-23T05:07:38.758970556Z [err]  
+2026-06-23T05:07:44.241844762Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:44.241849672Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:44.241855172Z [err]                ^
+2026-06-23T05:07:44.241859492Z [err]  
+2026-06-23T05:07:44.241864122Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:44.241868182Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:44.241871812Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:44.241875441Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:44.241879261Z [err]  }
+2026-06-23T05:07:44.241882641Z [err]  
+2026-06-23T05:07:44.241885581Z [err]  Node.js v22.22.3
+2026-06-23T05:07:44.243587242Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:49.794214856Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:49.794220036Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:49.794223396Z [err]                ^
+2026-06-23T05:07:49.794227346Z [err]  
+2026-06-23T05:07:49.794230906Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:49.794235366Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:49.794238466Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:49.794241276Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:49.794244636Z [err]  }
+2026-06-23T05:07:49.794247886Z [err]  
+2026-06-23T05:07:49.794250876Z [err]  Node.js v22.22.3
+2026-06-23T05:07:49.794253896Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:07:55.270889867Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:07:55.270896737Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:07:55.270901126Z [err]                ^
+2026-06-23T05:07:55.270904106Z [err]  
+2026-06-23T05:07:55.270907896Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:07:55.270911366Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:07:55.270914906Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:07:55.270918526Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:07:55.270922096Z [err]  }
+2026-06-23T05:07:55.270926306Z [err]  
+2026-06-23T05:07:55.270929126Z [err]  Node.js v22.22.3
+2026-06-23T05:07:55.276208985Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:00.848344642Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:00.848349501Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:00.848352211Z [err]                ^
+2026-06-23T05:08:00.848355721Z [err]  
+2026-06-23T05:08:00.848358191Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:00.848360901Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:00.848363581Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:00.848366001Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:00.848368371Z [err]  }
+2026-06-23T05:08:00.848370741Z [err]  
+2026-06-23T05:08:00.848373201Z [err]  Node.js v22.22.3
+2026-06-23T05:08:00.848378221Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:06.464875049Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:06.464880479Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:06.464885649Z [err]                ^
+2026-06-23T05:08:06.464892848Z [err]  
+2026-06-23T05:08:06.464897988Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:06.464902928Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:06.464907778Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:06.464913118Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:06.464918558Z [err]  }
+2026-06-23T05:08:06.464923498Z [err]  
+2026-06-23T05:08:06.464928678Z [err]  Node.js v22.22.3
+2026-06-23T05:08:06.464934658Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:11.795807780Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:11.795810430Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:11.795813030Z [err]                ^
+2026-06-23T05:08:11.795816010Z [err]  
+2026-06-23T05:08:11.795818320Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:11.795820690Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:11.795823290Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:11.795825760Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:11.795827870Z [err]  }
+2026-06-23T05:08:11.795830140Z [err]  
+2026-06-23T05:08:11.795832470Z [err]  Node.js v22.22.3
+2026-06-23T05:08:11.795835350Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:17.305192463Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:17.305195183Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:17.305197813Z [err]                ^
+2026-06-23T05:08:17.305200244Z [err]  
+2026-06-23T05:08:17.305203184Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:17.305205354Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:17.305207814Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:17.305210454Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:17.305215394Z [err]  }
+2026-06-23T05:08:17.305218124Z [err]  
+2026-06-23T05:08:17.305221194Z [err]  Node.js v22.22.3
+2026-06-23T05:08:17.305223924Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:22.810224045Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:22.810227205Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:22.810230115Z [err]                ^
+2026-06-23T05:08:22.810232785Z [err]  
+2026-06-23T05:08:22.810235345Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:22.810238215Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:22.810241475Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:22.810243785Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:22.810245975Z [err]  }
+2026-06-23T05:08:22.810248364Z [err]  
+2026-06-23T05:08:22.810250914Z [err]  Node.js v22.22.3
+2026-06-23T05:08:22.810253564Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:28.249753483Z [err]  Node.js v22.22.3
+2026-06-23T05:08:28.249765182Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:28.249778332Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:28.249782402Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:28.249786262Z [err]                ^
+2026-06-23T05:08:28.249790542Z [err]  
+2026-06-23T05:08:28.249794392Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:28.249798592Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:28.249802982Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:28.249806872Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:28.249810762Z [err]  }
+2026-06-23T05:08:28.249814842Z [err]  
+2026-06-23T05:08:33.875763650Z [err]  
+2026-06-23T05:08:33.875764320Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:33.875769980Z [err]  Node.js v22.22.3
+2026-06-23T05:08:33.875770470Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:33.875774260Z [err]                ^
+2026-06-23T05:08:33.875774430Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:33.875777660Z [err]  
+2026-06-23T05:08:33.875781750Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:33.875785270Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:33.875787930Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:33.875790370Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:33.875792720Z [err]  }
+2026-06-23T05:08:39.344028427Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:39.344031886Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:39.344035126Z [err]                ^
+2026-06-23T05:08:39.344038076Z [err]  
+2026-06-23T05:08:39.344040896Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:39.344043296Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:39.344045686Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:39.344048466Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:39.344051166Z [err]  }
+2026-06-23T05:08:39.344053746Z [err]  
+2026-06-23T05:08:39.344056536Z [err]  Node.js v22.22.3
+2026-06-23T05:08:39.344059756Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:44.813338116Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:44.813342866Z [err]  }
+2026-06-23T05:08:44.813346386Z [err]  
+2026-06-23T05:08:44.813349436Z [err]  Node.js v22.22.3
+2026-06-23T05:08:44.813430756Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:44.813449416Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:44.813453956Z [err]                ^
+2026-06-23T05:08:44.813459386Z [err]  
+2026-06-23T05:08:44.813462816Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:44.813466546Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:44.813470405Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:44.817861764Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:50.322928586Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:50.322935736Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:50.322940906Z [err]                ^
+2026-06-23T05:08:50.322945876Z [err]  
+2026-06-23T05:08:50.322949676Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:50.322953716Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:50.322957686Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:50.322961196Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:50.322964496Z [err]  }
+2026-06-23T05:08:50.322968146Z [err]  
+2026-06-23T05:08:50.322971716Z [err]  Node.js v22.22.3
+2026-06-23T05:08:50.324359299Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:08:55.818150258Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:08:55.818156948Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:08:55.818161078Z [err]                ^
+2026-06-23T05:08:55.818164738Z [err]  
+2026-06-23T05:08:55.818168758Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:08:55.818172208Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:08:55.818175548Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:08:55.818179168Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:08:55.818182618Z [err]  }
+2026-06-23T05:08:55.818185777Z [err]  
+2026-06-23T05:08:55.818189317Z [err]  Node.js v22.22.3
+2026-06-23T05:08:55.823776692Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:01.359989815Z [err]  }
+2026-06-23T05:09:01.359993655Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:01.359999375Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:01.360003855Z [err]  
+2026-06-23T05:09:01.360005485Z [err]                ^
+2026-06-23T05:09:01.360012685Z [err]  
+2026-06-23T05:09:01.360012905Z [err]  Node.js v22.22.3
+2026-06-23T05:09:01.360021715Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:01.360021965Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:01.360028695Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:01.360032315Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:01.360035815Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:06.801691062Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:06.801694382Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:06.801697292Z [err]                ^
+2026-06-23T05:09:06.801700872Z [err]  
+2026-06-23T05:09:06.801704232Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:06.801706792Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:06.801709242Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:06.801711503Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:06.801713753Z [err]  }
+2026-06-23T05:09:06.801716213Z [err]  
+2026-06-23T05:09:06.801718513Z [err]  Node.js v22.22.3
+2026-06-23T05:09:06.801721653Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:12.284547438Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:12.284552048Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:12.284554728Z [err]                ^
+2026-06-23T05:09:12.284557238Z [err]  
+2026-06-23T05:09:12.284559937Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:12.284562407Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:12.284564887Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:12.284567767Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:12.284569837Z [err]  }
+2026-06-23T05:09:12.284572287Z [err]  
+2026-06-23T05:09:12.284574487Z [err]  Node.js v22.22.3
+2026-06-23T05:09:12.289639599Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:17.790775558Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:17.790783518Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:17.790790278Z [err]                ^
+2026-06-23T05:09:17.790795138Z [err]  
+2026-06-23T05:09:17.790799518Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:17.790803648Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:17.790808018Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:17.790812418Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:17.790816948Z [err]  }
+2026-06-23T05:09:17.790821928Z [err]  
+2026-06-23T05:09:17.790826868Z [err]  Node.js v22.22.3
+2026-06-23T05:09:17.796254074Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:23.281937150Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:23.281942550Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:23.281946140Z [err]                ^
+2026-06-23T05:09:23.281950170Z [err]  
+2026-06-23T05:09:23.281953650Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:23.281957730Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:23.281960970Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:23.281964360Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:23.281968770Z [err]  }
+2026-06-23T05:09:23.281972190Z [err]  
+2026-06-23T05:09:23.281975500Z [err]  Node.js v22.22.3
+2026-06-23T05:09:23.281979030Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:28.813600469Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:28.813603899Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:28.813608009Z [err]                ^
+2026-06-23T05:09:28.813612499Z [err]  
+2026-06-23T05:09:28.813615669Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:28.813619639Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:28.813622989Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:28.813625989Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:28.813628888Z [err]  }
+2026-06-23T05:09:28.813632248Z [err]  
+2026-06-23T05:09:28.813635298Z [err]  Node.js v22.22.3
+2026-06-23T05:09:28.813638278Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:34.293395146Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:34.293400226Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:34.293403546Z [err]                ^
+2026-06-23T05:09:34.293406516Z [err]  
+2026-06-23T05:09:34.293409336Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:34.293412386Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:34.293415065Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:34.293417925Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:34.293420585Z [err]  }
+2026-06-23T05:09:34.293423195Z [err]  
+2026-06-23T05:09:34.293425875Z [err]  Node.js v22.22.3
+2026-06-23T05:09:34.293428385Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:39.777745058Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:39.777749138Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:39.777754358Z [err]                ^
+2026-06-23T05:09:39.777758158Z [err]  
+2026-06-23T05:09:39.777762118Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:39.777765528Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:39.777769477Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:39.777773627Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:39.777776847Z [err]  }
+2026-06-23T05:09:39.777780837Z [err]  
+2026-06-23T05:09:39.777784697Z [err]  Node.js v22.22.3
+2026-06-23T05:09:39.777788357Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:45.269228403Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:45.269235763Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:45.269241063Z [err]                ^
+2026-06-23T05:09:45.269246243Z [err]  
+2026-06-23T05:09:45.269251033Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:45.269256852Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:45.269262662Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:45.269266752Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:45.269271172Z [err]  }
+2026-06-23T05:09:45.269276152Z [err]  
+2026-06-23T05:09:45.269281022Z [err]  Node.js v22.22.3
+2026-06-23T05:09:45.269285032Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:50.761971709Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:50.761976039Z [err]  }
+2026-06-23T05:09:50.761979179Z [err]  
+2026-06-23T05:09:50.761982739Z [err]  Node.js v22.22.3
+2026-06-23T05:09:50.761985359Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:09:50.761985859Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:50.761988989Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:50.761992159Z [err]                ^
+2026-06-23T05:09:50.762000859Z [err]  
+2026-06-23T05:09:50.762003739Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:50.762006359Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:50.762009049Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:56.273941290Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:09:56.273944090Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:09:56.273946730Z [err]                ^
+2026-06-23T05:09:56.273949619Z [err]  
+2026-06-23T05:09:56.273952419Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:09:56.273954979Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:09:56.273957709Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:09:56.273960279Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:09:56.273962809Z [err]  }
+2026-06-23T05:09:56.273965279Z [err]  
+2026-06-23T05:09:56.273967679Z [err]  Node.js v22.22.3
+2026-06-23T05:09:56.273969919Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:01.787163413Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:01.787165913Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:01.787168513Z [err]                ^
+2026-06-23T05:10:01.787171263Z [err]  
+2026-06-23T05:10:01.787174073Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:01.787176473Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:01.787178573Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:01.787181203Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:01.787184633Z [err]  }
+2026-06-23T05:10:01.787187763Z [err]  
+2026-06-23T05:10:01.787191422Z [err]  Node.js v22.22.3
+2026-06-23T05:10:01.787194122Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:07.259354529Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:07.259354539Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:07.259361159Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:07.259361749Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:07.259365299Z [err]  }
+2026-06-23T05:10:07.259365389Z [err]                ^
+2026-06-23T05:10:07.259368969Z [err]  
+2026-06-23T05:10:07.259368989Z [err]  
+2026-06-23T05:10:07.259372119Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:07.259372329Z [err]  Node.js v22.22.3
+2026-06-23T05:10:07.259375429Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:07.259375779Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:12.738653410Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:12.738656820Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:12.738659830Z [err]                ^
+2026-06-23T05:10:12.738662940Z [err]  
+2026-06-23T05:10:12.738665840Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:12.738668650Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:12.738671970Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:12.738674760Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:12.738678090Z [err]  }
+2026-06-23T05:10:12.738681120Z [err]  
+2026-06-23T05:10:12.738684040Z [err]  Node.js v22.22.3
+2026-06-23T05:10:12.738687200Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:18.222638534Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:18.222643804Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:18.222647044Z [err]                ^
+2026-06-23T05:10:18.222649874Z [err]  
+2026-06-23T05:10:18.222652584Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:18.222655264Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:18.222658203Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:18.222661123Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:18.222664803Z [err]  }
+2026-06-23T05:10:18.222667213Z [err]  
+2026-06-23T05:10:18.222669793Z [err]  Node.js v22.22.3
+2026-06-23T05:10:18.233552866Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:23.711538406Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:23.711542346Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:23.711546236Z [err]                ^
+2026-06-23T05:10:23.711549416Z [err]  
+2026-06-23T05:10:23.711552476Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:23.711555746Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:23.711558436Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:23.711561446Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:23.711564726Z [err]  }
+2026-06-23T05:10:23.711567686Z [err]  
+2026-06-23T05:10:23.711570306Z [err]  Node.js v22.22.3
+2026-06-23T05:10:23.716255192Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:29.229963953Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:29.229968403Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:29.229971473Z [err]                ^
+2026-06-23T05:10:29.229974103Z [err]  
+2026-06-23T05:10:29.229976643Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:29.229979293Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:29.229982683Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:29.229985403Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:29.229988303Z [err]  }
+2026-06-23T05:10:29.229991302Z [err]  
+2026-06-23T05:10:29.229994463Z [err]  Node.js v22.22.3
+2026-06-23T05:10:29.229997563Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:34.720443492Z [err]  }
+2026-06-23T05:10:34.720449782Z [err]  
+2026-06-23T05:10:34.720454442Z [err]  Node.js v22.22.3
+2026-06-23T05:10:34.720459182Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:34.720461752Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:34.720471482Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:34.720477451Z [err]                ^
+2026-06-23T05:10:34.720482491Z [err]  
+2026-06-23T05:10:34.720486281Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:34.720490141Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:34.720493641Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:34.720496771Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:40.245613554Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:40.245617344Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:40.245620404Z [err]                ^
+2026-06-23T05:10:40.245624334Z [err]  
+2026-06-23T05:10:40.245627734Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:40.245631964Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:40.245635604Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:40.245639034Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:40.245642164Z [err]  }
+2026-06-23T05:10:40.245645944Z [err]  
+2026-06-23T05:10:40.245649104Z [err]  Node.js v22.22.3
+2026-06-23T05:10:40.245652664Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:45.743124776Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:45.743127756Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:45.743131356Z [err]                ^
+2026-06-23T05:10:45.743134536Z [err]  
+2026-06-23T05:10:45.743137836Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:45.743141386Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:45.743144516Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:45.743147366Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:45.743150846Z [err]  }
+2026-06-23T05:10:45.743153806Z [err]  
+2026-06-23T05:10:45.743157805Z [err]  Node.js v22.22.3
+2026-06-23T05:10:45.743161295Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:51.344038571Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:51.344041561Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:51.344044401Z [err]                ^
+2026-06-23T05:10:51.344047051Z [err]  
+2026-06-23T05:10:51.344049501Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:51.344051841Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:51.344054871Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:51.344057551Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:51.344059951Z [err]  }
+2026-06-23T05:10:51.344062311Z [err]  
+2026-06-23T05:10:51.344064581Z [err]  Node.js v22.22.3
+2026-06-23T05:10:51.344067341Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:10:56.717991724Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:10:56.717994404Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:10:56.717996434Z [err]  }
+2026-06-23T05:10:56.718000084Z [err]  
+2026-06-23T05:10:56.718000844Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:10:56.718003194Z [err]  Node.js v22.22.3
+2026-06-23T05:10:56.718005154Z [err]                ^
+2026-06-23T05:10:56.718008364Z [err]  
+2026-06-23T05:10:56.718011554Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:10:56.718015004Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:10:56.718017724Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:10:56.729679277Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:02.199231956Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:02.199234496Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:02.199237116Z [err]                ^
+2026-06-23T05:11:02.199239856Z [err]  
+2026-06-23T05:11:02.199243136Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:02.199245745Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:02.199248645Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:02.199252365Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:02.199255455Z [err]  }
+2026-06-23T05:11:02.199258125Z [err]  
+2026-06-23T05:11:02.199261015Z [err]  Node.js v22.22.3
+2026-06-23T05:11:02.203579675Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:07.704052630Z [err]  }
+2026-06-23T05:11:07.704058460Z [err]  
+2026-06-23T05:11:07.704062030Z [err]  Node.js v22.22.3
+2026-06-23T05:11:07.704090650Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:07.704094590Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:07.704120379Z [err]                ^
+2026-06-23T05:11:07.704131909Z [err]  
+2026-06-23T05:11:07.704137269Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:07.704141329Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:07.704145369Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:07.704149629Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:07.713955735Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:13.211189135Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:13.211194495Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:13.211197575Z [err]                ^
+2026-06-23T05:11:13.211201455Z [err]  
+2026-06-23T05:11:13.211205225Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:13.211208925Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:13.211212925Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:13.211216005Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:13.211218845Z [err]  }
+2026-06-23T05:11:13.211221855Z [err]  
+2026-06-23T05:11:13.211224545Z [err]  Node.js v22.22.3
+2026-06-23T05:11:13.220735804Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:18.687511527Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:18.687516467Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:18.687522727Z [err]                ^
+2026-06-23T05:11:18.687527017Z [err]  
+2026-06-23T05:11:18.687531487Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:18.687535187Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:18.687540246Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:18.687544046Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:18.687548326Z [err]  }
+2026-06-23T05:11:18.687552896Z [err]  
+2026-06-23T05:11:18.687556366Z [err]  Node.js v22.22.3
+2026-06-23T05:11:18.692385659Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:24.156603889Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:24.156609229Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:24.156612909Z [err]                ^
+2026-06-23T05:11:24.156616588Z [err]  
+2026-06-23T05:11:24.156620208Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:24.156623468Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:24.156627078Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:24.156630708Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:24.156634118Z [err]  }
+2026-06-23T05:11:24.156637528Z [err]  
+2026-06-23T05:11:24.156641618Z [err]  Node.js v22.22.3
+2026-06-23T05:11:24.164866832Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:29.667335423Z [err]  Node.js v22.22.3
+2026-06-23T05:11:29.667347424Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:29.667406683Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:29.667410003Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:29.667413383Z [err]                ^
+2026-06-23T05:11:29.667416993Z [err]  
+2026-06-23T05:11:29.667421043Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:29.667424783Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:29.667428223Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:29.667431373Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:29.667434723Z [err]  }
+2026-06-23T05:11:29.667438143Z [err]  
+2026-06-23T05:11:35.136981653Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:35.136987373Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:35.136992483Z [err]                ^
+2026-06-23T05:11:35.136996023Z [err]  
+2026-06-23T05:11:35.136999403Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:35.137003063Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:35.137006533Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:35.137010073Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:35.137013033Z [err]  }
+2026-06-23T05:11:35.137016473Z [err]  
+2026-06-23T05:11:35.137019413Z [err]  Node.js v22.22.3
+2026-06-23T05:11:35.137023153Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:40.637460953Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:40.637465853Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:40.637471473Z [err]                ^
+2026-06-23T05:11:40.637476553Z [err]  
+2026-06-23T05:11:40.637482013Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:40.637486523Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:40.637491543Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:40.637495563Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:40.637499642Z [err]  }
+2026-06-23T05:11:40.637504502Z [err]  
+2026-06-23T05:11:40.637509202Z [err]  Node.js v22.22.3
+2026-06-23T05:11:40.637512822Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:46.162535593Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:46.162539053Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:46.162542263Z [err]                ^
+2026-06-23T05:11:46.162544643Z [err]  
+2026-06-23T05:11:46.162547053Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:46.162549713Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:46.162552253Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:46.162555453Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:46.162557813Z [err]  }
+2026-06-23T05:11:46.162560503Z [err]  
+2026-06-23T05:11:46.162562833Z [err]  Node.js v22.22.3
+2026-06-23T05:11:46.167323118Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:51.735442194Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:51.735445364Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:51.735448414Z [err]                ^
+2026-06-23T05:11:51.735452294Z [err]  
+2026-06-23T05:11:51.735455804Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:51.735459684Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:51.735463254Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:51.735466294Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:51.735469534Z [err]  }
+2026-06-23T05:11:51.735473624Z [err]  
+2026-06-23T05:11:51.735477524Z [err]  Node.js v22.22.3
+2026-06-23T05:11:51.735480744Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:11:57.143484422Z [err]  
+2026-06-23T05:11:57.143492502Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:11:57.143497202Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:11:57.143501912Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:11:57.143506812Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:11:57.143513852Z [err]  }
+2026-06-23T05:11:57.143516502Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:11:57.143523562Z [err]  
+2026-06-23T05:11:57.143524472Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:11:57.143532051Z [err]                ^
+2026-06-23T05:11:57.143534121Z [err]  Node.js v22.22.3
+2026-06-23T05:11:57.143539221Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:12:02.661481597Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:12:02.661491797Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:12:02.661497797Z [err]                ^
+2026-06-23T05:12:02.661502477Z [err]  
+2026-06-23T05:12:02.661509007Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:12:02.661513467Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:12:02.661518157Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:12:02.661522377Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:12:02.661527317Z [err]  }
+2026-06-23T05:12:02.661530767Z [err]  
+2026-06-23T05:12:02.661534417Z [err]  Node.js v22.22.3
+2026-06-23T05:12:02.667780744Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:12:08.181526637Z [err]  /app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244
+2026-06-23T05:12:08.181528936Z [err]          throw new Error(WSCodes[error.code]);
+2026-06-23T05:12:08.181531146Z [err]                ^
+2026-06-23T05:12:08.181534976Z [err]  
+2026-06-23T05:12:08.181537886Z [err]  Error [TOKEN_INVALID]: An invalid token was provided.
+2026-06-23T05:12:08.181540416Z [err]      at WebSocketManager.createShards (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/websocket/WebSocketManager.js:244:15)
+2026-06-23T05:12:08.181543006Z [err]      at async Client.login (/app/node_modules/.pnpm/discord.js-selfbot-v13@3.7.1/node_modules/discord.js-selfbot-v13/src/client/Client.js:287:7) {
+2026-06-23T05:12:08.181546316Z [err]    [Symbol(code)]: 'TOKEN_INVALID'
+2026-06-23T05:12:08.181548766Z [err]  }
+2026-06-23T05:12:08.181551086Z [err]  
+2026-06-23T05:12:08.181554626Z [err]  Node.js v22.22.3
+2026-06-23T05:12:08.188010250Z [err]  [userbot] proses mati (code 1), restart dalam 5 detik...
+2026-06-23T05:26:45.061849415Z [err]  [userbot] error: Request failed with status code 503
+2026-06-23T05:29:04.943063317Z [err]  [userbot] error: Request failed with status code 503

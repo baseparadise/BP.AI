@@ -1,1 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BP.AI — Coding Assistant</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #1f6feb;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --radius: 8px;
+    --sidebar: 280px;
+  }
+
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* ── Layout ── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar);
+    min-width: var(--sidebar);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--text2); font-weight: 400; font-size: 13px; margin-left: 4px; }
+
+  .sidebar-section { padding: 12px 16px 4px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* File list */
+  .file-list { padding: 4px 8px; flex: 1; overflow-y: auto; }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    cursor: default;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .file-item:hover { background: var(--bg3); }
+  .file-item .fi-icon { font-size: 14px; flex-shrink: 0; }
+  .file-item .fi-name { flex: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-item .fi-size { font-size: 11px; color: var(--text2); flex-shrink: 0; }
+  .file-item .fi-badge {
+    font-size: 9px;
+    background: var(--accent2);
+    color: #fff;
+    border-radius: 3px;
+    padding: 1px 4px;
+    flex-shrink: 0;
+  }
+  .file-item .fi-remove {
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .file-item:hover .fi-remove { opacity: 1; }
+  .file-item .fi-remove:hover { color: var(--red); background: rgba(248,81,73,0.1); }
+
+  .no-files { padding: 12px 16px; color: var(--text2); font-size: 12px; font-style: italic; }
+
+  /* Upload area */
+  .upload-area {
+    margin: 8px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--text2);
+    font-size: 12px;
+  }
+  .upload-area:hover, .upload-area.drag-over { border-color: var(--accent); background: rgba(88,166,255,0.05); color: var(--accent); }
+  .upload-area .upload-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+
+  #file-input { display: none; }
+
+  /* Session controls */
+  .sidebar-footer { padding: 8px; border-top: 1px solid var(--border); }
+  .btn-clear {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-clear:hover { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.05); }
+
+  /* ── Chat area ── */
+  .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .chat-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+  }
+  .chat-title { font-weight: 600; font-size: 15px; }
+  .chat-subtitle { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px var(--green); }
+
+  /* Messages */
+  .messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .msg { display: flex; gap: 10px; max-width: 100%; }
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .msg.user .msg-avatar { background: var(--accent2); border-color: var(--accent); }
+
+  .msg-body { flex: 1; min-width: 0; }
+  .msg.user .msg-body { display: flex; flex-direction: column; align-items: flex-end; }
+
+  .msg-bubble {
+    display: inline-block;
+    max-width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg.user .msg-bubble { background: var(--accent2); border-color: var(--accent); color: #fff; border-radius: 12px 12px 2px 12px; }
+  .msg.ai .msg-bubble { border-radius: 2px 12px 12px 12px; }
+
+  .msg-bubble p { margin-bottom: 8px; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+  .msg-bubble strong { font-weight: 600; }
+  .msg-bubble ul, .msg-bubble ol { padding-left: 18px; margin: 6px 0; }
+  .msg-bubble li { margin: 3px 0; }
+
+  /* Code blocks inside messages */
+  .code-block-wrap {
+    margin: 8px 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: #161b22;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .code-block-header .lang-badge {
+    background: var(--bg3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .code-block-actions { display: flex; gap: 6px; }
+  .btn-copy, .btn-download {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover, .btn-download:hover { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.05); }
+  .btn-copy.copied { border-color: var(--green); color: var(--green); }
+
+  .code-block-wrap pre { margin: 0 !important; border-radius: 0 !important; max-height: 500px; overflow: auto; }
+  .code-block-wrap pre code { font-size: 12.5px !important; font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important; }
+
+  /* Sources */
+  .msg-sources { margin-top: 8px; padding: 8px 12px; background: var(--bg3); border-radius: var(--radius); border: 1px solid var(--border); }
+  .msg-sources-title { font-size: 11px; color: var(--text2); font-weight: 600; margin-bottom: 4px; }
+  .msg-sources a { display: block; font-size: 11px; color: var(--accent); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 0; }
+  .msg-sources a:hover { text-decoration: underline; }
+
+  /* Typing indicator */
+  .typing-msg .msg-bubble { padding: 12px 16px; }
+  .typing-dots { display: flex; gap: 4px; }
+  .typing-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text2);
+    animation: blink 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  /* Welcome */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px;
+    text-align: center;
+    color: var(--text2);
+  }
+  .welcome-icon { font-size: 48px; margin-bottom: 16px; }
+  .welcome h2 { color: var(--text); font-size: 20px; margin-bottom: 8px; }
+  .welcome p { font-size: 13px; line-height: 1.7; max-width: 420px; }
+  .welcome-tips { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .tip-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .tip-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.05); }
+
+  /* ── Input area ── */
+  .input-area {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--accent); }
+
+  .input-file-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: color 0.15s;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 2px;
+  }
+  .input-file-btn:hover { color: var(--accent); }
+
+  #msg-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    line-height: 1.5;
+    max-height: 160px;
+    min-height: 22px;
+    overflow-y: auto;
+  }
+  #msg-input::placeholder { color: var(--text2); }
+
+  .send-btn {
+    background: var(--accent2);
+    border: none;
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: #388bfd; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--bg3); color: var(--text2); cursor: not-allowed; transform: none; }
+
+  .input-hint { font-size: 11px; color: var(--text2); margin-top: 6px; padding: 0 4px; }
+  .input-hint kbd { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 10px; }
+
+  /* ── Toast ── */
+  .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+  .toast {
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    animation: slideIn 0.2s ease;
+    max-width: 320px;
+  }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div>
+        <div class="logo">BP.AI <span>coding assistant</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">File Aktif</div>
+    <div class="file-list" id="file-list">
+      <div class="no-files" id="no-files-msg">Belum ada file. Upload dulu.</div>
+    </div>
+
+    <label class="upload-area" id="upload-area" for="file-input">
+      <span class="upload-icon">📂</span>
+      Klik atau drag file ke sini
+      <br><small>JS, TS, PY, HTML, CSS, JSON, ...</small>
+    </label>
+    <input type="file" id="file-input" multiple accept=".js,.ts,.jsx,.tsx,.py,.html,.htm,.css,.scss,.json,.md,.txt,.yaml,.yml,.sh,.go,.rs,.java,.cpp,.c,.php,.sql,.env,.xml,.toml,.vue,.svelte" />
+
+    <div class="sidebar-footer">
+      <button class="btn-clear" id="clear-btn">🗑️ Hapus sesi & history</button>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div>
+        <div class="chat-title"><span class="status-dot"></span>BP.AI</div>
+        <div class="chat-subtitle" id="chat-subtitle">Siap membantu coding</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)" id="model-label"></div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h2>BP.AI Coding Assistant</h2>
+        <p>Upload file kode-mu di sidebar, lalu tanya apa saja. File hanya dikirim ke AI sekali — percakapan selanjutnya hemat token otomatis.</p>
+        <div class="welcome-tips">
+          <div class="tip-chip" onclick="useTip(this)">Cek bug di file ini</div>
+          <div class="tip-chip" onclick="useTip(this)">Perbaiki dan kirim versi utuh</div>
+          <div class="tip-chip" onclick="useTip(this)">Jelaskan fungsi ini</div>
+          <div class="tip-chip" onclick="useTip(this)">Tambahkan error handling</div>
+          <div class="tip-chip" onclick="useTip(this)">Optimalkan performa</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <button class="input-file-btn" title="Upload file" onclick="document.getElementById('file-input').click()">📎</button>
+        <textarea id="msg-input" placeholder="Tanya sesuatu atau minta edit kode..." rows="1"></textarea>
+        <button class="send-btn" id="send-btn" title="Kirim (Ctrl+Enter)">➤</button>
+      </div>
+      <div class="input-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> untuk kirim &nbsp;·&nbsp; <kbd>Enter</kbd> untuk baris baru</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let sessionId = localStorage.getItem('bp_session_id') || null;
+let files = {};     // { filename: { size, inContext } }
+let isLoading = false;
+
+const EXT_ICONS = {
+  js: '🟨', ts: '🔷', jsx: '⚛️', tsx: '⚛️', py: '🐍', html: '🌐', css: '🎨',
+  scss: '🎨', json: '📋', md: '📝', sh: '⚙️', go: '🐹', rs: '🦀', java: '☕',
+  php: '🐘', sql: '🗄️', yml: '⚙️', yaml: '⚙️', txt: '📄', env: '🔒',
+};
+
+function getIcon(filename) {
+  const ext = (filename.split('.').pop() || '').toLowerCase();
+  return EXT_ICONS[ext] || '📄';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + 'B';
+  return (bytes / 1024).toFixed(1) + 'KB';
+}
+
+// ── Session ────────────────────────────────────────────────────────
+function getHeaders(extra = {}) {
+  const h = { 'Content-Type': 'application/json', ...extra };
+  if (sessionId) h['X-Session-Id'] = sessionId;
+  return h;
+}
+
+async function loadSessionFiles() {
+  if (!sessionId) return;
+  try {
+    const r = await fetch('/api/session/files', { headers: { 'X-Session-Id': sessionId } });
+    const data = await r.json();
+    files = {};
+    data.files.forEach(f => { files[f.name] = { size: f.size, inContext: f.inContext }; });
+    renderFileList();
+  } catch {}
+}
+
+// ── File upload ────────────────────────────────────────────────────
+const fileInput = document.getElementById('file-input');
+const uploadArea = document.getElementById('upload-area');
+
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+async function handleFiles(fileList) {
+  if (!fileList || fileList.length === 0) return;
+  const fd = new FormData();
+  for (const f of fileList) fd.append('files', f, f.name);
+
+  const headers = {};
+  if (sessionId) headers['X-Session-Id'] = sessionId;
+
+  try {
+    const r = await fetch('/api/upload', { method: 'POST', headers, body: fd });
+    const data = await r.json();
+
+    if (!sessionId && data.sessionId) {
+      sessionId = data.sessionId;
+      localStorage.setItem('bp_session_id', sessionId);
+    }
+
+    if (data.uploaded && data.uploaded.length > 0) {
+      toast(`✅ ${data.uploaded.join(', ')} berhasil diupload`, 'success');
+      await loadSessionFiles();
+      hideWelcome();
+    }
+    if (data.errors && data.errors.length > 0) {
+      data.errors.forEach(e => toast('⚠️ ' + e, 'error'));
+    }
+  } catch (e) {
+    toast('❌ Gagal upload: ' + e.message, 'error');
+  }
+  fileInput.value = '';
+}
+
+function renderFileList() {
+  const list = document.getElementById('file-list');
+  const noMsg = document.getElementById('no-files-msg');
+  const names = Object.keys(files);
+
+  if (names.length === 0) {
+    noMsg.style.display = '';
+    list.querySelectorAll('.file-item').forEach(el => el.remove());
+    return;
+  }
+  noMsg.style.display = 'none';
+
+  // Rebuild list
+  list.querySelectorAll('.file-item').forEach(el => el.remove());
+  names.forEach(name => {
+    const f = files[name];
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.innerHTML = `
+      <span class="fi-icon">${getIcon(name)}</span>
+      <span class="fi-name" title="${name}">${name}</span>
+      <span class="fi-size">${formatSize(f.size)}</span>
+      ${f.inContext ? '<span class="fi-badge">AI</span>' : ''}
+    `;
+    list.appendChild(item);
+  });
+
+  // Update subtitle
+  const sub = document.getElementById('chat-subtitle');
+  sub.textContent = `${names.length} file aktif di sesi ini`;
+}
+
+// ── Chat ───────────────────────────────────────────────────────────
+const messagesEl = document.getElementById('messages');
+const msgInput = document.getElementById('msg-input');
+const sendBtn = document.getElementById('send-btn');
+
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 160) + 'px';
+});
+
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+sendBtn.addEventListener('click', sendMessage);
+
+function useTip(el) {
+  msgInput.value = el.textContent;
+  msgInput.dispatchEvent(new Event('input'));
+  msgInput.focus();
+}
+
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const text = msgInput.value.trim();
+  if (!text && Object.keys(files).length === 0) return;
+
+  hideWelcome();
+  appendUserMsg(text || '[kirim dengan file aktif]');
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  const typingEl = appendTyping();
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ message: text, useFiles: true }),
+    });
+    const data = await r.json();
+
+    if (!sessionId && data.sessionId) {
+      sessionId = data.sessionId;
+      localStorage.setItem('bp_session_id', sessionId);
+    }
+
+    typingEl.remove();
+
+    if (r.ok) {
+      appendAIMsg(data);
+      // Update file context status
+      if (data.filesInContext) {
+        data.filesInContext.forEach(f => { if (files[f]) files[f].inContext = true; });
+        renderFileList();
+      }
+    } else {
+      appendError(data.error || 'Terjadi kesalahan.');
+    }
+  } catch (e) {
+    typingEl.remove();
+    appendError('Gagal menghubungi server: ' + e.message);
+  }
+
+  isLoading = false;
+  sendBtn.disabled = false;
+  msgInput.focus();
+}
+
+// ── Render messages ────────────────────────────────────────────────
+function appendUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `
+    <div class="msg-avatar">👤</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${escHtml(text)}</div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollBottom();
+}
+
+function appendAIMsg(data) {
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+
+  // Render text: pisahkan code block dari teks biasa
+  const rendered = renderMarkdown(data.text || '');
+
+  let sourcesHtml = '';
+  if (data.sources && data.sources.length > 0) {
+    const links = data.sources.map(s => `<a href="${escHtml(s.uri)}" target="_blank" rel="noopener">${escHtml(s.title || s.uri)}</a>`).join('');
+    sourcesHtml = `<div class="msg-sources"><div class="msg-sources-title">📚 Sumber</div>${links}</div>`;
+  }
+
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${rendered}</div>
+      ${sourcesHtml}
+    </div>`;
+  messagesEl.appendChild(div);
+
+  // Syntax highlight
+  div.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  scrollBottom();
+}
+
+function appendError(msg) {
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-body">
+      <div class="msg-bubble" style="color:var(--red);border-color:var(--red)">⚠️ ${escHtml(msg)}</div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollBottom();
+}
+
+function appendTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg ai typing-msg';
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-body">
+      <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollBottom();
+  return div;
+}
+
+// ── Markdown renderer (ringan, tanpa library) ──────────────────────
+let blockCounter = 0;
+
+function renderMarkdown(text) {
+  // Pisahkan code block terlebih dahulu
+  const parts = [];
+  const codeRegex = /```(\w[\w+-]*)?\r?\n([\s\S]*?)```/g;
+  let last = 0, m;
+
+  while ((m = codeRegex.exec(text)) !== null) {
+    if (m.index > last) parts.push({ type: 'text', content: text.slice(last, m.index) });
+    parts.push({ type: 'code', lang: m[1] || 'text', code: m[2].replace(/\s+$/, '') });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push({ type: 'text', content: text.slice(last) });
+
+  return parts.map(p => {
+    if (p.type === 'code') return renderCodeBlock(p.lang, p.code);
+    return renderInlineText(p.content);
+  }).join('');
+}
+
+function renderInlineText(text) {
+  return escHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:12px">$1</code>')
+    .replace(/^(#{1,3})\s+(.+)$/gm, (_, h, t) => `<strong>${t}</strong>`)
+    .replace(/^[-*]\s+(.+)$/gm, '• $1')
+    .replace(/\n/g, '<br>');
+}
+
+function renderCodeBlock(lang, code) {
+  const id = 'cb-' + (++blockCounter);
+  const displayLang = lang || 'text';
+  const safeCode = escHtml(code);
+
+  return `<div class="code-block-wrap">
+    <div class="code-block-header">
+      <span class="lang-badge">${displayLang}</span>
+      <div class="code-block-actions">
+        <button class="btn-copy" onclick="copyCode('${id}', this)">Salin</button>
+        <button class="btn-download" onclick="downloadCode('${id}', '${displayLang}')">⬇ Unduh</button>
+      </div>
+    </div>
+    <pre><code id="${id}" class="language-${displayLang}">${safeCode}</code></pre>
+  </div>`;
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    btn.textContent = '✓ Disalin';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Salin'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function downloadCode(id, lang) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const extMap = { javascript: 'js', typescript: 'ts', python: 'py', html: 'html', css: 'css', json: 'json', bash: 'sh', sh: 'sh', go: 'go', rust: 'rs', java: 'java', php: 'php', sql: 'sql' };
+  const ext = extMap[lang] || lang || 'txt';
+  const filename = prompt('Nama file:', `output.${ext}`);
+  if (!filename) return;
+  const blob = new Blob([el.textContent], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Clear session ──────────────────────────────────────────────────
+document.getElementById('clear-btn').addEventListener('click', async () => {
+  if (!confirm('Hapus semua history dan file di sesi ini?')) return;
+  if (sessionId) {
+    await fetch('/api/session/clear', { method: 'POST', headers: { 'X-Session-Id': sessionId } });
+  }
+  sessionId = null;
+  localStorage.removeItem('bp_session_id');
+  files = {};
+  renderFileList();
+  messagesEl.innerHTML = '';
+  // Tampilkan welcome lagi
+  const w = document.createElement('div');
+  w.className = 'welcome';
+  w.id = 'welcome';
+  w.innerHTML = `<div class="welcome-icon">🤖</div><h2>Sesi baru dimulai</h2><p>Upload file dan mulai ngobrol.</p>`;
+  messagesEl.appendChild(w);
+  toast('Sesi dihapus', 'success');
+});
+
+// ── Toast ──────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── Util ───────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function scrollBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+(async () => {
+  if (sessionId) await loadSessionFiles();
+})();
+</script>
+</body>
+</html>

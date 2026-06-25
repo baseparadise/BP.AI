@@ -23,7 +23,9 @@ const path = require('path');
 const crypto = require('crypto');
 const { askGemini, extractCodeBlocks, stripCodeBlocks } = require('./lib/ai');
 
-const PORT = process.env.WEB_PORT || 3002;
+// Pakai PORT utama Railway agar bisa diakses dari internet.
+// start.js yang baru memberi PORT ke web.js, bukan ke bot.js.
+const PORT = process.env.PORT || 3000;
 const WEB_PASSWORD = process.env.WEB_PASSWORD || '';
 
 if (!WEB_PASSWORD) {

@@ -31,26 +31,37 @@ const {
 // KONFIGURASI
 // ============================================================
 
-// ID Owner — satu-satunya yang bisa pakai bot di DM.
 const OWNER_ID = '1292088584429637707';
 
-// Channel: simpan maks 2 pasang (termasuk saat owner di channel),
-// setelah itu auto-clear agar tidak merusak konteks DM.
-// DM owner: tidak pernah di-auto-clear — simpan seterusnya.
 const MAX_CHANNEL_TURNS = 2;
 
-// Batas file yang bisa dikirim per pesan.
-// DM owner bisa kirim lebih banyak file (hingga 10, batas Discord).
-const MAX_FILES_DM    = 10;  // DM owner
-const MAX_FILES_CH    = 3;   // channel
+const MAX_FILES_DM    = 10;
+const MAX_FILES_CH    = 3;
 
 // Batas ukuran file per-attachment (60 KB).
 const MAX_FILE_BYTES = 60 * 1024;
 
+// Batas total ukuran semua file dalam satu pesan yang dikirim ke AI.
+// Jika melebihi ini, file akan diproses satu per satu agar tidak melebihi context window.
+// [FIX] Turunkan threshold untuk mencegah AI truncate karena kelebihan token.
+const MAX_TOTAL_BYTES_COMBINED = 30 * 1024; // 30KB total sebelum split satu-per-satu
+
 // Discord membatasi maks 10 file per reply.
 const DISCORD_MAX_FILES = 10;
 
-// File JSON penyimpanan riwayat permanen.
+// Pola yang mengindikasikan AI memberikan respons palsu/hallusinasi.
+// [FIX BARU] Deteksi konten yang tidak berguna agar bisa di-retry.
+const HALLUCINATION_PATTERNS = [
+  /https?:\/\/github\.com\/your[-_]?repo/i,
+  /github\.com\/your[-_]?project/i,
+  /\byour[-_]?repo\b/i,
+  /\[nama[-_ ]?repo\]/i,
+  /silakan\s+kunjungi\s+tautan/i,
+  /karena\s+keterbatasan\s+platform/i,
+  /saya\s+tidak\s+dapat\s+mengirim\s+file/i,
+  /saya\s+tidak\s+bisa\s+mengirim\s+file/i,
+];
+
 const HISTORY_FILE = path.join(__dirname, 'conversation_history.json');
 
 // ============================================================
@@ -68,7 +79,6 @@ try {
   allHistory = {};
 }
 
-// Simpan ke file JSON secara async agar tidak blokir event loop.
 function saveHistory() {
   fs.writeFile(HISTORY_FILE, JSON.stringify(allHistory, null, 2), 'utf-8', (err) => {
     if (err) console.error('[bot] Gagal menyimpan riwayat:', err.message);
@@ -80,44 +90,29 @@ function getHistory(key) {
   return allHistory[key];
 }
 
-// Hapus riwayat sebuah sesi.
 function clearHistory(key) {
   delete allHistory[key];
   saveHistory();
 }
 
-// Tambah satu pasang percakapan ke riwayat.
-//
-// historyUserContent : yang disimpan ke history — instruksi + nama file saja (TANPA isi file).
-//                      Ini mencegah history membengkak dan token AI membengkak di pesan berikutnya.
-// isDMOwner          : DM owner → tidak pernah ditrim/auto-clear.
-//                      Channel (termasuk kalau owner ada di channel) → auto-clear setelah 2 pasang.
-//
-// Kenapa channel owner tetap di-clear?
-//   Histori channel disimpan per-channel (bukan per-user), dan percakapan channel biasanya
-//   hal umum/crypto. Kalau tidak di-clear, konteks channel bisa "bocor" ke sesi DM coding.
 function pushHistory(key, historyUserContent, assistantText, isDMOwner) {
   const history = getHistory(key);
   history.push({ role: 'user', content: historyUserContent });
   history.push({ role: 'assistant', content: assistantText });
 
   if (!isDMOwner) {
-    // Channel: setelah mencapai MAX_CHANNEL_TURNS pasang, hapus seluruh history key ini
-    // supaya percakapan berikutnya dimulai dari awal (hemat token, konteks tetap bersih).
     if (history.length >= MAX_CHANNEL_TURNS * 2) {
-      delete allHistory[key]; // pakai delete bukan [] supaya tidak ada sisa kunci kosong
+      delete allHistory[key];
     }
   }
-  // DM owner: tidak pernah dihapus otomatis — tumbuh terus sampai !ClearHistory diketik.
 
   saveHistory();
 }
 
-// Ambil history yang akan dikirim ke AI.
 function getHistoryForAI(key, isDMOwner) {
   const history = getHistory(key);
-  if (isDMOwner) return history;                          // DM: seluruh history
-  return history.slice(-(MAX_CHANNEL_TURNS * 2));         // Channel: 2 pasang terakhir
+  if (isDMOwner) return history;
+  return history.slice(-(MAX_CHANNEL_TURNS * 2));
 }
 
 // ============================================================
@@ -156,7 +151,8 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-client.once('clientReady', () => console.log(`[bot] Login sebagai ${client.user.tag}`));
+// [FIX] 'clientReady' tidak valid di discord.js v14 — event yang benar adalah 'ready'.
+client.once('ready', () => console.log(`[bot] Login sebagai ${client.user.tag}`));
 client.on('error', (err) => console.error('[bot] Client error:', err));
 process.on('unhandledRejection', (err) => console.error('[bot] Unhandled rejection:', err));
 
@@ -182,9 +178,24 @@ async function downloadAttachmentText(attachment) {
   return String(data);
 }
 
-// Tentukan apakah jawaban AI harus dikirim sebagai file attachment.
-// Di DM owner: threshold sangat rendah — kode apapun > 80 karakter langsung jadi file.
-// Di channel: threshold normal (500 karakter atau keyword file tertentu).
+// [FIX BARU] Deteksi apakah respons AI mengandung hallusinasi/konten palsu.
+function containsHallucination(text) {
+  return HALLUCINATION_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+// [FIX BARU] Validasi code block — pastikan isinya cukup panjang dan bukan placeholder.
+// Minimum 50 karakter — code yang valid pasti lebih panjang dari itu.
+function isValidCodeBlock(code) {
+  if (!code || code.trim().length < 50) return false;
+  const lower = code.toLowerCase();
+  // Deteksi placeholder yang biasa AI gunakan saat truncate
+  const placeholders = ['// ...', '/* ... */', '// kode selanjutnya', '// rest of', '...omitted', '// tambahkan sisanya'];
+  const placeholderCount = placeholders.filter((p) => lower.includes(p)).length;
+  // Boleh ada 1 placeholder (komentar biasa), tapi lebih dari 1 curiga truncated
+  if (placeholderCount > 1) return false;
+  return true;
+}
+
 function shouldSendAsFile(question, blocks, isDMOwner) {
   if (!blocks.length) return false;
   if (blocks.length > 1) return true;
@@ -195,24 +206,30 @@ function shouldSendAsFile(question, blocks, isDMOwner) {
 }
 
 // Kirim jawaban sebagai file attachment.
-// originalFileNames: nama-nama file asli yang dikirim user.
-//   → Kalau user kirim 1 file dan AI balas 1 code block → pakai nama file asli user persis.
-//   → Kalau banyak file dan urutan cocok → pakai nama file asli per-index.
-//   → Kalau tidak cocok → fallback ke output.ext.
-// Discord membatasi maks 10 file per reply — selebihnya dipotong.
+// [FIX] Validasi setiap code block sebelum dijadikan file — skip block yang kosong/placeholder.
 async function replyWithFiles(message, text, blocks, originalFileNames = []) {
-  const cappedBlocks = blocks.slice(0, DISCORD_MAX_FILES);
+  // Filter block yang tidak valid sebelum dijadikan file
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    // Tidak ada block valid — kirim sebagai teks biasa
+    const explanation = stripCodeBlocks(text);
+    await message.reply({
+      content: (explanation || '⚠️ AI tidak menghasilkan kode yang valid. Coba kirim ulang dengan instruksi lebih spesifik.').slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const cappedBlocks = validBlocks.slice(0, DISCORD_MAX_FILES);
 
   const files = cappedBlocks.map((b, i) => {
-    // Satu file masuk, satu block keluar → pakai nama asli user.
     if (originalFileNames.length === 1 && cappedBlocks.length === 1) {
       return makeFile(b.code, originalFileNames[0]);
     }
-    // Banyak file masuk → cocokkan per-index.
     if (originalFileNames[i]) {
       return makeFile(b.code, originalFileNames[i]);
     }
-    // Fallback: pakai ekstensi dari bahasa code block.
     const ext = EXT_MAP[b.lang] || (TEXT_FILE_EXTENSIONS.includes(b.lang) ? b.lang : 'txt');
     const filename = cappedBlocks.length > 1 ? `file_${i + 1}.${ext}` : `output.${ext}`;
     return makeFile(b.code, filename);
@@ -223,8 +240,13 @@ async function replyWithFiles(message, text, blocks, originalFileNames = []) {
     ? `\n\n⚠️ Hanya ${DISCORD_MAX_FILES} file pertama yang dikirim (Discord membatasi maks ${DISCORD_MAX_FILES} file per pesan).`
     : '';
 
+  // [FIX] Tambah info jumlah file yang berhasil divalidasi
+  const skippedNote = (blocks.length - validBlocks.length) > 0
+    ? `\n⚠️ ${blocks.length - validBlocks.length} code block dilewati karena isinya tidak lengkap.`
+    : '';
+
   await message.reply({
-    content: ((explanation || '📎 Ini hasilnya, dikirim sebagai file.') + truncatedNote).slice(0, 2000),
+    content: ((explanation || '📎 Ini hasilnya, dikirim sebagai file.') + truncatedNote + skippedNote).slice(0, 2000),
     files,
     flags: MessageFlags.SuppressEmbeds,
   });
@@ -261,7 +283,6 @@ function friendlyGitHubError(err, ref) {
   return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
 }
 
-// History dipakai di sini supaya AI ingat konteks percakapan sebelumnya (terutama penting di DM owner).
 async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
   let branch = ref.branch;
   try {
@@ -276,15 +297,32 @@ async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
       + `\`\`\`\n${oldContent}\n\`\`\``;
 
     const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
     const blocks = extractCodeBlocks(text);
     if (!blocks.length) {
       await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
       return;
     }
     const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
     const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
     const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
     const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
 
     await message.reply({
       content: [
@@ -292,12 +330,54 @@ async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
         result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
         summary,
       ].filter(Boolean).join('\n').slice(0, 2000),
-      files: [makeFile(newContent, ref.path.split('/').pop())],
+      files: [makeFile(newContent, replyFilename)],
       flags: MessageFlags.SuppressEmbeds,
     });
   } catch (err) {
     await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
   }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: `**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`,
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
 }
 
 // ============================================================
@@ -313,22 +393,17 @@ client.on('messageCreate', async (message) => {
 
     if (!mentioned && !isDM) return;
 
-    // DM: hanya owner yang boleh.
     if (isDM && message.author.id !== OWNER_ID) {
       await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
       return;
     }
 
-    // isDMOwner ditentukan di sini (SEBELUM filter file) supaya batas jumlah file bisa berbeda.
-    // Penting: isDMOwner = true HANYA kalau pesan benar-benar dari DM owner, bukan dari channel
-    // meskipun yang ngetik adalah owner. Dengan begitu history channel dan DM selalu terpisah.
     const isDMOwner = isDM && message.author.id === OWNER_ID;
     const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
 
     const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
     const question = message.content.replace(mentionRegex, '').trim();
 
-    // Filter attachment berdasarkan ekstensi, dengan batas berbeda per mode.
     const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
     const fileAttachments = [...message.attachments.values()]
       .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
@@ -340,7 +415,6 @@ client.on('messageCreate', async (message) => {
     }
 
     // === Perintah !ClearHistory ===
-    // Bekerja di channel maupun DM. Di DM owner, ini satu-satunya cara menghapus history.
     if (question.toLowerCase() === '!clearhistory') {
       const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
       clearHistory(historyKey);
@@ -374,59 +448,106 @@ client.on('messageCreate', async (message) => {
       // Kalau generate gambar gagal, jatuh ke mode teks biasa.
     }
 
-    // === Bangun pertanyaan untuk AI ===
-    //
-    // finalQuestion      → dikirim ke AI saat ini: instruksi + isi file lengkap.
-    // historyUserContent → disimpan ke history: instruksi + nama file saja (TANPA isi file).
-    //
-    // Isi file TIDAK disimpan ke history agar:
-    //   1. Token tidak membengkak di pesan-pesan berikutnya.
-    //   2. History file JSON tidak tumbuh besar.
-    //   3. AI tetap bisa menjawab dengan konteks yang tepat.
-    let finalQuestion = question;
-    let historyUserContent = question;
-    const originalFileNames = []; // nama file asli untuk penamaan reply attachment
-
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
     if (fileAttachments.length > 0) {
-      const fileParts = [];
-      const fileNames = [];
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
 
+      // Download semua file dulu
+      const loadedFiles = [];
       for (const att of fileAttachments) {
         try {
           const content = await downloadAttachmentText(att);
-          fileParts.push(`// === File: ${att.name} ===\n${content}`);
-          fileNames.push(att.name);
-          originalFileNames.push(att.name);
+          loadedFiles.push({ att, content });
         } catch (e) {
-          fileParts.push(`// Gagal membaca file "${att.name}": ${e.message}`);
-          fileNames.push(att.name);
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
         }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
       }
 
       const instruction = question
         || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
 
-      finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
-      historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await message.reply({
+        content: formatAnswer(text, sources),
+        flags: MessageFlags.SuppressEmbeds,
+      });
+      return;
     }
 
-    // === Ambil history & tanya AI ===
-    //
-    // isDMOwner diteruskan ke askGemini supaya:
-    //   - System prompt coding mendalam aktif di SEMUA provider (Groq/Gemini/OpenAI).
-    //   - Konteks tetap terjaga meskipun provider berganti — history selalu dikirim ulang.
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
     const history = getHistoryForAI(historyKey, isDMOwner);
     const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
 
-    // Simpan ke history pakai historyUserContent (bukan finalQuestion yang berisi isi file).
     pushHistory(historyKey, historyUserContent, text, isDMOwner);
 
     const blocks = extractCodeBlocks(text);
 
-    // Di DM owner: threshold rendah → hampir semua kode dikirim sebagai file.
-    // Di channel: threshold normal.
     if (shouldSendAsFile(question, blocks, isDMOwner)) {
-      await replyWithFiles(message, text, blocks, originalFileNames);
+      await replyWithFiles(message, text, blocks, []);
       return;
     }
 
@@ -435,6 +556,7 @@ client.on('messageCreate', async (message) => {
       flags: MessageFlags.SuppressEmbeds,
     });
   } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
     await message.reply(friendlyError(err)).catch(() => {});
   }
 });

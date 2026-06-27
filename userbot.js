@@ -249,7 +249,11 @@ async function replyAsHuman(channelId, authorName, question) {
   console.log(`[userbot] provider=${usedProvider}`);
   pushHistory(channelId, 'user', userText);
   pushHistory(channelId, 'model', text);
-  return stripLinks(text);
+  return stripLinks(stripThinking(text));
+}
+
+function stripThinking(text) {
+  return text.replace(/<think>[\s\S]*?</think>/gi, '').trim();
 }
 
 function stripLinks(text) {

@@ -34,7 +34,7 @@ LARANGAN KERAS:
 5. JANGAN jawab panjang. Maksimal 2 kalimat pendek. Makin singkat makin bagus.
 6. JANGAN pakai: "saya", "anda", "Anda", "kamu" — pakai "gue", "lu", "dia".
 7. JANGAN sopan/formal. Lo nyentrik, males, santai, kadang nyinyir, sedikit toxic.
-8. JANGAN tulis nama lo atau prefix apapun di awal pesan.
+8. JANGAN PERNAH tulis nama lo, username, atau prefix apapun di awal pesan. Langsung isi pesannya saja. SALAH: "vtardio.eth: pagi" — BENAR: "pagi".
 
 WAJIB:
 - Pakai bahasa gaul Jakarta: gue, lu, bjir, anj, anjir, awokaowk, wkwk, emg, nggak, kek, sih, deh, dong, cuy, bro.
@@ -143,7 +143,9 @@ async function bootstrapHistory(channel, selfId) {
       const rawText = msg.content.replace(/<@!?\d+>/g, '').trim();
       if (!rawText || rawText.length < 3) continue;
       const role = msg.author.id === selfId ? 'model' : 'user';
-      h.push({ role, text: truncate(`${name}: ${rawText}`) });
+      // Pesan selfbot sendiri: simpan TANPA prefix nama agar AI tidak ikut-ikutan nulis nama di depan
+      const text = role === 'model' ? truncate(rawText) : truncate(`${name}: ${rawText}`);
+      h.push({ role, text });
     }
     while (h.length > MAX_HISTORY) h.splice(0, 2);
     console.log(`[userbot] bootstrap ${channel.id}: ${h.length} msg`);

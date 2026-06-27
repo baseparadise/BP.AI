@@ -540,6 +540,18 @@ client.on('messageCreate', async (message) => {
     let finalQuestion = question;
     const historyUserContent = question;
 
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
     const history = getHistoryForAI(historyKey, isDMOwner);
     const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
 

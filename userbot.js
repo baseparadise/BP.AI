@@ -253,7 +253,7 @@ async function replyAsHuman(channelId, authorName, question) {
 }
 
 function stripThinking(text) {
-  return text.replace(/<think>[\s\S]*?</think>/gi, '').trim();
+  return text.replace(new RegExp('<think>[\s\S]*?<\/think>', 'gi'), '').trim();
 }
 
 function stripLinks(text) {

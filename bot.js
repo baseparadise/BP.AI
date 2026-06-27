@@ -415,6 +415,27 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
     // === Perintah !ClearHistory ===
     if (question.toLowerCase() === '!clearhistory') {
       const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);

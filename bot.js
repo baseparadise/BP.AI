@@ -62,7 +62,7 @@ const HALLUCINATION_PATTERNS = [
   /saya\s+tidak\s+bisa\s+mengirim\s+file/i,
 ];
 
-const HISTORY_FILE = path.join(__dirname, 'conversation_history.json');
+const HISTORY_FILE = path.join(require('os').tmpdir(), 'bp_ai_history.json');
 
 // ============================================================
 // MANAJEMEN RIWAYAT

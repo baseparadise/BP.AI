@@ -318,8 +318,28 @@ client.once('clientReady', () => {
 
 client.on('messageCreate', async (message) => {
   try {
-    if (message.author.id === client.user.id) return;
     if (message.author.bot) return;
+
+    // ── Perintah owner: !delete [n] ─────────────────────────────────────────
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(message.content.trim())) {
+      const n = Math.min(parseInt(message.content.trim().split(/\s+/)[1], 10), 100);
+      // Hapus pesan perintah owner dulu (supaya tidak ketahuan)
+      message.delete().catch(() => {});
+      // Fetch banyak pesan recent, cari yang dikirim selfbot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = fetched
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .first(n);
+      for (const m of mine) {
+        await m.delete().catch(() => {});
+        await new Promise(r => setTimeout(r, 400)); // jeda antar delete biar tidak rate-limit
+      }
+      console.log(`[userbot] !delete: hapus ${mine.length} pesan`);
+      return;
+    }
+
+    if (message.author.id === client.user.id) return;
 
     const isDM = message.channel.type === 'DM' || message.channel.type === 1;
     const mentioned =

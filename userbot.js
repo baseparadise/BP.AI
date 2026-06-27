@@ -97,6 +97,12 @@ const GROQ_MODEL = (process.env.GROQ_MODELS || 'llama-3.3-70b-versatile')
   .split(',')[0].trim();
 let groqKeyCursor = 0;
 
+// Log status Groq saat startup (sebelum Discord connect)
+console.log(`[userbot] Groq keys ditemukan: ${GROQ_KEYS.length} | Model: ${GROQ_MODEL}`);
+if (GROQ_KEYS.length === 0) {
+  console.warn('[userbot] PERINGATAN: GROQ_API_KEYS / GROQ_API_KEY tidak di-set — akan pakai Gemini saja!');
+}
+
 // ── Histori percakapan per channel ──────────────────────────────────────────
 const history = new Map();
 const bootstrapped = new Set();
@@ -323,19 +329,21 @@ client.on('messageCreate', async (message) => {
     // ── Perintah owner: !delete [n] ─────────────────────────────────────────
     if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(message.content.trim())) {
       const n = Math.min(parseInt(message.content.trim().split(/\s+/)[1], 10), 100);
+      console.log(`[userbot] !delete dipanggil oleh owner, n=${n}`);
       // Hapus pesan perintah owner dulu (supaya tidak ketahuan)
       message.delete().catch(() => {});
-      // Fetch banyak pesan recent, cari yang dikirim selfbot
+      // Fetch pesan recent, convert ke array biasa dulu agar sort/slice aman
       const fetched = await message.channel.messages.fetch({ limit: 100 });
-      const mine = fetched
+      const mine = [...fetched.values()]
         .filter(m => m.author.id === client.user.id)
         .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
-        .first(n);
+        .slice(0, n);
+      console.log(`[userbot] !delete: ditemukan ${mine.length} pesan milik selfbot`);
       for (const m of mine) {
-        await m.delete().catch(() => {});
-        await new Promise(r => setTimeout(r, 400)); // jeda antar delete biar tidak rate-limit
+        await m.delete().catch(e => console.warn(`[userbot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
       }
-      console.log(`[userbot] !delete: hapus ${mine.length} pesan`);
+      console.log(`[userbot] !delete: selesai hapus ${mine.length} pesan`);
       return;
     }
 

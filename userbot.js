@@ -5,7 +5,6 @@
 const http = require('http');
 const axios = require('axios');
 const { Client } = require('discord.js-selfbot-v13');
-const { callGemini, GEMINI_MODEL } = require('./lib/ai');
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
@@ -90,17 +89,22 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-// ── Groq setup ───────────────────────────────────────────────────────────────
+// ── Provider setup ───────────────────────────────────────────────────────────
 const GROQ_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '')
   .split(',').map(s => s.trim()).filter(Boolean);
-const GROQ_MODEL = (process.env.GROQ_MODELS || 'llama-3.3-70b-versatile')
-  .split(',')[0].trim();
-let groqKeyCursor = 0;
+const GROQ_MODELS = (process.env.GROQ_MODELS || 'llama-3.3-70b-versatile,llama-3.1-8b-instant,gemma2-9b-it')
+  .split(',').map(s => s.trim()).filter(Boolean);
 
-// Log status Groq saat startup (sebelum Discord connect)
-console.log(`[userbot] Groq keys ditemukan: ${GROQ_KEYS.length} | Model: ${GROQ_MODEL}`);
-if (GROQ_KEYS.length === 0) {
-  console.warn('[userbot] PERINGATAN: GROQ_API_KEYS / GROQ_API_KEY tidak di-set — akan pakai Gemini saja!');
+const GEMINI_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
+const GEMINI_MODELS = (process.env.GEMINI_MODELS || 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b')
+  .split(',').map(s => s.trim()).filter(Boolean);
+
+// Log status semua provider saat startup
+console.log(`[userbot] Groq  : ${GROQ_KEYS.length} key | Models: ${GROQ_MODELS.join(', ')}`);
+console.log(`[userbot] Gemini: ${GEMINI_KEYS.length} key | Models: ${GEMINI_MODELS.join(', ')}`);
+if (GROQ_KEYS.length === 0 && GEMINI_KEYS.length === 0) {
+  console.warn('[userbot] ⚠️  TIDAK ADA provider AI yang dikonfigurasi! Set GROQ_API_KEYS atau GEMINI_API_KEYS.');
 }
 
 // ── Histori percakapan per channel ──────────────────────────────────────────
@@ -160,70 +164,91 @@ async function bootstrapHistory(channel, selfId) {
   }
 }
 
-// ── AI calls ─────────────────────────────────────────────────────────────────
-async function callGroqPersona(userText, historyGroq) {
-  if (GROQ_KEYS.length === 0) throw new Error('No Groq keys');
-  const key = GROQ_KEYS[groqKeyCursor % GROQ_KEYS.length];
-  groqKeyCursor++;
-  const { data } = await axios.post(
-    'https://api.groq.com/openai/v1/chat/completions',
-    {
-      model: GROQ_MODEL,
-      max_tokens: 120,
-      temperature: 1.1,
-      messages: [
-        { role: 'system', content: PERSONA_PROMPT },
-        ...historyGroq,
-        { role: 'user', content: userText },
-      ],
-    },
-    { headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, timeout: 20000 }
-  );
-  return data?.choices?.[0]?.message?.content || '';
-}
+// ── AI calls — rotasi semua key × model, Groq duluan baru Gemini ─────────────
 
-async function callGeminiPersona(userText, historyGemini) {
-  const contents = [...historyGemini, { role: 'user', parts: [{ text: userText }] }];
-  const body = {
-    contents,
-    systemInstruction: { parts: [{ text: PERSONA_PROMPT }] },
-    generationConfig: { temperature: 1.1, maxOutputTokens: 120, thinkingConfig: { thinkingBudget: 0 } },
-  };
-  const data = await callGemini(GEMINI_MODEL, body, 40000);
-  return data?.candidates?.[0]?.content?.parts
-    ?.filter(p => !p.thought).map(p => p.text).filter(Boolean).join('') || '';
+// Coba semua kombinasi key × model untuk satu provider.
+// Mengembalikan teks balasan, atau null kalau semua kombinasi gagal.
+async function tryAllCombinations(keys, models, buildMessages, providerName, timeout) {
+  for (const model of models) {
+    for (const key of keys) {
+      try {
+        const messages = buildMessages(model, key);
+        let text = '';
+
+        if (providerName === 'groq') {
+          const { data } = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            { model, max_tokens: 120, temperature: 1.1, messages },
+            { headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, timeout }
+          );
+          text = data?.choices?.[0]?.message?.content || '';
+        } else {
+          // gemini
+          const { data } = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+            messages, // untuk gemini, messages sudah berupa full body
+            { headers: { 'Content-Type': 'application/json' }, timeout }
+          );
+          text = data?.candidates?.[0]?.content?.parts
+            ?.filter(p => !p.thought).map(p => p.text).filter(Boolean).join('') || '';
+        }
+
+        if (text.trim()) {
+          console.log(`[userbot] ✅ ${providerName}/${model} key=...${key.slice(-4)}`);
+          return text.trim();
+        }
+      } catch (err) {
+        const status = err.response?.status || err.code;
+        console.warn(`[userbot] ✗ ${providerName}/${model} key=...${key.slice(-4)} [${status}]`);
+      }
+    }
+  }
+  return null;
 }
 
 async function replyAsHuman(channelId, authorName, question) {
   const h = getHistory(channelId);
   const userText = truncate(`${authorName}: ${question}`);
-  let text = '';
+  let text = null;
   let usedProvider = '';
 
+  // ── 1. Coba semua Groq key × model ────────────────────────────────────────
   if (GROQ_KEYS.length > 0) {
-    try {
-      text = await callGroqPersona(userText, historyToGroq(h));
-      usedProvider = 'groq';
-    } catch (err) {
-      console.warn(`[userbot] Groq gagal [${err.response?.status || err.code}], fallback Gemini...`);
-    }
-  }
-  if (!text.trim()) {
-    try {
-      text = await callGeminiPersona(userText, historyToGemini(h));
-      usedProvider = 'gemini';
-    } catch (err) {
-      console.error(`[userbot] Gemini juga gagal:`, err.message);
-      throw err;
-    }
+    text = await tryAllCombinations(
+      GROQ_KEYS, GROQ_MODELS,
+      (model) => [
+        { role: 'system', content: PERSONA_PROMPT },
+        ...historyToGroq(h),
+        { role: 'user', content: userText },
+      ],
+      'groq', 15000
+    );
+    if (text) usedProvider = 'groq';
   }
 
-  if (!text.trim()) return null;
+  // ── 2. Semua Groq habis → coba semua Gemini key × model ───────────────────
+  if (!text && GEMINI_KEYS.length > 0) {
+    const geminiHistory = historyToGemini(h);
+    text = await tryAllCombinations(
+      GEMINI_KEYS, GEMINI_MODELS,
+      (model, key) => ({
+        contents: [...geminiHistory, { role: 'user', parts: [{ text: userText }] }],
+        systemInstruction: { parts: [{ text: PERSONA_PROMPT }] },
+        generationConfig: { temperature: 1.1, maxOutputTokens: 120, thinkingConfig: { thinkingBudget: 0 } },
+      }),
+      'gemini', 30000
+    );
+    if (text) usedProvider = 'gemini';
+  }
+
+  if (!text) {
+    console.error('[userbot] ❌ Semua provider habis, tidak ada balasan');
+    return null;
+  }
+
   console.log(`[userbot] provider=${usedProvider}`);
-
   pushHistory(channelId, 'user', userText);
   pushHistory(channelId, 'model', text);
-
   return stripLinks(text);
 }
 

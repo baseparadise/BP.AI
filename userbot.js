@@ -65,6 +65,31 @@ Contoh jawaban BENAR:
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ── Cooldown per user (kecuali owner) ───────────────────────────────────────
+const OWNER_ID = process.env.OWNER_ID || '1292088584429637707';
+const COOLDOWN_MS = 45_000; // 45 detik
+const cooldowns = new Map(); // userId → timestamp terakhir dibalas
+
+function isOnCooldown(userId) {
+  if (userId === OWNER_ID) return false;
+  const last = cooldowns.get(userId);
+  if (!last) return false;
+  return Date.now() - last < COOLDOWN_MS;
+}
+
+function setCooldown(userId) {
+  if (userId === OWNER_ID) return;
+  cooldowns.set(userId, Date.now());
+}
+
+// Bersihkan cooldown lama tiap 5 menit agar Map tidak numpuk
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, ts] of cooldowns) {
+    if (now - ts > COOLDOWN_MS * 2) cooldowns.delete(id);
+  }
+}, 5 * 60 * 1000);
+
 // ── Groq setup ───────────────────────────────────────────────────────────────
 const GROQ_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '')
   .split(',').map(s => s.trim()).filter(Boolean);
@@ -304,6 +329,13 @@ client.on('messageCreate', async (message) => {
     const question = message.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
     if (!question) return;
 
+    // Cek cooldown — diam saja, tidak kirim pesan apapun (lebih natural)
+    if (isOnCooldown(message.author.id)) {
+      const sisaDetik = Math.ceil((COOLDOWN_MS - (Date.now() - cooldowns.get(message.author.id))) / 1000);
+      console.log(`[userbot] cooldown ${message.author.username} (sisa ${sisaDetik}s)`);
+      return;
+    }
+
     // Cek apakah skip (jam tidur atau random 10%)
     if (shouldSkip(isDM)) {
       console.log(`[userbot] skip respon untuk ${message.author.username} (${isSleepTime() ? 'jam tidur' : 'random skip'})`);
@@ -357,6 +389,7 @@ client.on('messageCreate', async (message) => {
 
     if (splitParts) {
       await sendReply(splitParts[0]);
+      setCooldown(message.author.id);
       await sleep(1000 + Math.random() * 2500); // jeda 1–3.5 detik
       try {
         await message.channel.send(splitParts[1]);
@@ -365,6 +398,7 @@ client.on('messageCreate', async (message) => {
       }
     } else {
       await sendReply(reply);
+      setCooldown(message.author.id);
     }
 
   } catch (err) {

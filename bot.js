@@ -26,6 +26,7 @@ const {
   getGitHubFileContent,
   commitGitHubFile,
 } = require('./lib/ai');
+const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
 
 // ============================================================
 // KONFIGURASI

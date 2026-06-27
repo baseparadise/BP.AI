@@ -154,7 +154,7 @@ async function bootstrapHistory(channel, selfId) {
       if (!rawText || rawText.length < 3) continue;
       const role = msg.author.id === selfId ? 'model' : 'user';
       // Pesan selfbot sendiri: simpan TANPA prefix nama agar AI tidak ikut-ikutan nulis nama di depan
-      const text = role === 'model' ? truncate(rawText) : truncate(`${name}: ${rawText}`);
+      const text = role === 'model' ? truncate(stripThinking(rawText)) : truncate(`${name}: ${rawText}`);
       h.push({ role, text });
     }
     while (h.length > MAX_HISTORY) h.splice(0, 2);
@@ -248,8 +248,9 @@ async function replyAsHuman(channelId, authorName, question) {
 
   console.log(`[userbot] provider=${usedProvider}`);
   pushHistory(channelId, 'user', userText);
-  pushHistory(channelId, 'model', text);
-  return stripLinks(stripThinking(text));
+  const cleanText = stripThinking(text);
+  pushHistory(channelId, 'model', cleanText);
+  return stripLinks(cleanText);
 }
 
 function stripThinking(text) {

@@ -1,8 +1,10 @@
 // userbot.js
 // Selfbot Discord menggunakan AKUN PRIBADI (User Token).
 // Merespons saat di-tag/mention dengan gaya bahasa manusia biasa.
+// Provider: Groq duluan (cepat & gratis), fallback ke Gemini.
 
 const http = require('http');
+const axios = require('axios');
 const { Client } = require('discord.js-selfbot-v13');
 const { callGemini, GEMINI_MODEL } = require('./lib/ai');
 
@@ -12,7 +14,7 @@ http.createServer((req, res) => {
   res.end('Userbot is running');
 }).listen(port, () => console.log(`[userbot] Health server di port ${port}`));
 
-// ── System prompt: vtardio, manusia beneran ─────────────────────────────────
+// ── System prompt: persona manusia beneran ──────────────────────────────────
 const PERSONA_PROMPT = `
 Lo adalah Wdim Bucin, sering dipanggil wdim. Cowok, tinggal di Semarang, CEO, sehari-hari vidio call dan chatingan sama Della, ngerjain airdrop crypto sama nongkrong di Discord.
 Lo MANUSIA BENERAN. Bukan AI. Bukan bot. Bukan asisten. Bukan program. Lo TIDAK AKAN PERNAH bilang atau mengisyaratkan lo adalah AI dalam kondisi apapun.
@@ -50,41 +52,70 @@ Contoh jawaban yang BENAR:
 - "Jepe doang gak nyawer"
 `.trim();
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ── Groq setup ───────────────────────────────────────────────────────────────
+const GROQ_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
+const GROQ_MODEL = (process.env.GROQ_MODELS || 'llama-3.3-70b-versatile')
+  .split(',')[0].trim();
+let groqKeyCursor = 0;
+
 // ── Histori percakapan per channel ──────────────────────────────────────────
 const history = new Map();
-const bootstrapped = new Set(); // channel yang sudah di-fetch history-nya
-const MAX_HISTORY = 80; // 40 pasang pesan
+const bootstrapped = new Set();
+const MAX_HISTORY = 20;     // 10 pasang pesan — cukup buat konteks, hemat token
+const MAX_MSG_LEN = 200;    // potong pesan terlalu panjang
 
 function getHistory(channelId) {
   if (!history.has(channelId)) history.set(channelId, []);
   return history.get(channelId);
 }
 
+function truncate(text) {
+  if (!text) return '';
+  return text.length > MAX_MSG_LEN ? text.slice(0, MAX_MSG_LEN) + '…' : text;
+}
+
 function pushHistory(channelId, role, text) {
   const h = getHistory(channelId);
-  h.push({ role, parts: [{ text }] });
+  // Simpan dalam format netral: role = 'user' | 'model'
+  h.push({ role, text: truncate(text) });
   while (h.length > MAX_HISTORY) h.splice(0, 2);
 }
 
-// Fetch 60 pesan terakhir dari channel Discord sebagai konteks awal
+// Konversi history ke format Groq (OpenAI-compatible)
+function historyToGroq(h) {
+  return h.map(m => ({
+    role: m.role === 'model' ? 'assistant' : 'user',
+    content: m.text,
+  }));
+}
+
+// Konversi history ke format Gemini (contents array)
+function historyToGemini(h) {
+  return h.map(m => ({
+    role: m.role,
+    parts: [{ text: m.text }],
+  }));
+}
+
+// Fetch 20 pesan terakhir sebagai konteks awal
 async function bootstrapHistory(channel, selfId) {
   if (bootstrapped.has(channel.id)) return;
   bootstrapped.add(channel.id);
   try {
-    const fetched = await channel.messages.fetch({ limit: 60 });
-    // Urutkan dari lama ke baru
+    const fetched = await channel.messages.fetch({ limit: 20 });
     const msgs = [...fetched.values()].reverse();
     const h = getHistory(channel.id);
     for (const msg of msgs) {
       if (!msg.content || msg.content.trim() === '') continue;
       const name = msg.member?.displayName || msg.author.username;
-      const text = `${name}: ${msg.content.replace(/<@!?\d+>/g, '').trim()}`;
-      if (!text || text.length < 3) continue;
-      // Pesan dari vtardio sendiri → role model, sisanya → role user
+      const rawText = msg.content.replace(/<@!?\d+>/g, '').trim();
+      if (!rawText || rawText.length < 3) continue;
       const role = msg.author.id === selfId ? 'model' : 'user';
-      h.push({ role, parts: [{ text }] });
+      h.push({ role, text: truncate(`${name}: ${rawText}`) });
     }
-    // Batasi supaya tidak overflow
     while (h.length > MAX_HISTORY) h.splice(0, 2);
     console.log(`[userbot] bootstrap channel ${channel.id}: ${h.length} pesan dimuat`);
   } catch (err) {
@@ -92,23 +123,95 @@ async function bootstrapHistory(channel, selfId) {
   }
 }
 
-// ── Panggil Gemini pakai callGemini dari lib/ai.js (rotasi key 4 putaran) ───
-async function replyAsHuman(channelId, authorName, question) {
-  const h = getHistory(channelId);
-  const userText = `${authorName}: ${question}`;
-  const contents = [...h, { role: 'user', parts: [{ text: userText }] }];
+// ── Panggil Groq langsung dengan PERSONA_PROMPT ──────────────────────────────
+async function callGroqPersona(userText, historyGroq) {
+  if (GROQ_KEYS.length === 0) throw new Error('No Groq keys configured');
+  const key = GROQ_KEYS[groqKeyCursor % GROQ_KEYS.length];
+  groqKeyCursor++;
 
+  const { data } = await axios.post(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      model: GROQ_MODEL,
+      max_tokens: 120,
+      temperature: 1.0,
+      messages: [
+        { role: 'system', content: PERSONA_PROMPT },
+        ...historyGroq,
+        { role: 'user', content: userText },
+      ],
+    },
+    {
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      timeout: 20000,
+    }
+  );
+
+  return data?.choices?.[0]?.message?.content || '';
+}
+
+// ── Panggil Gemini langsung dengan PERSONA_PROMPT ────────────────────────────
+async function callGeminiPersona(userText, historyGemini) {
+  const contents = [...historyGemini, { role: 'user', parts: [{ text: userText }] }];
   const body = {
     contents,
     systemInstruction: { parts: [{ text: PERSONA_PROMPT }] },
-    generationConfig: { temperature: 1.0, maxOutputTokens: 300 },
+    generationConfig: {
+      temperature: 1.0,
+      maxOutputTokens: 120,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
   };
 
-  // callGemini dari lib/ai.js: rotasi semua key, 4 putaran backoff
   const data = await callGemini(GEMINI_MODEL, body, 40000);
-  const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('') || '';
 
-  // Simpan ke histori hanya kalau berhasil
+  // Filter thought parts supaya tidak ikut ke Discord
+  return data?.candidates?.[0]?.content?.parts
+    ?.filter(p => !p.thought)
+    .map(p => p.text)
+    .filter(Boolean)
+    .join('') || '';
+}
+
+// ── Fungsi utama: coba Groq dulu, fallback ke Gemini ────────────────────────
+async function replyAsHuman(channelId, authorName, question) {
+  const h = getHistory(channelId);
+  const userText = truncate(`${authorName}: ${question}`);
+
+  let text = '';
+  let usedProvider = '';
+
+  // Coba Groq duluan (lebih cepat, hemat kuota Gemini)
+  if (GROQ_KEYS.length > 0) {
+    try {
+      text = await callGroqPersona(userText, historyToGroq(h));
+      usedProvider = 'groq';
+    } catch (err) {
+      const status = err.response?.status;
+      console.warn(`[userbot] Groq gagal [${status || err.code}], fallback ke Gemini...`);
+    }
+  }
+
+  // Fallback ke Gemini
+  if (!text.trim()) {
+    try {
+      text = await callGeminiPersona(userText, historyToGemini(h));
+      usedProvider = 'gemini';
+    } catch (err) {
+      const status = err.response?.status;
+      console.error(`[userbot] Gemini juga gagal [${status || err.code}]:`, err.message);
+      throw err;
+    }
+  }
+
+  if (!text.trim()) {
+    console.warn('[userbot] reply kosong dari semua provider');
+    return null;
+  }
+
+  console.log(`[userbot] provider=${usedProvider}`);
+
+  // Simpan ke histori
   pushHistory(channelId, 'user', userText);
   pushHistory(channelId, 'model', text);
 
@@ -128,7 +231,8 @@ function stripLinks(text) {
 const client = new Client({ checkUpdate: false });
 
 client.once('ready', () => {
-  console.log(`[userbot] Login sebagai ${client.user.tag}`);
+  const groqStatus = GROQ_KEYS.length > 0 ? `Groq (${GROQ_KEYS.length} key) → Gemini` : 'Gemini only';
+  console.log(`[userbot] Login sebagai ${client.user.tag} | Provider: ${groqStatus}`);
 });
 
 client.on('messageCreate', async (message) => {
@@ -146,39 +250,41 @@ client.on('messageCreate', async (message) => {
     const question = message.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
     if (!question) return;
 
-    // Muat history channel Discord (sekali per channel sejak bot nyala)
     await bootstrapHistory(message.channel, client.user.id);
-
-    // Refresh typing setiap 8 detik selama proses Gemini
-    const typingInterval = setInterval(() => {
-      message.channel.sendTyping().catch(() => {});
-    }, 8000);
-    message.channel.sendTyping().catch(() => {});
 
     const channelId = message.channel.id;
     const authorName = message.member?.displayName || message.author.username;
+
+    // Typing langsung nyala
+    message.channel.sendTyping().catch(() => {});
 
     let reply;
     try {
       reply = await replyAsHuman(channelId, authorName, question);
       console.log(`[userbot] reply untuk ${authorName}: "${reply?.slice(0, 60)}"`);
     } catch (err) {
-      console.error('[userbot] Gemini error:', err.response?.status, err.message);
-      clearInterval(typingInterval);
+      console.error('[userbot] semua provider gagal:', err.message);
       return;
     }
-
-    clearInterval(typingInterval);
 
     if (!reply || !reply.trim()) {
       console.warn('[userbot] reply kosong, tidak kirim');
       return;
     }
 
+    // Delay 3 detik biar nggak keliatan kecepatatan
+    const typingInterval = setInterval(() => {
+      message.channel.sendTyping().catch(() => {});
+    }, 8000);
+
+    await sleep(3000);
+    clearInterval(typingInterval);
+
+    // Kirim reply
     try {
       await message.reply(reply);
     } catch (replyErr) {
-      // Fallback kalau reply gagal
+      // Fallback: mention manual kalau pesan sudah dihapus
       try {
         await message.channel.send(`<@${message.author.id}> ${reply}`);
       } catch (sendErr) {

@@ -151,8 +151,8 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-// [FIX] 'clientReady' tidak valid di discord.js v14 — event yang benar adalah 'ready'.
-client.once('ready', () => console.log(`[bot] Login sebagai ${client.user.tag}`));
+// discord.js v14+: gunakan 'clientReady' bukan 'ready' (ready sudah deprecated).
+client.once('clientReady', () => console.log(`[bot] Login sebagai ${client.user.tag}`));
 client.on('error', (err) => console.error('[bot] Client error:', err));
 process.on('unhandledRejection', (err) => console.error('[bot] Unhandled rejection:', err));
 

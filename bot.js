@@ -1096,39 +1096,39 @@ if (!token) {
 // TOMBOL DELETE — hanya user pengirim yang bisa klik
 // ============================================================
 client.on('interactionCreate', async (interaction) => {
+  console.log('[btn] interactionCreate fired, type:', interaction.type, 'isButton:', interaction.isButton?.());
   try {
     if (!interaction.isButton()) return;
+    console.log('[btn] customId:', interaction.customId, 'userId:', interaction.user?.id);
     if (!interaction.customId.startsWith('del_')) return;
 
-    // customId = "del_<userId>" — slice(4) langsung dapat userId
     const ownerId = interaction.customId.slice(4);
+    console.log('[btn] ownerId:', ownerId, 'clickerId:', interaction.user.id);
 
     if (interaction.user.id !== ownerId) {
+      console.log('[btn] bukan pemilik, tolak');
       await interaction.reply({
         content: '⛔ Hanya pengirim pesan asli yang bisa menghapus ini.',
         ephemeral: true,
-      }).catch(() => {});
+      });
       return;
     }
 
-    // Acknowledge DULU (<3 detik), baru hapus — paling sederhana & reliable
-    await interaction.reply({
-      content: '✅ Pesan dihapus.',
-      ephemeral: true,
-    });
+    // deferUpdate = silent ACK ke Discord (paling cepat, tidak buat pesan baru)
+    console.log('[btn] deferUpdate...');
+    await interaction.deferUpdate();
+    console.log('[btn] deferUpdate OK, deleting message...');
 
-    // Hapus pesan bot (fire-and-forget)
-    if (interaction.message) {
-      await interaction.message.delete().catch((e) => {
-        console.error('[delete-btn] gagal hapus pesan:', e.message);
-      });
-    }
+    await interaction.message.delete();
+    console.log('[btn] message deleted OK');
   } catch (err) {
-    console.error('[interactionCreate] error:', err.message);
-    await interaction.reply({
-      content: '⚠️ Terjadi error: ' + err.message,
-      ephemeral: true,
-    }).catch(() => {});
+    console.error('[btn] ERROR:', err.message, err.stack);
+    // Coba reply jika belum di-acknowledge
+    try {
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '⚠️ Gagal hapus: ' + err.message, ephemeral: true });
+      }
+    } catch (_) {}
   }
 });
 

@@ -446,6 +446,36 @@ const SUPPORTED_VS = new Set([
   'btc','eth','bnb','sats',
 ]);
 
+// Cache dinamis untuk token yang tidak ada di COIN_ID_MAP
+const dynamicCoinIdCache = {};
+
+// Resolusi coin ID: hardcoded map → cache → CoinGecko /search
+async function resolveCoinId(symbol) {
+  const lower = symbol.toLowerCase();
+  if (COIN_ID_MAP[lower]) return COIN_ID_MAP[lower];
+  if (Object.prototype.hasOwnProperty.call(dynamicCoinIdCache, lower)) return dynamicCoinIdCache[lower];
+  try {
+    const cgKey = process.env.COINGECKO_API_KEY || '';
+    const headers = { Accept: 'application/json' };
+    if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+    const resp = await axios.get(
+      'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(lower),
+      { headers, timeout: 6000 }
+    );
+    const coins = (resp.data && resp.data.coins) ? resp.data.coins : [];
+    const exact = coins.find(c => c.symbol.toLowerCase() === lower);
+    const match = exact || coins[0] || null;
+    dynamicCoinIdCache[lower] = match ? match.id : null;
+    if (match) console.log('[crypto] Found: ' + symbol + ' → ' + match.id + ' (' + match.name + ')');
+    else console.log('[crypto] Tidak ditemukan di CoinGecko: ' + symbol.toUpperCase());
+    return dynamicCoinIdCache[lower];
+  } catch (e) {
+    console.warn('[crypto] resolveCoinId gagal untuk "' + symbol + '":', e.message);
+    dynamicCoinIdCache[lower] = null;
+    return null;
+  }
+}
+
 function formatCryptoAmount(amount, currency) {
   var cur = currency.toLowerCase();
   if (cur === 'btc' || cur === 'sats') {
@@ -475,17 +505,20 @@ function parseConvAmount(raw) {
   return parseFloat(s) * mult;
 }
 
-function detectCryptoConversion(question) {
+async function detectCryptoConversion(question) {
   var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
   if (!m) return null;
   var amount = parseConvAmount(m[1]);
   var from = m[2].toLowerCase();
   var to = m[3].toLowerCase();
   if (isNaN(amount) || amount <= 0) return null;
-  var coinId = COIN_ID_MAP[from];
-  var validTo = SUPPORTED_VS.has(to) || COIN_ID_MAP[to];
-  if (!coinId || !validTo) return null;
-  return { amount: amount, from: from, to: to, coinId: coinId };
+  // Resolve coin ID — hardcoded map dulu, lalu CoinGecko /search untuk token apapun
+  var coinId = await resolveCoinId(from);
+  if (!coinId) return { notFound: true, from: from, to: to };
+  var toIsVs = SUPPORTED_VS.has(to);
+  var toCoinId = toIsVs ? null : await resolveCoinId(to);
+  if (!toIsVs && !toCoinId) return null;
+  return { amount: amount, from: from, to: to, coinId: coinId, toCoinId: toCoinId };
 }
 
 // Deteksi: "price btc" atau "p eth" (tanpa tag bot)
@@ -540,7 +573,7 @@ async function fetchCryptoConversion(conv) {
   var toSym = to.toUpperCase();
   var cgKey = process.env.COINGECKO_API_KEY || '';
 
-  var toCoinId = COIN_ID_MAP[to];
+  var toCoinId = conv.toCoinId || COIN_ID_MAP[to] || null;
   var toIsVsCurrency = SUPPORTED_VS.has(to);
 
   var ids = coinId;
@@ -794,8 +827,12 @@ client.on('messageCreate', async (message) => {
     }
 
     // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
-    var cryptoConv = detectCryptoConversion(question);
+    var cryptoConv = await detectCryptoConversion(question);
     if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
       await message.channel.sendTyping().catch(() => {});
       try {
         var convResult = await fetchCryptoConversion(cryptoConv);

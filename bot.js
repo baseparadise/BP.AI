@@ -855,12 +855,12 @@ client.on('messageCreate', async (message) => {
           await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
       }
-      // === Chart command tanpa tag: C BTC / C ETH 4h ===
-      var chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
+      // === Chart command tanpa tag: C BTC / C ETH 4h / C ETH 4h 30 ===
+      var chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
       if (chartRawMatch) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          await handleChartCommand(message, chartRawMatch[1], chartRawMatch[2] || '4h');
+          await handleChartCommand(message, chartRawMatch[1], chartRawMatch[2] || '4h', chartRawMatch[3]);
         } catch (e) {
           await message.reply('Gagal buat chart: ' + e.message).catch(() => {});
         }
@@ -958,12 +958,12 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h ===
-    const chartM = question.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
+    // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h / @bot C ETH 4h 30 ===
+    const chartM = question.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
     if (chartM) {
       await message.channel.sendTyping().catch(() => {});
       try {
-        await handleChartCommand(message, chartM[1], chartM[2] || '4h');
+        await handleChartCommand(message, chartM[1], chartM[2] || '4h', chartM[3]);
       } catch (e) {
         await message.reply('Gagal buat chart: ' + e.message).catch(() => {});
       }

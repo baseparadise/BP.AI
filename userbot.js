@@ -429,6 +429,10 @@ client.on('messageCreate', async (message) => {
     if (message.author.id === client.user.id) return;
 
     const isDM = message.channel.type === 'DM' || message.channel.type === 1;
+
+    // Userbot tidak melayani DM kecuali dari owner
+    if (isDM && message.author.id !== OWNER_ID) return;
+
     const mentioned =
       message.mentions.users.has(client.user.id) ||
       message.content.includes(`<@${client.user.id}>`);

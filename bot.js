@@ -380,16 +380,17 @@ function splitMessage(text, maxLen = DISCORD_MAX_CHARS) {
 }
 
 async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
-  const chunks = splitMessage(text);
+  // 1960 agar prefix "*(lanjutan X/Y)*\n" tidak dorong total > 2000
+  const chunks = splitMessage(text, 1960);
   if (chunks.length === 0) return;
 
-  // Pesan pertama sebagai reply ke user
-  await message.reply({ content: chunks[0], flags });
+  await message.reply({ content: chunks[0].slice(0, 2000), flags });
 
-  // Pesan berikutnya dikirim langsung ke channel (bukan reply berantai)
   for (let i = 1; i < chunks.length; i++) {
-    await new Promise(r => setTimeout(r, 300)); // jeda kecil antar pesan
-    await message.channel.send({ content: `*(lanjutan ${i + 1}/${chunks.length})*\n${chunks[i]}`, flags });
+    await new Promise(r => setTimeout(r, 300));
+    const prefix = '*(lanjutan ' + (i + 1) + '/' + chunks.length + ')*\n';
+    const body = chunks[i].slice(0, 2000 - prefix.length);
+    await message.channel.send({ content: prefix + body, flags });
   }
 }
 
@@ -505,7 +506,7 @@ async function processSingleFile(message, att, content, question, history, isDMO
   if (validBlocks.length === 0) {
     const explanation = stripCodeBlocks(text).slice(0, 1800);
     await message.reply({
-      content: `**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`,
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
       flags: MessageFlags.SuppressEmbeds,
     });
     return;

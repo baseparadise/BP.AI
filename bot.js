@@ -34,7 +34,6 @@ const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnaly
 
 const OWNER_ID = '1292088584429637707';
 
-const MAX_CHANNEL_TURNS = 10;
 
 const MAX_FILES_DM    = 10;
 const MAX_FILES_CH    = 3;

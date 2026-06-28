@@ -459,17 +459,16 @@ function formatCryptoAmount(amount, currency) {
   return amount.toPrecision(6) + ' ' + cur.toUpperCase();
 }
 
-function parseConvAmount(str) {
-  var s = str.toLowerCase().replace(/,/g, '.');
+function parseConvAmount(raw) {
+  var s = raw.toLowerCase().replace(/,/g, '.');
   var mult = 1;
-  if (s.endsWith('k')) { mult = 1e3;  s = s.slice(0, -1); }
-  else if (s.endsWith('m')) { mult = 1e6;  s = s.slice(0, -1); }
-  else if (s.endsWith('b')) { mult = 1e9;  s = s.slice(0, -1); }
+  if (s.endsWith('k')) { mult = 1e3; s = s.slice(0, -1); }
+  else if (s.endsWith('m')) { mult = 1e6; s = s.slice(0, -1); }
+  else if (s.endsWith('b')) { mult = 1e9; s = s.slice(0, -1); }
   return parseFloat(s) * mult;
 }
 
 function detectCryptoConversion(question) {
-  // Support: 5 usdc to idr | 5k usdc to idr | 1.5m btc to usd | 2b usdt to idr
   var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
   if (!m) return null;
   var amount = parseConvAmount(m[1]);
@@ -480,6 +479,52 @@ function detectCryptoConversion(question) {
   var validTo = SUPPORTED_VS.has(to) || COIN_ID_MAP[to];
   if (!coinId || !validTo) return null;
   return { amount: amount, from: from, to: to, coinId: coinId };
+}
+
+// Deteksi: "price btc" atau "p eth" (tanpa tag bot)
+function detectPriceQuery(text) {
+  var m = text.match(/^(?:price|p)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var sym = m[1].toLowerCase();
+  var coinId = COIN_ID_MAP[sym];
+  if (!coinId) return null;
+  return { sym: sym, coinId: coinId };
+}
+
+async function fetchCoinPrice(pq) {
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price'
+    + '?ids=' + pq.coinId
+    + '&vs_currencies=usd,idr,btc'
+    + '&include_24hr_change=true'
+    + '&include_market_cap=true'
+    + '&precision=8';
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var d = resp.data[pq.coinId];
+  if (!d) throw new Error('Data tidak ditemukan');
+
+  var sym = pq.sym.toUpperCase();
+  var usd = d.usd;
+  var idr = d.idr;
+  var chg = d.usd_24h_change;
+  var mcap = d.usd_market_cap;
+
+  var chgStr = chg != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%' : 'N/A';
+  var usdStr = usd >= 1 ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : usd.toPrecision(6);
+  var idrStr = 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+  var mcapStr = mcap ? '$' + (mcap / 1e9).toFixed(2) + 'B' : 'N/A';
+  var arrow = chg != null ? (chg >= 0 ? '**UP**' : '**DOWN**') : '';
+
+  return '**$' + sym + '** ' + arrow + ' ' + chgStr + ' (24 jam)\n'
+    + 'USD: $' + usdStr + '\n'
+    + 'IDR: ' + idrStr + '\n'
+    + 'Market Cap: ' + mcapStr + '\n'
+    + '_(via CoinGecko)_';
 }
 
 async function fetchCryptoConversion(conv) {
@@ -667,17 +712,20 @@ client.on('messageCreate', async (message) => {
     const isDM = !message.guild;
     const mentioned = message.mentions.users.has(client.user.id);
 
-    // === Konversi crypto bisa tanpa tag bot (misal: "5k usdc to idr") ===
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
     if (!mentioned && !isDM) {
-      var rawMsg = message.content.trim();
-      var quickConv = detectCryptoConversion(rawMsg);
-      if (quickConv) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var quickResult = await fetchCryptoConversion(quickConv);
-          await message.reply({ content: quickResult, flags: MessageFlags.SuppressEmbeds });
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
         } catch (e) {
-          await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
       }
       return;
@@ -738,13 +786,26 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // === Deteksi konversi crypto (misal: "5 usdc to idr") ===
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
     var cryptoConv = detectCryptoConversion(question);
     if (cryptoConv) {
       await message.channel.sendTyping().catch(() => {});
       try {
         var convResult = await fetchCryptoConversion(cryptoConv);
         await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
       } catch (e) {
         await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
       }

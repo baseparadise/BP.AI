@@ -34,7 +34,7 @@ const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnaly
 
 const OWNER_ID = '1292088584429637707';
 
-const MAX_CHANNEL_TURNS = 2;
+const MAX_CHANNEL_TURNS = 10;
 
 const MAX_FILES_DM    = 10;
 const MAX_FILES_CH    = 3;
@@ -69,6 +69,17 @@ const HISTORY_FILE = path.join(require('os').tmpdir(), 'bp_ai_history.json');
 // MANAJEMEN RIWAYAT
 // ============================================================
 
+// Sliding window: simpan N pasang terakhir, tidak hapus semua.
+// Discord dipakai sebagai "database" — bootstrap dari channel saat restart.
+const MAX_HISTORY_LEN_DM      = 30;  // 15 turn untuk DM owner
+const MAX_HISTORY_LEN_CHANNEL = 20;  // 10 turn untuk channel
+const MAX_MSG_CHARS           = 500; // potong pesan sangat panjang agar hemat token
+
+function truncateContent(text) {
+  if (!text) return '';
+  return text.length > MAX_MSG_CHARS ? text.slice(0, MAX_MSG_CHARS) + '…' : text;
+}
+
 let allHistory = {};
 try {
   if (fs.existsSync(HISTORY_FILE)) {
@@ -98,22 +109,52 @@ function clearHistory(key) {
 
 function pushHistory(key, historyUserContent, assistantText, isDMOwner) {
   const history = getHistory(key);
-  history.push({ role: 'user', content: historyUserContent });
-  history.push({ role: 'assistant', content: assistantText });
+  history.push({ role: 'user', content: truncateContent(historyUserContent) });
+  history.push({ role: 'assistant', content: truncateContent(assistantText) });
 
-  if (!isDMOwner) {
-    if (history.length >= MAX_CHANNEL_TURNS * 2) {
-      delete allHistory[key];
-    }
-  }
+  // Sliding window: buang pasang terlama jika melebihi batas
+  const maxLen = isDMOwner ? MAX_HISTORY_LEN_DM : MAX_HISTORY_LEN_CHANNEL;
+  while (history.length > maxLen) history.splice(0, 2);
 
   saveHistory();
 }
 
 function getHistoryForAI(key, isDMOwner) {
   const history = getHistory(key);
-  if (isDMOwner) return history;
-  return history.slice(-(MAX_CHANNEL_TURNS * 2));
+  const maxLen = isDMOwner ? MAX_HISTORY_LEN_DM : MAX_HISTORY_LEN_CHANNEL;
+  return history.slice(-maxLen);
+}
+
+// Bootstrap: muat ulang konteks dari Discord saat restart
+// sehingga history tidak hilang meski /tmp terhapus.
+const bootstrappedChannels = new Set();
+
+async function bootstrapHistory(key, channel, isDMOwner) {
+  if (bootstrappedChannels.has(key)) return;
+  bootstrappedChannels.add(key);
+  if (allHistory[key] && allHistory[key].length > 0) return; // sudah ada dari file
+
+  try {
+    const botId = channel.client?.user?.id;
+    const fetched = await channel.messages.fetch({ limit: 30 });
+    const msgs = [...fetched.values()]
+      .filter(m => m.content && m.content.trim().length > 2)
+      .sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+
+    const history = getHistory(key);
+    for (const msg of msgs) {
+      const isBot = msg.author.id === botId;
+      // Bersihkan mention dari pesan
+      const content = msg.content.replace(/<@!?\d+>/g, '').trim();
+      if (!content) continue;
+      history.push({ role: isBot ? 'assistant' : 'user', content: truncateContent(content) });
+    }
+    const maxLen = isDMOwner ? MAX_HISTORY_LEN_DM : MAX_HISTORY_LEN_CHANNEL;
+    while (history.length > maxLen) history.splice(0, 2);
+    console.log(`[bot] bootstrap ${key}: ${history.length} pesan dimuat dari Discord`);
+  } catch (e) {
+    console.warn(`[bot] bootstrap gagal ${key}:`, e.message);
+  }
 }
 
 // ============================================================
@@ -401,6 +442,9 @@ client.on('messageCreate', async (message) => {
 
     const isDMOwner = isDM && message.author.id === OWNER_ID;
     const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
 
     const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
     const question = message.content.replace(mentionRegex, '').trim();

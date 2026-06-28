@@ -13,6 +13,7 @@ const path = require('path');
 const http = require('http');
 const axios = require('axios');
 const { Client, GatewayIntentBits, Partials, AttachmentBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { handleChartCommand } = require('./lib/chartAnalysis');
 const {
   isImageRequest,
   askGemini,
@@ -854,6 +855,17 @@ client.on('messageCreate', async (message) => {
           await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
       }
+      // === Chart command tanpa tag: C BTC / C ETH 4h ===
+      var chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
+      if (chartRawMatch) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          await handleChartCommand(message, chartRawMatch[1], chartRawMatch[2] || '4h');
+        } catch (e) {
+          await message.reply('Gagal buat chart: ' + e.message).catch(() => {});
+        }
+        return;
+      }
       return;
     }
 
@@ -942,6 +954,18 @@ client.on('messageCreate', async (message) => {
         await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
       } catch (e) {
         await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h ===
+    const chartM = question.match(/^cs+([a-zA-Z]+)(?:s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
+    if (chartM) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        await handleChartCommand(message, chartM[1], chartM[2] || '4h');
+      } catch (e) {
+        await message.reply('Gagal buat chart: ' + e.message).catch(() => {});
       }
       return;
     }

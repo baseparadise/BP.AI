@@ -1108,15 +1108,20 @@ client.on('interactionCreate', async (interaction) => {
     });
     return;
   }
+  // PENTING: acknowledge dulu (max 3 detik), baru hapus pesan
   try {
+    // 1. Acknowledge interaction segera agar Discord tidak timeout
+    await interaction.deferReply({ ephemeral: true });
+    // 2. Hapus pesan bot
     await interaction.message.delete();
-    // Konfirmasi ephemeral (hanya kelihatan ke yg klik, lalu hilang sendiri)
-    await interaction.reply({ content: '✅ Pesan dihapus.', ephemeral: true });
+    // 3. Edit deferred reply (ephemeral, hanya kelihatan ke yg klik)
+    await interaction.editReply({ content: '✅ Pesan dihapus.' });
   } catch (e) {
-    await interaction.reply({
-      content: '⚠️ Gagal menghapus pesan: ' + e.message,
-      ephemeral: true,
-    });
+    try {
+      await interaction.editReply({ content: '⚠️ Gagal menghapus: ' + e.message });
+    } catch (_) {
+      // interaction sudah expired, abaikan
+    }
   }
 });
 

@@ -169,8 +169,10 @@ async function bootstrapHistory(channel, selfId) {
 // Coba semua kombinasi key × model untuk satu provider.
 // Mengembalikan teks balasan, atau null kalau semua kombinasi gagal.
 async function tryAllCombinations(keys, models, buildMessages, providerName, timeout) {
-  for (const model of models) {
-    for (const key of keys) {
+  // Rotasi: key#0 → semua model, key#1 → semua model, dst.
+  // Pindah ke key berikutnya hanya jika key saat ini habis di semua model.
+  for (const key of keys) {
+    for (const model of models) {
       try {
         const messages = buildMessages(model, key);
         let text = '';

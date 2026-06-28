@@ -459,10 +459,20 @@ function formatCryptoAmount(amount, currency) {
   return amount.toPrecision(6) + ' ' + cur.toUpperCase();
 }
 
+function parseConvAmount(str) {
+  var s = str.toLowerCase().replace(/,/g, '.');
+  var mult = 1;
+  if (s.endsWith('k')) { mult = 1e3;  s = s.slice(0, -1); }
+  else if (s.endsWith('m')) { mult = 1e6;  s = s.slice(0, -1); }
+  else if (s.endsWith('b')) { mult = 1e9;  s = s.slice(0, -1); }
+  return parseFloat(s) * mult;
+}
+
 function detectCryptoConversion(question) {
-  var m = question.match(/^([\d.,]+)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
+  // Support: 5 usdc to idr | 5k usdc to idr | 1.5m btc to usd | 2b usdt to idr
+  var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
   if (!m) return null;
-  var amount = parseFloat(m[1].replace(/,/g, '.'));
+  var amount = parseConvAmount(m[1]);
   var from = m[2].toLowerCase();
   var to = m[3].toLowerCase();
   if (isNaN(amount) || amount <= 0) return null;
@@ -657,7 +667,21 @@ client.on('messageCreate', async (message) => {
     const isDM = !message.guild;
     const mentioned = message.mentions.users.has(client.user.id);
 
-    if (!mentioned && !isDM) return;
+    // === Konversi crypto bisa tanpa tag bot (misal: "5k usdc to idr") ===
+    if (!mentioned && !isDM) {
+      var rawMsg = message.content.trim();
+      var quickConv = detectCryptoConversion(rawMsg);
+      if (quickConv) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var quickResult = await fetchCryptoConversion(quickConv);
+          await message.reply({ content: quickResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
 
     if (isDM && message.author.id !== OWNER_ID) {
       await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');

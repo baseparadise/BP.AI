@@ -380,8 +380,15 @@ function splitMessage(text, maxLen = DISCORD_MAX_CHARS) {
 }
 
 async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
+  // HARD CAP: max 2 pesan Discord = 3900 karakter
+  var MAX_REPLY = 3900;
+  var safe = text;
+  if (safe.length > MAX_REPLY) {
+    var cut = safe.lastIndexOf('\n', MAX_REPLY - 1);
+    safe = safe.slice(0, cut > 2000 ? cut : MAX_REPLY - 1) + '\n…';
+  }
   // 1960 agar prefix "*(lanjutan X/Y)*\n" tidak dorong total > 2000
-  const chunks = splitMessage(text, 1960);
+  const chunks = splitMessage(safe, 1960);
   if (chunks.length === 0) return;
 
   await message.reply({ content: chunks[0].slice(0, 2000), flags });

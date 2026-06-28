@@ -959,7 +959,7 @@ client.on('messageCreate', async (message) => {
     }
 
     // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h ===
-    const chartM = question.match(/^cs+([a-zA-Z]+)(?:s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
+    const chartM = question.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?$/i);
     if (chartM) {
       await message.channel.sendTyping().catch(() => {});
       try {

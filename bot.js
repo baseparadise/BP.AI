@@ -329,6 +329,70 @@ async function replyWithFiles(message, text, blocks, originalFileNames = []) {
   });
 }
 
+
+// ============================================================
+// SPLIT PESAN PANJANG — Discord maks 2000 karakter per pesan
+// Otomatis pecah jawaban panjang jadi beberapa pesan tanpa memotong di tengah kalimat.
+// ============================================================
+
+const DISCORD_MAX_CHARS = 1990;
+
+function splitMessage(text, maxLen = DISCORD_MAX_CHARS) {
+  if (!text || text.length <= maxLen) return [text];
+
+  const chunks = [];
+  let remaining = text.trim();
+
+  while (remaining.length > maxLen) {
+    let splitAt = -1;
+
+    // 1. Pecah di paragraf (baris kosong)
+    const paraIdx = remaining.lastIndexOf('\n\n', maxLen);
+    if (paraIdx > maxLen * 0.4) splitAt = paraIdx + 2;
+
+    // 2. Pecah di baris baru tunggal
+    if (splitAt < 0) {
+      const nlIdx = remaining.lastIndexOf('\n', maxLen);
+      if (nlIdx > maxLen * 0.4) splitAt = nlIdx + 1;
+    }
+
+    // 3. Pecah di akhir kalimat (. ! ?)
+    if (splitAt < 0) {
+      const sentMatch = remaining.slice(0, maxLen).match(/^[\s\S]*[.!?](?=\s)/);
+      if (sentMatch && sentMatch[0].length > maxLen * 0.4) splitAt = sentMatch[0].length;
+    }
+
+    // 4. Pecah di spasi
+    if (splitAt < 0) {
+      const spaceIdx = remaining.lastIndexOf(' ', maxLen);
+      if (spaceIdx > maxLen * 0.3) splitAt = spaceIdx + 1;
+    }
+
+    // 5. Fallback: potong paksa
+    if (splitAt < 0) splitAt = maxLen;
+
+    chunks.push(remaining.slice(0, splitAt).trimEnd());
+    remaining = remaining.slice(splitAt).trimStart();
+  }
+
+  if (remaining.trim()) chunks.push(remaining.trim());
+  return chunks.filter(c => c.length > 0);
+}
+
+async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
+  const chunks = splitMessage(text);
+  if (chunks.length === 0) return;
+
+  // Pesan pertama sebagai reply ke user
+  await message.reply({ content: chunks[0], flags });
+
+  // Pesan berikutnya dikirim langsung ke channel (bukan reply berantai)
+  for (let i = 1; i < chunks.length; i++) {
+    await new Promise(r => setTimeout(r, 300)); // jeda kecil antar pesan
+    await message.channel.send({ content: `*(lanjutan ${i + 1}/${chunks.length})*\n${chunks[i]}`, flags });
+  }
+}
+
 // ============================================================
 // GITHUB EDIT
 // ============================================================
@@ -629,10 +693,7 @@ client.on('messageCreate', async (message) => {
         return;
       }
 
-      await message.reply({
-        content: formatAnswer(text, sources),
-        flags: MessageFlags.SuppressEmbeds,
-      });
+      await sendLongReply(message, formatAnswer(text, sources));
       return;
     }
 
@@ -664,10 +725,7 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    await message.reply({
-      content: formatAnswer(text, sources),
-      flags: MessageFlags.SuppressEmbeds,
-    });
+    await sendLongReply(message, formatAnswer(text, sources));
   } catch (err) {
     console.error('[bot] Error di messageCreate:', err);
     await message.reply(friendlyError(err)).catch(() => {});

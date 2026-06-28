@@ -405,6 +405,16 @@ client.on('messageCreate', async (message) => {
   try {
     if (message.author.bot) return;
 
+    // ── Perintah owner: !clearhistory ──────────────────────────────────────
+    if (message.author.id === OWNER_ID && /^!clearhistory$/i.test(message.content.trim())) {
+      const cid = message.channel.id;
+      history.delete(cid);
+      summaries.delete(cid);
+      message.delete().catch(() => {});
+      console.log(`[userbot] !clearhistory: history+summary channel ${cid} dihapus`);
+      return;
+    }
+
     // ── Perintah owner: !delete [n] ─────────────────────────────────────────
     if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(message.content.trim())) {
       const n = Math.min(parseInt(message.content.trim().split(/\s+/)[1], 10), 100);

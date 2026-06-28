@@ -71,8 +71,8 @@ const HISTORY_FILE = path.join(require('os').tmpdir(), 'bp_ai_history.json');
 
 // Sliding window: simpan N pasang terakhir, tidak hapus semua.
 // Discord dipakai sebagai "database" — bootstrap dari channel saat restart.
-const MAX_HISTORY_LEN_DM      = 30;  // 15 turn untuk DM owner
-const MAX_HISTORY_LEN_CHANNEL = 20;  // 10 turn untuk channel
+const MAX_HISTORY_LEN_DM      = 20;  // 10 turn untuk DM owner
+const MAX_HISTORY_LEN_CHANNEL = 6;   // 3 turn untuk channel
 const MAX_MSG_CHARS           = 500; // potong pesan sangat panjang agar hemat token
 
 function truncateContent(text) {
@@ -104,17 +104,44 @@ function getHistory(key) {
 
 function clearHistory(key) {
   delete allHistory[key];
+  delete allHistory[key + '__summary'];
   saveHistory();
 }
 
-function pushHistory(key, historyUserContent, assistantText, isDMOwner) {
+// Summary disimpan di allHistory dengan suffix '__summary'
+function getSummary(key) { return allHistory[key + '__summary'] || null; }
+function setSummary(key, text) {
+  if (text) allHistory[key + '__summary'] = text.replace(/\n+/g, ' ').trim().slice(0, 300);
+  else delete allHistory[key + '__summary'];
+  saveHistory();
+}
+
+async function summarizeDropped(key, dropped) {
+  const existing = getSummary(key);
+  const parts = [];
+  if (existing) parts.push(`Ringkasan sebelumnya: ${existing}`);
+  parts.push(...dropped.map(t => `${t.role === 'user' ? 'User' : 'AI'}: ${t.content}`));
+  const convo = parts.join('\n');
+  const prompt = `Buat ringkasan singkat (1-2 kalimat, bahasa yang sama dengan percakapan) untuk dijadikan konteks AI:\n\n${convo}`;
+  try {
+    const { text } = await askGemini(prompt, [], false);
+    return text;
+  } catch {
+    return existing; // fallback ke summary lama jika gagal
+  }
+}
+
+async function pushHistory(key, historyUserContent, assistantText, isDMOwner) {
   const history = getHistory(key);
   history.push({ role: 'user', content: truncateContent(historyUserContent) });
   history.push({ role: 'assistant', content: truncateContent(assistantText) });
 
-  // Sliding window: buang pasang terlama jika melebihi batas
   const maxLen = isDMOwner ? MAX_HISTORY_LEN_DM : MAX_HISTORY_LEN_CHANNEL;
-  while (history.length > maxLen) history.splice(0, 2);
+  if (history.length > maxLen) {
+    const dropped = history.splice(0, history.length - maxLen);
+    const newSummary = await summarizeDropped(key, dropped);
+    setSummary(key, newSummary);
+  }
 
   saveHistory();
 }
@@ -122,7 +149,16 @@ function pushHistory(key, historyUserContent, assistantText, isDMOwner) {
 function getHistoryForAI(key, isDMOwner) {
   const history = getHistory(key);
   const maxLen = isDMOwner ? MAX_HISTORY_LEN_DM : MAX_HISTORY_LEN_CHANNEL;
-  return history.slice(-maxLen);
+  const recent = history.slice(-maxLen);
+  const summary = getSummary(key);
+  if (summary) {
+    return [
+      { role: 'user', content: `[Ringkasan percakapan sebelumnya: ${summary}]` },
+      { role: 'assistant', content: 'Baik, saya sudah memahami konteks tersebut.' },
+      ...recent,
+    ];
+  }
+  return recent;
 }
 
 // Bootstrap: muat ulang konteks dari Discord saat restart
@@ -554,7 +590,7 @@ client.on('messageCreate', async (message) => {
 
         // Simpan history — hanya nama file, bukan isi
         const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
-        pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
         return;
       }
 
@@ -585,7 +621,7 @@ client.on('messageCreate', async (message) => {
         return;
       }
 
-      pushHistory(historyKey, historyUserContent, text, isDMOwner);
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 
       const blocks = extractCodeBlocks(text);
 
@@ -620,7 +656,7 @@ client.on('messageCreate', async (message) => {
     const history = getHistoryForAI(historyKey, isDMOwner);
     const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
 
-    pushHistory(historyKey, historyUserContent, text, isDMOwner);
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 
     const blocks = extractCodeBlocks(text);
 

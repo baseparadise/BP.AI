@@ -1096,32 +1096,39 @@ if (!token) {
 // TOMBOL DELETE — hanya user pengirim yang bisa klik
 // ============================================================
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isButton()) return;
-  // customId format: "del_{userId}"
-  const parts = interaction.customId.split('_');
-  if (parts[0] !== 'del') return;
-  const ownerId = parts.slice(1).join('_'); // support userId dengan underscore
-  if (interaction.user.id !== ownerId) {
+  try {
+    if (!interaction.isButton()) return;
+    if (!interaction.customId.startsWith('del_')) return;
+
+    // customId = "del_<userId>" — slice(4) langsung dapat userId
+    const ownerId = interaction.customId.slice(4);
+
+    if (interaction.user.id !== ownerId) {
+      await interaction.reply({
+        content: '⛔ Hanya pengirim pesan asli yang bisa menghapus ini.',
+        ephemeral: true,
+      }).catch(() => {});
+      return;
+    }
+
+    // Acknowledge DULU (<3 detik), baru hapus — paling sederhana & reliable
     await interaction.reply({
-      content: '⛔ Hanya pengirim pesan asli yang bisa menghapus ini.',
+      content: '✅ Pesan dihapus.',
       ephemeral: true,
     });
-    return;
-  }
-  // PENTING: acknowledge dulu (max 3 detik), baru hapus pesan
-  try {
-    // 1. Acknowledge interaction segera agar Discord tidak timeout
-    await interaction.deferReply({ ephemeral: true });
-    // 2. Hapus pesan bot
-    await interaction.message.delete();
-    // 3. Edit deferred reply (ephemeral, hanya kelihatan ke yg klik)
-    await interaction.editReply({ content: '✅ Pesan dihapus.' });
-  } catch (e) {
-    try {
-      await interaction.editReply({ content: '⚠️ Gagal menghapus: ' + e.message });
-    } catch (_) {
-      // interaction sudah expired, abaikan
+
+    // Hapus pesan bot (fire-and-forget)
+    if (interaction.message) {
+      await interaction.message.delete().catch((e) => {
+        console.error('[delete-btn] gagal hapus pesan:', e.message);
+      });
     }
+  } catch (err) {
+    console.error('[interactionCreate] error:', err.message);
+    await interaction.reply({
+      content: '⚠️ Terjadi error: ' + err.message,
+      ephemeral: true,
+    }).catch(() => {});
   }
 });
 

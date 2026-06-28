@@ -448,6 +448,2651 @@ const SUPPORTED_VS = new Set([
 
 // Cache dinamis untuk token yang tidak ada di COIN_ID_MAP
 const dynamicCoinIdCache = {};
+// Cache harga USD dari DexScreener untuk token micro-cap / baru
+const dynamicDexCache = {};
+
+// Cari harga USD dari DexScreener berdasarkan simbol (untuk token tidak ada di CoinGecko)
+async function resolveDexPrice(symbol) {
+  const lower = symbol.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(dynamicDexCache, lower)) return dynamicDexCache[lower];
+  try {
+    const { data } = await axios.get('https://api.dexscreener.com/latest/dex/search', {
+      params: { q: symbol }, timeout: 7000
+    });
+    const pairs = (data?.pairs || [])
+      .filter(p => p.baseToken?.symbol?.toLowerCase() === lower && p.priceUsd)
+      .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+    const best = pairs[0] || null;
+    if (best) {
+      const price = parseFloat(best.priceUsd);
+      dynamicDexCache[lower] = { priceUsd: price, pair: best.baseToken.symbol + '/' + best.quoteToken.symbol, dex: best.dexId, chain: best.chainId };
+      console.log('[dex] Found ' + symbol.toUpperCase() + ' via DexScreener: 
+
+// Resolusi coin ID: hardcoded map → cache → CoinGecko /search
+async function resolveCoinId(symbol) {
+  const lower = symbol.toLowerCase();
+  if (COIN_ID_MAP[lower]) return COIN_ID_MAP[lower];
+  if (Object.prototype.hasOwnProperty.call(dynamicCoinIdCache, lower)) return dynamicCoinIdCache[lower];
+  try {
+    const cgKey = process.env.COINGECKO_API_KEY || '';
+    const headers = { Accept: 'application/json' };
+    if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+    const resp = await axios.get(
+      'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(lower),
+      { headers, timeout: 6000 }
+    );
+    const coins = (resp.data && resp.data.coins) ? resp.data.coins : [];
+    const exact = coins.find(c => c.symbol.toLowerCase() === lower);
+    const match = exact || coins[0] || null;
+    dynamicCoinIdCache[lower] = match ? match.id : null;
+    if (match) console.log('[crypto] Found: ' + symbol + ' → ' + match.id + ' (' + match.name + ')');
+    else console.log('[crypto] Tidak ditemukan di CoinGecko: ' + symbol.toUpperCase());
+    return dynamicCoinIdCache[lower];
+  } catch (e) {
+    console.warn('[crypto] resolveCoinId gagal untuk "' + symbol + '":', e.message);
+    dynamicCoinIdCache[lower] = null;
+    return null;
+  }
+}
+
+function formatCryptoAmount(amount, currency) {
+  var cur = currency.toLowerCase();
+  if (cur === 'btc' || cur === 'sats') {
+    return amount.toFixed(8) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'eth' || cur === 'bnb') {
+    return amount.toFixed(6) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'idr' || cur === 'krw' || cur === 'vnd') {
+    return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+  }
+  if (cur === 'jpy') {
+    return Math.round(amount).toLocaleString('id-ID') + ' JPY';
+  }
+  if (amount >= 1) {
+    return amount.toFixed(2) + ' ' + cur.toUpperCase();
+  }
+  return amount.toPrecision(6) + ' ' + cur.toUpperCase();
+}
+
+function parseConvAmount(raw) {
+  var s = raw.toLowerCase().replace(/,/g, '.');
+  var mult = 1;
+  if (s.endsWith('k')) { mult = 1e3; s = s.slice(0, -1); }
+  else if (s.endsWith('m')) { mult = 1e6; s = s.slice(0, -1); }
+  else if (s.endsWith('b')) { mult = 1e9; s = s.slice(0, -1); }
+  return parseFloat(s) * mult;
+}
+
+async function detectCryptoConversion(question) {
+  var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var amount = parseConvAmount(m[1]);
+  var from = m[2].toLowerCase();
+  var to = m[3].toLowerCase();
+  if (isNaN(amount) || amount <= 0) return null;
+  // Resolve coin ID — hardcoded map dulu, lalu CoinGecko /search untuk token apapun
+  var coinId = await resolveCoinId(from);
+  if (!coinId) {
+    // CoinGecko tidak kenal token ini — coba DexScreener sebagai fallback
+    var dexInfo = await resolveDexPrice(from);
+    if (!dexInfo) return { notFound: true, from: from, to: to };
+    // DexScreener hanya bisa konversi ke fiat (via USD rate), bukan ke crypto lain
+    if (!SUPPORTED_VS.has(to)) return { notFound: true, from: from, to: to };
+    return { amount: amount, from: from, to: to, coinId: null, dexInfo: dexInfo };
+  }
+  var toIsVs = SUPPORTED_VS.has(to);
+  var toCoinId = toIsVs ? null : await resolveCoinId(to);
+  if (!toIsVs && !toCoinId) return null;
+  return { amount: amount, from: from, to: to, coinId: coinId, toCoinId: toCoinId };
+}
+
+// Deteksi: "price btc" atau "p eth" (tanpa tag bot)
+function detectPriceQuery(text) {
+  var m = text.match(/^(?:price|p)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var sym = m[1].toLowerCase();
+  var coinId = COIN_ID_MAP[sym];
+  if (!coinId) return null;
+  return { sym: sym, coinId: coinId };
+}
+
+async function fetchCoinPrice(pq) {
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price'
+    + '?ids=' + pq.coinId
+    + '&vs_currencies=usd,idr,btc'
+    + '&include_24hr_change=true'
+    + '&include_market_cap=true'
+    + '&precision=8';
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var d = resp.data[pq.coinId];
+  if (!d) throw new Error('Data tidak ditemukan');
+
+  var sym = pq.sym.toUpperCase();
+  var usd = d.usd;
+  var idr = d.idr;
+  var chg = d.usd_24h_change;
+  var mcap = d.usd_market_cap;
+
+  var chgStr = chg != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%' : 'N/A';
+  var usdStr = usd >= 1 ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : usd.toPrecision(6);
+  var idrStr = 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+  var mcapStr = mcap ? '$' + (mcap / 1e9).toFixed(2) + 'B' : 'N/A';
+  var arrow = chg != null ? (chg >= 0 ? '**UP**' : '**DOWN**') : '';
+
+  return '**$' + sym + '** ' + arrow + ' ' + chgStr + ' (24 jam)\n'
+    + 'USD: $' + usdStr + '\n'
+    + 'IDR: ' + idrStr + '\n'
+    + 'Market Cap: ' + mcapStr + '\n'
+    + '_(via CoinGecko)_';
+}
+
+async function fetchCryptoConversion(conv) {
+  var amount = conv.amount, from = conv.from, to = conv.to, coinId = conv.coinId;
+  var fromSym = from.toUpperCase();
+  var toSym = to.toUpperCase();
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+
+  // ── DexScreener path (token tidak ada di CoinGecko) ──
+  if (conv.dexInfo) {
+    var priceUsd = conv.dexInfo.priceUsd;
+    // Dapatkan rate USD → target fiat dari CoinGecko
+    var targetRate = 1; // default: USD
+    if (to !== 'usd') {
+      var rateHeaders = { Accept: 'application/json' };
+      if (cgKey) rateHeaders['x-cg-demo-api-key'] = cgKey;
+      var rateResp = await axios.get(
+        'https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=' + to + '&precision=6',
+        { headers: rateHeaders, timeout: 6000 }
+      );
+      var rateData = rateResp.data && rateResp.data['tether'];
+      targetRate = (rateData && rateData[to]) ? rateData[to] : 1;
+    }
+    var priceInTarget = priceUsd * targetRate;
+    var resultInTarget = amount * priceInTarget;
+    var dexSource = conv.dexInfo.dex + '/' + conv.dexInfo.chain;
+    var line1Dex = '**' + amount + ' 
+
+  var ids = coinId;
+  var vsCurrencies = to;
+
+  // Kalau "to" adalah crypto yg tidak didukung sebagai vs_currency, hitung via USD
+  if (!toIsVsCurrency && toCoinId) {
+    ids = coinId + ',' + toCoinId;
+    vsCurrencies = 'usd';
+  }
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=' + vsCurrencies + '&precision=8';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var data = resp.data;
+
+  var result, line1, line2;
+
+  if (!toIsVsCurrency && toCoinId) {
+    var fromUsd = data[coinId] && data[coinId]['usd'];
+    var toUsd = data[toCoinId] && data[toCoinId]['usd'];
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak tersedia');
+    result = (amount * fromUsd) / toUsd;
+    line1 = '**' + amount + ' $' + fromSym + ' ke $' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(fromUsd / toUsd, to);
+  } else {
+    var price = data[coinId] && data[coinId][to];
+    if (price == null) throw new Error('Data harga tidak tersedia');
+    result = amount * price;
+    line1 = '**' + amount + ' $' + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(price, to);
+  }
+
+  return line1 + '\n' + line2 + '\n_(via CoinGecko, harga real-time)_';
+}
+
+
+// ============================================================
+// GITHUB EDIT
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
+    if (!mentioned && !isDM) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
+    var cryptoConv = await detectCryptoConversion(question);
+    if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var convResult = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+ + price + ' (' + best.dexId + '/' + best.chainId + ')');
+    } else {
+      dynamicDexCache[lower] = null;
+      console.log('[dex] ' + symbol.toUpperCase() + ' tidak ditemukan di DexScreener');
+    }
+    return dynamicDexCache[lower];
+  } catch (e) {
+    console.warn('[dex] resolveDexPrice gagal untuk "' + symbol + '":', e.message);
+    dynamicDexCache[lower] = null;
+    return null;
+  }
+}
+
+// Resolusi coin ID: hardcoded map → cache → CoinGecko /search
+async function resolveCoinId(symbol) {
+  const lower = symbol.toLowerCase();
+  if (COIN_ID_MAP[lower]) return COIN_ID_MAP[lower];
+  if (Object.prototype.hasOwnProperty.call(dynamicCoinIdCache, lower)) return dynamicCoinIdCache[lower];
+  try {
+    const cgKey = process.env.COINGECKO_API_KEY || '';
+    const headers = { Accept: 'application/json' };
+    if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+    const resp = await axios.get(
+      'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(lower),
+      { headers, timeout: 6000 }
+    );
+    const coins = (resp.data && resp.data.coins) ? resp.data.coins : [];
+    const exact = coins.find(c => c.symbol.toLowerCase() === lower);
+    const match = exact || coins[0] || null;
+    dynamicCoinIdCache[lower] = match ? match.id : null;
+    if (match) console.log('[crypto] Found: ' + symbol + ' → ' + match.id + ' (' + match.name + ')');
+    else console.log('[crypto] Tidak ditemukan di CoinGecko: ' + symbol.toUpperCase());
+    return dynamicCoinIdCache[lower];
+  } catch (e) {
+    console.warn('[crypto] resolveCoinId gagal untuk "' + symbol + '":', e.message);
+    dynamicCoinIdCache[lower] = null;
+    return null;
+  }
+}
+
+function formatCryptoAmount(amount, currency) {
+  var cur = currency.toLowerCase();
+  if (cur === 'btc' || cur === 'sats') {
+    return amount.toFixed(8) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'eth' || cur === 'bnb') {
+    return amount.toFixed(6) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'idr' || cur === 'krw' || cur === 'vnd') {
+    return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+  }
+  if (cur === 'jpy') {
+    return Math.round(amount).toLocaleString('id-ID') + ' JPY';
+  }
+  if (amount >= 1) {
+    return amount.toFixed(2) + ' ' + cur.toUpperCase();
+  }
+  return amount.toPrecision(6) + ' ' + cur.toUpperCase();
+}
+
+function parseConvAmount(raw) {
+  var s = raw.toLowerCase().replace(/,/g, '.');
+  var mult = 1;
+  if (s.endsWith('k')) { mult = 1e3; s = s.slice(0, -1); }
+  else if (s.endsWith('m')) { mult = 1e6; s = s.slice(0, -1); }
+  else if (s.endsWith('b')) { mult = 1e9; s = s.slice(0, -1); }
+  return parseFloat(s) * mult;
+}
+
+async function detectCryptoConversion(question) {
+  var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var amount = parseConvAmount(m[1]);
+  var from = m[2].toLowerCase();
+  var to = m[3].toLowerCase();
+  if (isNaN(amount) || amount <= 0) return null;
+  // Resolve coin ID — hardcoded map dulu, lalu CoinGecko /search untuk token apapun
+  var coinId = await resolveCoinId(from);
+  if (!coinId) return { notFound: true, from: from, to: to };
+  var toIsVs = SUPPORTED_VS.has(to);
+  var toCoinId = toIsVs ? null : await resolveCoinId(to);
+  if (!toIsVs && !toCoinId) return null;
+  return { amount: amount, from: from, to: to, coinId: coinId, toCoinId: toCoinId };
+}
+
+// Deteksi: "price btc" atau "p eth" (tanpa tag bot)
+function detectPriceQuery(text) {
+  var m = text.match(/^(?:price|p)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var sym = m[1].toLowerCase();
+  var coinId = COIN_ID_MAP[sym];
+  if (!coinId) return null;
+  return { sym: sym, coinId: coinId };
+}
+
+async function fetchCoinPrice(pq) {
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price'
+    + '?ids=' + pq.coinId
+    + '&vs_currencies=usd,idr,btc'
+    + '&include_24hr_change=true'
+    + '&include_market_cap=true'
+    + '&precision=8';
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var d = resp.data[pq.coinId];
+  if (!d) throw new Error('Data tidak ditemukan');
+
+  var sym = pq.sym.toUpperCase();
+  var usd = d.usd;
+  var idr = d.idr;
+  var chg = d.usd_24h_change;
+  var mcap = d.usd_market_cap;
+
+  var chgStr = chg != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%' : 'N/A';
+  var usdStr = usd >= 1 ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : usd.toPrecision(6);
+  var idrStr = 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+  var mcapStr = mcap ? '$' + (mcap / 1e9).toFixed(2) + 'B' : 'N/A';
+  var arrow = chg != null ? (chg >= 0 ? '**UP**' : '**DOWN**') : '';
+
+  return '**$' + sym + '** ' + arrow + ' ' + chgStr + ' (24 jam)\n'
+    + 'USD: $' + usdStr + '\n'
+    + 'IDR: ' + idrStr + '\n'
+    + 'Market Cap: ' + mcapStr + '\n'
+    + '_(via CoinGecko)_';
+}
+
+async function fetchCryptoConversion(conv) {
+  var amount = conv.amount, from = conv.from, to = conv.to, coinId = conv.coinId;
+  var fromSym = from.toUpperCase();
+  var toSym = to.toUpperCase();
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+
+  var toCoinId = conv.toCoinId || COIN_ID_MAP[to] || null;
+  var toIsVsCurrency = SUPPORTED_VS.has(to);
+
+  var ids = coinId;
+  var vsCurrencies = to;
+
+  // Kalau "to" adalah crypto yg tidak didukung sebagai vs_currency, hitung via USD
+  if (!toIsVsCurrency && toCoinId) {
+    ids = coinId + ',' + toCoinId;
+    vsCurrencies = 'usd';
+  }
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=' + vsCurrencies + '&precision=8';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var data = resp.data;
+
+  var result, line1, line2;
+
+  if (!toIsVsCurrency && toCoinId) {
+    var fromUsd = data[coinId] && data[coinId]['usd'];
+    var toUsd = data[toCoinId] && data[toCoinId]['usd'];
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak tersedia');
+    result = (amount * fromUsd) / toUsd;
+    line1 = '**' + amount + ' $' + fromSym + ' ke $' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(fromUsd / toUsd, to);
+  } else {
+    var price = data[coinId] && data[coinId][to];
+    if (price == null) throw new Error('Data harga tidak tersedia');
+    result = amount * price;
+    line1 = '**' + amount + ' $' + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(price, to);
+  }
+
+  return line1 + '\n' + line2 + '\n_(via CoinGecko, harga real-time)_';
+}
+
+
+// ============================================================
+// GITHUB EDIT
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
+    if (!mentioned && !isDM) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
+    var cryptoConv = await detectCryptoConversion(question);
+    if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var convResult = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+ + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(resultInTarget, to) + '**';
+    var line2Dex = '1 
+
+  var ids = coinId;
+  var vsCurrencies = to;
+
+  // Kalau "to" adalah crypto yg tidak didukung sebagai vs_currency, hitung via USD
+  if (!toIsVsCurrency && toCoinId) {
+    ids = coinId + ',' + toCoinId;
+    vsCurrencies = 'usd';
+  }
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=' + vsCurrencies + '&precision=8';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var data = resp.data;
+
+  var result, line1, line2;
+
+  if (!toIsVsCurrency && toCoinId) {
+    var fromUsd = data[coinId] && data[coinId]['usd'];
+    var toUsd = data[toCoinId] && data[toCoinId]['usd'];
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak tersedia');
+    result = (amount * fromUsd) / toUsd;
+    line1 = '**' + amount + ' $' + fromSym + ' ke $' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(fromUsd / toUsd, to);
+  } else {
+    var price = data[coinId] && data[coinId][to];
+    if (price == null) throw new Error('Data harga tidak tersedia');
+    result = amount * price;
+    line1 = '**' + amount + ' $' + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(price, to);
+  }
+
+  return line1 + '\n' + line2 + '\n_(via CoinGecko, harga real-time)_';
+}
+
+
+// ============================================================
+// GITHUB EDIT
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
+    if (!mentioned && !isDM) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
+    var cryptoConv = await detectCryptoConversion(question);
+    if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var convResult = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+ + price + ' (' + best.dexId + '/' + best.chainId + ')');
+    } else {
+      dynamicDexCache[lower] = null;
+      console.log('[dex] ' + symbol.toUpperCase() + ' tidak ditemukan di DexScreener');
+    }
+    return dynamicDexCache[lower];
+  } catch (e) {
+    console.warn('[dex] resolveDexPrice gagal untuk "' + symbol + '":', e.message);
+    dynamicDexCache[lower] = null;
+    return null;
+  }
+}
+
+// Resolusi coin ID: hardcoded map → cache → CoinGecko /search
+async function resolveCoinId(symbol) {
+  const lower = symbol.toLowerCase();
+  if (COIN_ID_MAP[lower]) return COIN_ID_MAP[lower];
+  if (Object.prototype.hasOwnProperty.call(dynamicCoinIdCache, lower)) return dynamicCoinIdCache[lower];
+  try {
+    const cgKey = process.env.COINGECKO_API_KEY || '';
+    const headers = { Accept: 'application/json' };
+    if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+    const resp = await axios.get(
+      'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(lower),
+      { headers, timeout: 6000 }
+    );
+    const coins = (resp.data && resp.data.coins) ? resp.data.coins : [];
+    const exact = coins.find(c => c.symbol.toLowerCase() === lower);
+    const match = exact || coins[0] || null;
+    dynamicCoinIdCache[lower] = match ? match.id : null;
+    if (match) console.log('[crypto] Found: ' + symbol + ' → ' + match.id + ' (' + match.name + ')');
+    else console.log('[crypto] Tidak ditemukan di CoinGecko: ' + symbol.toUpperCase());
+    return dynamicCoinIdCache[lower];
+  } catch (e) {
+    console.warn('[crypto] resolveCoinId gagal untuk "' + symbol + '":', e.message);
+    dynamicCoinIdCache[lower] = null;
+    return null;
+  }
+}
+
+function formatCryptoAmount(amount, currency) {
+  var cur = currency.toLowerCase();
+  if (cur === 'btc' || cur === 'sats') {
+    return amount.toFixed(8) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'eth' || cur === 'bnb') {
+    return amount.toFixed(6) + ' ' + cur.toUpperCase();
+  }
+  if (cur === 'idr' || cur === 'krw' || cur === 'vnd') {
+    return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+  }
+  if (cur === 'jpy') {
+    return Math.round(amount).toLocaleString('id-ID') + ' JPY';
+  }
+  if (amount >= 1) {
+    return amount.toFixed(2) + ' ' + cur.toUpperCase();
+  }
+  return amount.toPrecision(6) + ' ' + cur.toUpperCase();
+}
+
+function parseConvAmount(raw) {
+  var s = raw.toLowerCase().replace(/,/g, '.');
+  var mult = 1;
+  if (s.endsWith('k')) { mult = 1e3; s = s.slice(0, -1); }
+  else if (s.endsWith('m')) { mult = 1e6; s = s.slice(0, -1); }
+  else if (s.endsWith('b')) { mult = 1e9; s = s.slice(0, -1); }
+  return parseFloat(s) * mult;
+}
+
+async function detectCryptoConversion(question) {
+  var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var amount = parseConvAmount(m[1]);
+  var from = m[2].toLowerCase();
+  var to = m[3].toLowerCase();
+  if (isNaN(amount) || amount <= 0) return null;
+  // Resolve coin ID — hardcoded map dulu, lalu CoinGecko /search untuk token apapun
+  var coinId = await resolveCoinId(from);
+  if (!coinId) return { notFound: true, from: from, to: to };
+  var toIsVs = SUPPORTED_VS.has(to);
+  var toCoinId = toIsVs ? null : await resolveCoinId(to);
+  if (!toIsVs && !toCoinId) return null;
+  return { amount: amount, from: from, to: to, coinId: coinId, toCoinId: toCoinId };
+}
+
+// Deteksi: "price btc" atau "p eth" (tanpa tag bot)
+function detectPriceQuery(text) {
+  var m = text.match(/^(?:price|p)\s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  var sym = m[1].toLowerCase();
+  var coinId = COIN_ID_MAP[sym];
+  if (!coinId) return null;
+  return { sym: sym, coinId: coinId };
+}
+
+async function fetchCoinPrice(pq) {
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price'
+    + '?ids=' + pq.coinId
+    + '&vs_currencies=usd,idr,btc'
+    + '&include_24hr_change=true'
+    + '&include_market_cap=true'
+    + '&precision=8';
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var d = resp.data[pq.coinId];
+  if (!d) throw new Error('Data tidak ditemukan');
+
+  var sym = pq.sym.toUpperCase();
+  var usd = d.usd;
+  var idr = d.idr;
+  var chg = d.usd_24h_change;
+  var mcap = d.usd_market_cap;
+
+  var chgStr = chg != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%' : 'N/A';
+  var usdStr = usd >= 1 ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : usd.toPrecision(6);
+  var idrStr = 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+  var mcapStr = mcap ? '$' + (mcap / 1e9).toFixed(2) + 'B' : 'N/A';
+  var arrow = chg != null ? (chg >= 0 ? '**UP**' : '**DOWN**') : '';
+
+  return '**$' + sym + '** ' + arrow + ' ' + chgStr + ' (24 jam)\n'
+    + 'USD: $' + usdStr + '\n'
+    + 'IDR: ' + idrStr + '\n'
+    + 'Market Cap: ' + mcapStr + '\n'
+    + '_(via CoinGecko)_';
+}
+
+async function fetchCryptoConversion(conv) {
+  var amount = conv.amount, from = conv.from, to = conv.to, coinId = conv.coinId;
+  var fromSym = from.toUpperCase();
+  var toSym = to.toUpperCase();
+  var cgKey = process.env.COINGECKO_API_KEY || '';
+
+  var toCoinId = conv.toCoinId || COIN_ID_MAP[to] || null;
+  var toIsVsCurrency = SUPPORTED_VS.has(to);
+
+  var ids = coinId;
+  var vsCurrencies = to;
+
+  // Kalau "to" adalah crypto yg tidak didukung sebagai vs_currency, hitung via USD
+  if (!toIsVsCurrency && toCoinId) {
+    ids = coinId + ',' + toCoinId;
+    vsCurrencies = 'usd';
+  }
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=' + vsCurrencies + '&precision=8';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var data = resp.data;
+
+  var result, line1, line2;
+
+  if (!toIsVsCurrency && toCoinId) {
+    var fromUsd = data[coinId] && data[coinId]['usd'];
+    var toUsd = data[toCoinId] && data[toCoinId]['usd'];
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak tersedia');
+    result = (amount * fromUsd) / toUsd;
+    line1 = '**' + amount + ' $' + fromSym + ' ke $' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(fromUsd / toUsd, to);
+  } else {
+    var price = data[coinId] && data[coinId][to];
+    if (price == null) throw new Error('Data harga tidak tersedia');
+    result = amount * price;
+    line1 = '**' + amount + ' $' + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(price, to);
+  }
+
+  return line1 + '\n' + line2 + '\n_(via CoinGecko, harga real-time)_';
+}
+
+
+// ============================================================
+// GITHUB EDIT
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
+    if (!mentioned && !isDM) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
+    var cryptoConv = await detectCryptoConversion(question);
+    if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var convResult = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+ + fromSym + ' = ' + formatCryptoAmount(priceInTarget, to);
+    return line1Dex + '
+' + line2Dex + '
+_(via DexScreener — ' + dexSource + ', harga real-time)_';
+  }
+
+  var toCoinId = conv.toCoinId || COIN_ID_MAP[to] || null;
+  var toIsVsCurrency = SUPPORTED_VS.has(to);
+
+  var ids = coinId;
+  var vsCurrencies = to;
+
+  // Kalau "to" adalah crypto yg tidak didukung sebagai vs_currency, hitung via USD
+  if (!toIsVsCurrency && toCoinId) {
+    ids = coinId + ',' + toCoinId;
+    vsCurrencies = 'usd';
+  }
+
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=' + vsCurrencies + '&precision=8';
+  var headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  var resp = await axios.get(url, { headers: headers, timeout: 8000 });
+  var data = resp.data;
+
+  var result, line1, line2;
+
+  if (!toIsVsCurrency && toCoinId) {
+    var fromUsd = data[coinId] && data[coinId]['usd'];
+    var toUsd = data[toCoinId] && data[toCoinId]['usd'];
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak tersedia');
+    result = (amount * fromUsd) / toUsd;
+    line1 = '**' + amount + ' $' + fromSym + ' ke $' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(fromUsd / toUsd, to);
+  } else {
+    var price = data[coinId] && data[coinId][to];
+    if (price == null) throw new Error('Data harga tidak tersedia');
+    result = amount * price;
+    line1 = '**' + amount + ' $' + fromSym + ' ke ' + toSym + ' = ' + formatCryptoAmount(result, to) + '**';
+    line2 = '1 $' + fromSym + ' = ' + formatCryptoAmount(price, to);
+  }
+
+  return line1 + '\n' + line2 + '\n_(via CoinGecko, harga real-time)_';
+}
+
+
+// ============================================================
+// GITHUB EDIT
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
+    if (!mentioned && !isDM) {
+      var rawText = message.content.trim();
+      var noTagConv = detectCryptoConversion(rawText);
+      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      if (noTagConv || noTagPrice) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagResult = noTagConv
+            ? await fetchCryptoConversion(noTagConv)
+            : await fetchCoinPrice(noTagPrice);
+          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+        } catch (e) {
+          await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5k usdc to idr") ===
+    var cryptoConv = await detectCryptoConversion(question);
+    if (cryptoConv) {
+      if (cryptoConv.notFound) {
+        await message.reply({ content: '❌ Token **' + cryptoConv.from.toUpperCase() + '** tidak ditemukan di CoinGecko. Coba cek simbol tokennya.', flags: MessageFlags.SuppressEmbeds });
+        return;
+      }
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var convResult = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Deteksi price query (misal: "price btc" atau "p eth") ===
+    var priceQ = detectPriceQuery(question);
+    if (priceQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var priceResult = await fetchCoinPrice(priceQ);
+        await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+ + price + ' (' + best.dexId + '/' + best.chainId + ')');
+    } else {
+      dynamicDexCache[lower] = null;
+      console.log('[dex] ' + symbol.toUpperCase() + ' tidak ditemukan di DexScreener');
+    }
+    return dynamicDexCache[lower];
+  } catch (e) {
+    console.warn('[dex] resolveDexPrice gagal untuk "' + symbol + '":', e.message);
+    dynamicDexCache[lower] = null;
+    return null;
+  }
+}
 
 // Resolusi coin ID: hardcoded map → cache → CoinGecko /search
 async function resolveCoinId(symbol) {

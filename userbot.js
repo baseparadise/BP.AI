@@ -110,8 +110,8 @@ if (GROQ_KEYS.length === 0 && GEMINI_KEYS.length === 0) {
 // ── Histori percakapan per channel ──────────────────────────────────────────
 const history = new Map();
 const bootstrapped = new Set();
-const MAX_HISTORY = 20;
-const MAX_MSG_LEN = 200;
+const MAX_HISTORY = 15;
+const MAX_MSG_LEN = 500;
 
 function getHistory(channelId) {
   if (!history.has(channelId)) history.set(channelId, []);

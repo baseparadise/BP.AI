@@ -225,11 +225,18 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
   ],
-  partials: [Partials.Channel],
+  // Partials.Message + Partials.Interaction wajib agar interactionCreate
+  // tetap terpicu pada pesan yang belum di-cache (termasuk tombol di guild channel).
+  partials: [Partials.Channel, Partials.Message, Partials.Interaction],
 });
 
 // discord.js v14+: gunakan 'clientReady' bukan 'ready' (ready sudah deprecated).
-client.once('clientReady', () => console.log(`[bot] Login sebagai ${client.user.tag}`));
+client.once('clientReady', () => {
+  console.log(`[bot] ===== v2025-06-28-INTERACTION-FIX =====`);
+  console.log(`[bot] Login sebagai ${client.user.tag}`);
+  console.log(`[bot] Partials: ${JSON.stringify(client.options.partials)}`);
+  console.log(`[bot] interactionCreate listener count: ${client.listenerCount('interactionCreate')}`);
+});
 client.on('error', (err) => console.error('[bot] Client error:', err));
 process.on('unhandledRejection', (err) => console.error('[bot] Unhandled rejection:', err));
 

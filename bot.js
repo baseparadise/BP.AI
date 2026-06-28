@@ -392,6 +392,850 @@ async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds)
     const body = chunks[i].slice(0, 2000 - prefix.length);
     await message.channel.send({ content: prefix + body, flags });
   }
+
+// ============================================================
+// CRYPTO CONVERSION — menggunakan CoinGecko API
+// Contoh: "5 usdc to idr" → "5 $USDC → IDR = Rp 82.500,00"
+// ============================================================
+const COIN_ID_MAP = {
+  btc: 'bitcoin', bitcoin: 'bitcoin',
+  eth: 'ethereum', ethereum: 'ethereum',
+  usdc: 'usd-coin', 'usd-coin': 'usd-coin',
+  usdt: 'tether', tether: 'tether',
+  bnb: 'binancecoin', binance: 'binancecoin',
+  sol: 'solana', solana: 'solana',
+  xrp: 'ripple', ripple: 'ripple',
+  ada: 'cardano', cardano: 'cardano',
+  doge: 'dogecoin', dogecoin: 'dogecoin',
+  dot: 'polkadot', polkadot: 'polkadot',
+  avax: 'avalanche-2', avalanche: 'avalanche-2',
+  matic: 'matic-network', polygon: 'matic-network',
+  link: 'chainlink', chainlink: 'chainlink',
+  ltc: 'litecoin', litecoin: 'litecoin',
+  shib: 'shiba-inu', shiba: 'shiba-inu',
+  uni: 'uniswap', uniswap: 'uniswap',
+  atom: 'cosmos', cosmos: 'cosmos',
+  near: 'near', apt: 'aptos', aptos: 'aptos',
+  arb: 'arbitrum', arbitrum: 'arbitrum',
+  op: 'optimism', optimism: 'optimism',
+  inj: 'injective-protocol', injective: 'injective-protocol',
+  sui: 'sui', ton: 'the-open-network',
+  pepe: 'pepe', floki: 'floki',
+  trx: 'tron', tron: 'tron',
+  xlm: 'stellar', stellar: 'stellar',
+  icp: 'internet-computer',
+  fil: 'filecoin', filecoin: 'filecoin',
+  sand: 'the-sandbox', mana: 'decentraland',
+  axs: 'axie-infinity', gala: 'gala',
+};
+
+// vs_currencies yang didukung CoinGecko
+const FIAT_SYMBOLS = {
+  idr: 'IDR', usd: 'USD', eur: 'EUR', gbp: 'GBP', jpy: 'JPY',
+  krw: 'KRW', cny: 'CNY', sgd: 'SGD', aud: 'AUD', myr: 'MYR',
+  thb: 'THB', php: 'PHP', inr: 'INR', vnd: 'VND', brl: 'BRL',
+  try: 'TRY', rub: 'RUB', cad: 'CAD', chf: 'CHF', hkd: 'HKD',
+  btc: 'BTC', eth: 'ETH', bnb: 'BNB', sat: 'SAT', sats: 'SATS',
+};
+
+const FIAT_PREFIX = {
+  idr: 'Rp ', usd: '
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    if (!mentioned && !isDM) return;
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Deteksi konversi crypto (misal: "5 usdc to idr") ===
+    const cryptoConv = detectCryptoConversion(question);
+    if (cryptoConv) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const result = await fetchCryptoConversion(cryptoConv);
+        await message.reply({ content: result, flags: MessageFlags.SuppressEmbeds });
+      } catch (e) {
+        await message.reply(`⚠️ Gagal ambil harga: ${e.message}`).catch(() => {});
+      }
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+, eur: '€', gbp: '£', jpy: '¥', krw: '₩',
+  cny: '¥', inr: '₹', php: '₱', vnd: '₫', brl: 'R
+// ============================================================
+
+function parseGitHubFileRef(text) {
+  const urlMatch = text.match(/https?:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/blob\/([^/\s]+)\/([^\s?#]+)/i);
+  if (urlMatch) {
+    return {
+      owner: urlMatch[1], repo: urlMatch[2],
+      branch: urlMatch[3], path: decodeURIComponent(urlMatch[4]),
+      raw: urlMatch[0],
+    };
+  }
+  const shortMatch = text.match(/\b([\w.-]+)\/([\w.-]+):([\w\-./]+\.[a-zA-Z0-9]+)\b/);
+  if (shortMatch) {
+    return { owner: shortMatch[1], repo: shortMatch[2], branch: null, path: shortMatch[3], raw: shortMatch[0] };
+  }
+  return null;
+}
+
+function friendlyGitHubError(err, ref) {
+  const status = err.response?.status;
+  const apiMsg = err.response?.data?.message || err.message;
+  console.error('[bot] GitHub edit gagal:', status, apiMsg);
+  if (status === 404) return `⚠️ Repo/file tidak ditemukan: \`${ref.owner}/${ref.repo}\` path \`${ref.path}\`. Cek nama repo, path, dan branch-nya.`;
+  if (status === 401 || status === 403) return '⚠️ Bot tidak punya izin menulis ke repo ini. Pastikan `GITHUB_TOKEN` punya scope **repo** atau permission **Contents: Read and write**.';
+  if (status === 409) return '⚠️ Konflik: file sudah berubah sejak terakhir dibaca (sha mismatch). Kirim ulang permintaannya.';
+  if (status === 422) return `⚠️ Gagal commit (422): ${apiMsg}. Cek apakah nama branch/path valid.`;
+  return `⚠️ Gagal edit file GitHub. (${status || 'error'}: ${apiMsg})`;
+}
+
+async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
+  let branch = ref.branch;
+  try {
+    if (!branch) branch = await getDefaultBranch(ref.owner, ref.repo);
+    const { content: oldContent, sha } = await getGitHubFileContent(ref.owner, ref.repo, ref.path, branch);
+
+    const instruction = question.replace(ref.raw, '').trim()
+      || 'Periksa file ini, identifikasi error/masalahnya, lalu perbaiki dan rapikan.';
+
+    const prompt = `${instruction}\n\nIni isi file "${ref.path}" saat ini dari repo ${ref.owner}/${ref.repo} (branch ${branch}). `
+      + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
+      + `\`\`\`\n${oldContent}\n\`\`\``;
+
+    const { text } = await askGemini(prompt, history, isDMOwner);
+
+    // [FIX] Deteksi hallusinasi di respons GitHub edit
+    if (containsHallucination(text)) {
+      await message.reply('⚠️ AI tidak memberikan kode yang valid. Coba kirim ulang permintaannya dengan instruksi lebih spesifik.');
+      return;
+    }
+
+    const blocks = extractCodeBlocks(text);
+    if (!blocks.length) {
+      await message.reply('⚠️ AI tidak mengembalikan kode dalam format yang bisa diproses ke GitHub. Coba ulangi dengan instruksi yang lebih spesifik.');
+      return;
+    }
+    const newContent = blocks.reduce((a, b) => (b.code.length > a.code.length ? b : a)).code;
+
+    // [FIX] Validasi kode yang akan di-commit
+    if (!isValidCodeBlock(newContent)) {
+      await message.reply('⚠️ Kode yang dihasilkan AI terlihat tidak lengkap (terlalu pendek atau mengandung placeholder). Coba kirim ulang.');
+      return;
+    }
+
+    const commitMessage = `Auto-edit via Discord bot: ${instruction.slice(0, 60)}`;
+    const result = await commitGitHubFile(ref.owner, ref.repo, ref.path, newContent, commitMessage, sha, branch);
+    const summary = stripCodeBlocks(text).slice(0, 600);
+
+    // [FIX] Gunakan nama file lengkap dari path, bukan hanya pop() terakhir
+    const replyFilename = ref.path.includes('/') ? ref.path.split('/').slice(-1)[0] : ref.path;
+
+    await message.reply({
+      content: [
+        `✅ File **${ref.path}** di **${ref.owner}/${ref.repo}** (branch \`${branch}\`) berhasil diupdate.`,
+        result.commitUrl ? `🔗 Commit: <${result.commitUrl}>` : '',
+        summary,
+      ].filter(Boolean).join('\n').slice(0, 2000),
+      files: [makeFile(newContent, replyFilename)],
+      flags: MessageFlags.SuppressEmbeds,
+    });
+  } catch (err) {
+    await message.reply(friendlyGitHubError(err, ref)).catch(() => {});
+  }
+}
+
+// ============================================================
+// PROSES FILE SATU PER SATU
+// [FIX BARU] Jika total ukuran file melebihi threshold, proses tiap file secara terpisah
+// agar tidak melebihi context window AI dan mencegah truncate/hallusinasi.
+// ============================================================
+
+async function processSingleFile(message, att, content, question, history, isDMOwner) {
+  const instruction = question
+    || 'Periksa file ini, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam satu code block.';
+
+  const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
+
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+
+  // Deteksi hallusinasi
+  if (containsHallucination(text)) {
+    await message.reply(`⚠️ AI memberikan respons yang tidak valid untuk **${att.name}**. Coba kirim file ini sendiri tanpa file lain.`);
+    return;
+  }
+
+  const blocks = extractCodeBlocks(text);
+  const validBlocks = blocks.filter((b) => isValidCodeBlock(b.code));
+
+  if (validBlocks.length === 0) {
+    const explanation = stripCodeBlocks(text).slice(0, 1800);
+    await message.reply({
+      content: (`**${att.name}:**\n${explanation || '⚠️ AI tidak menghasilkan kode valid untuk file ini.'}`).slice(0, 2000),
+      flags: MessageFlags.SuppressEmbeds,
+    });
+    return;
+  }
+
+  const bestBlock = validBlocks.reduce((a, b) => (b.code.length > a.code.length ? b : a));
+  const explanation = stripCodeBlocks(text).slice(0, 800);
+
+  await message.reply({
+    content: (`✅ **${att.name}** sudah diperbaiki.\n` + (explanation || '')).slice(0, 2000),
+    files: [makeFile(bestBlock.code, att.name)],
+    flags: MessageFlags.SuppressEmbeds,
+  });
+}
+
+// ============================================================
+// HANDLER UTAMA
+// ============================================================
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.author.bot) return;
+
+    const isDM = !message.guild;
+    const mentioned = message.mentions.users.has(client.user.id);
+
+    if (!mentioned && !isDM) return;
+
+    if (isDM && message.author.id !== OWNER_ID) {
+      await message.reply('⛔ Maaf, DM bot ini hanya bisa digunakan oleh owner.');
+      return;
+    }
+
+    const isDMOwner = isDM && message.author.id === OWNER_ID;
+    const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+
+    // Bootstrap history dari Discord saat pertama kali aktif setelah restart
+    await bootstrapHistory(historyKey, message.channel, isDMOwner);
+
+    const mentionRegex = new RegExp(`<@!?${client.user.id}>`, 'g');
+    const question = message.content.replace(mentionRegex, '').trim();
+
+    const maxFiles = isDMOwner ? MAX_FILES_DM : MAX_FILES_CH;
+    const fileAttachments = [...message.attachments.values()]
+      .filter((a) => TEXT_FILE_EXTENSIONS.includes(getExt(a.name)))
+      .slice(0, maxFiles);
+
+    if (!question && fileAttachments.length === 0) {
+      await message.reply('Halo! Tag aku lalu tulis pertanyaanmu, lampirkan file untuk diperiksa/diperbaiki, kirim link GitHub untuk edit repo, atau minta aku buatkan gambar. 👋');
+      return;
+    }
+
+    // === Perintah !delete [n] (hanya owner) ===
+    if (message.author.id === OWNER_ID && /^!delete\s+\d+$/i.test(question)) {
+      const n = Math.min(parseInt(question.split(/\s+/)[1], 10), 100);
+      console.log(`[bot] !delete dipanggil oleh owner, n=${n}`);
+      // Coba hapus pesan perintah owner
+      message.delete().catch(() => {});
+      // Fetch pesan recent, filter hanya pesan milik bot
+      const fetched = await message.channel.messages.fetch({ limit: 100 });
+      const mine = [...fetched.values()]
+        .filter(m => m.author.id === client.user.id)
+        .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+        .slice(0, n);
+      console.log(`[bot] !delete: ditemukan ${mine.length} pesan milik bot`);
+      for (const m of mine) {
+        await m.delete().catch(e => console.warn(`[bot] gagal hapus ${m.id}: ${e.message}`));
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === Perintah !ClearHistory ===
+    if (question.toLowerCase() === '!clearhistory') {
+      const hadHistory = !!(allHistory[historyKey] && allHistory[historyKey].length > 0);
+      clearHistory(historyKey);
+      await message.reply(hadHistory
+        ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
+        : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Mode edit file GitHub langsung ===
+    const ghRef = parseGitHubFileRef(question);
+    if (ghRef) {
+      await message.channel.sendTyping().catch(() => {});
+      const history = getHistoryForAI(historyKey, isDMOwner);
+      await handleGitHubEdit(message, ghRef, question, history, isDMOwner);
+      return;
+    }
+
+    await message.channel.sendTyping().catch(() => {});
+
+    // === Mode gambar (hanya kalau tidak ada file dilampirkan) ===
+    if (fileAttachments.length === 0 && isImageRequest(question)) {
+      const { imageBuffer, text } = await generateImage(question);
+      if (imageBuffer) {
+        await message.reply({
+          content: (text || `Nih hasil gambarnya: "${question}"`).slice(0, 2000),
+          files: [makeFile(imageBuffer, 'hasil.png')],
+        });
+        return;
+      }
+      // Kalau generate gambar gagal, jatuh ke mode teks biasa.
+    }
+
+    // ============================================================
+    // [FIX] Cek total ukuran file sebelum gabung ke satu prompt.
+    // Kalau terlalu besar, proses satu per satu agar AI tidak truncate.
+    // ============================================================
+    if (fileAttachments.length > 0) {
+      const totalSize = fileAttachments.reduce((sum, a) => sum + a.size, 0);
+
+      // Download semua file dulu
+      const loadedFiles = [];
+      for (const att of fileAttachments) {
+        try {
+          const content = await downloadAttachmentText(att);
+          loadedFiles.push({ att, content });
+        } catch (e) {
+          await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
+        }
+      }
+
+      if (loadedFiles.length === 0) return;
+
+      const history = getHistoryForAI(historyKey, isDMOwner);
+
+      // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
+      // proses satu per satu untuk hindari context overflow
+      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+
+      if (shouldSplitProcess && isDMOwner) {
+        // Mode split: proses tiap file terpisah
+        await message.reply(
+          `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
+        ).catch(() => {});
+
+        for (const { att, content } of loadedFiles) {
+          await message.channel.sendTyping().catch(() => {});
+          await processSingleFile(message, att, content, question, history, isDMOwner);
+        }
+
+        // Simpan history — hanya nama file, bukan isi
+        const fileNames = loadedFiles.map((f) => f.att.name).join(', ');
+        await pushHistory(historyKey, `${question || 'cek file'} [File: ${fileNames}]`, '[File diproses satu per satu]', isDMOwner);
+        return;
+      }
+
+      // Proses gabung (file kecil atau channel)
+      const fileParts = [];
+      const fileNames = [];
+      const originalFileNames = [];
+
+      for (const { att, content } of loadedFiles) {
+        fileParts.push(`// === File: ${att.name} ===\n${content}`);
+        fileNames.push(att.name);
+        originalFileNames.push(att.name);
+      }
+
+      const instruction = question
+        || 'Periksa semua file yang dilampirkan, identifikasi semua error/masalahnya, lalu perbaiki dan berikan versi LENGKAP yang sudah diperbaiki dalam code block terpisah untuk tiap file.';
+
+      const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
+      const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
+
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+      // [FIX] Deteksi hallusinasi sebelum proses respons
+      if (containsHallucination(text)) {
+        await message.reply(
+          '⚠️ AI tidak dapat memproses file sebesar ini sekaligus. Coba kirim **satu file** saja agar hasilnya akurat.'
+        );
+        return;
+      }
+
+      await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+      const blocks = extractCodeBlocks(text);
+
+      if (shouldSendAsFile(question, blocks, isDMOwner)) {
+        await replyWithFiles(message, text, blocks, originalFileNames);
+        return;
+      }
+
+      await sendLongReply(message, formatAnswer(text, sources));
+      return;
+    }
+
+    // === Pertanyaan teks biasa (tanpa file) ===
+    let finalQuestion = question;
+    const historyUserContent = question;
+
+    // === Token scam/analisis skill ===
+    if (isScamAnalysisRequest(question)) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const scamResult = await runScamAnalysis(question);
+        finalQuestion = scamResult.fullPrompt;
+      } catch (e) {
+        console.error('[bot] scamAnalysis error:', e.message);
+        // fall through to normal AI
+      }
+    }
+
+    const history = getHistoryForAI(historyKey, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+
+    await pushHistory(historyKey, historyUserContent, text, isDMOwner);
+
+    const blocks = extractCodeBlocks(text);
+
+    if (shouldSendAsFile(question, blocks, isDMOwner)) {
+      await replyWithFiles(message, text, blocks, []);
+      return;
+    }
+
+    await sendLongReply(message, formatAnswer(text, sources));
+  } catch (err) {
+    console.error('[bot] Error di messageCreate:', err);
+    await message.reply(friendlyError(err)).catch(() => {});
+  }
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+const token = process.env.DISCORD_TOKEN;
+if (!token) {
+  console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
+  process.exit(1);
+}
+
+client.login(token);
+,
+};
+
+function formatCryptoAmount(amount, currency) {
+  const cur = currency.toLowerCase();
+  const prefix = FIAT_PREFIX[cur] || '';
+  const sym = FIAT_SYMBOLS[cur] || currency.toUpperCase();
+
+  if (['btc', 'sat', 'sats'].includes(cur)) {
+    return prefix + amount.toFixed(8) + ' ' + sym;
+  }
+  if (['eth', 'bnb'].includes(cur)) {
+    return prefix + amount.toFixed(6) + ' ' + sym;
+  }
+  if (['idr', 'krw', 'vnd'].includes(cur)) {
+    return prefix + Math.round(amount).toLocaleString('id-ID');
+  }
+  if (amount >= 1) {
+    return prefix + amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (prefix ? '' : ' ' + sym);
+  }
+  return prefix + amount.toPrecision(6) + (prefix ? '' : ' ' + sym);
+}
+
+function detectCryptoConversion(question) {
+  // Pattern: [angka] [coin] to [coin/fiat]
+  const m = question.match(/^([d.,]+)s+([a-zA-Z]+)s+(?:to|→|ke)s+([a-zA-Z]+)$/i);
+  if (!m) return null;
+  const amount = parseFloat(m[1].replace(/,/g, '.'));
+  const from = m[2].toLowerCase();
+  const to = m[3].toLowerCase();
+  if (isNaN(amount) || amount <= 0) return null;
+  const coinId = COIN_ID_MAP[from];
+  const toCurrency = FIAT_SYMBOLS[to] ? to : COIN_ID_MAP[to] ? to : null;
+  if (!coinId || !toCurrency) return null;
+  return { amount, from, to, coinId, fromSymbol: from.toUpperCase(), toSymbol: to.toUpperCase() };
+}
+
+async function fetchCryptoConversion(conv) {
+  const { amount, from, to, coinId, fromSymbol, toSymbol } = conv;
+  const cgKey = process.env.COINGECKO_API_KEY || '';
+
+  // Tentukan vs_currency yang dipakai
+  // Kalau "to" adalah crypto (bukan fiat), pakai USD dulu lalu hitung ulang
+  const isToCrypto = !!COIN_ID_MAP[to] && !FIAT_SYMBOLS[to]?.match(/^[A-Z]{3}$/);
+  
+  let vsCurrencies = to;
+  // Jika to adalah crypto coin ID, kita perlu query 2 harga (dari USD)
+  let toIsCoinGeckoCoin = !!COIN_ID_MAP[to] && !['btc','eth','bnb','sat','sats'].includes(to.toLowerCase()) && !FIAT_SYMBOLS[to];
+
+  // Untuk coin-to-coin non-native: query keduanya dalam USD lalu hitung ratio
+  let coinIds = coinId;
+  if (toIsCoinGeckoCoin) {
+    coinIds = coinId + ',' + COIN_ID_MAP[to];
+    vsCurrencies = 'usd';
+  }
+
+  const params = new URLSearchParams({ ids: coinIds, vs_currencies: vsCurrencies, precision: '8' });
+  const headers = { 'Accept': 'application/json' };
+  if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+
+  const url = `https://api.coingecko.com/api/v3/simple/price?${params}`;
+  const { data } = await axios.get(url, { headers, timeout: 8000 });
+
+  let result, priceStr;
+
+  if (toIsCoinGeckoCoin) {
+    const fromUsd = data[coinId]?.usd;
+    const toUsd = data[COIN_ID_MAP[to]]?.usd;
+    if (!fromUsd || !toUsd) throw new Error('Data harga tidak ditemukan');
+    result = (amount * fromUsd) / toUsd;
+    priceStr = `**${amount} ${fromSymbol} → ${toSymbol} = ${formatCryptoAmount(result, to)} ${toSymbol}**
+📊 Harga saat ini: 1 ${fromSymbol} ≈ ${(fromUsd/toUsd).toPrecision(6)} ${toSymbol}
+_(via CoinGecko)_`;
+  } else {
+    const price = data[coinId]?.[to.toLowerCase()];
+    if (price == null) throw new Error('Data harga tidak ditemukan');
+    result = amount * price;
+    const formatted = formatCryptoAmount(result, to);
+    const unitFormatted = formatCryptoAmount(price, to);
+    priceStr = `**${amount} ${fromSymbol} → ${FIAT_SYMBOLS[to] || toSymbol} = ${formatted}**
+📊 1 ${fromSymbol} ≈ ${unitFormatted}
+_(via CoinGecko, harga real-time)_`;
+  }
+
+  return priceStr;
 }
 
 // ============================================================

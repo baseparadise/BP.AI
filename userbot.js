@@ -110,8 +110,10 @@ if (GROQ_KEYS.length === 0 && GEMINI_KEYS.length === 0) {
 // ── Histori percakapan per channel ──────────────────────────────────────────
 const history = new Map();
 const bootstrapped = new Set();
-const MAX_HISTORY = 15;
+const MAX_HISTORY = 12; // 6 turn
 const MAX_MSG_LEN = 500;
+
+const summaries = new Map(); // ringkasan konteks per channel
 
 function getHistory(channelId) {
   if (!history.has(channelId)) history.set(channelId, []);
@@ -123,21 +125,61 @@ function truncate(text) {
   return text.length > MAX_MSG_LEN ? text.slice(0, MAX_MSG_LEN) + '…' : text;
 }
 
-function pushHistory(channelId, role, text) {
-  const h = getHistory(channelId);
-  h.push({ role, text: truncate(text) });
-  while (h.length > MAX_HISTORY) h.splice(0, 2);
+async function summarizeDropped(channelId, dropped) {
+  const existing = summaries.get(channelId) || null;
+  const parts = [];
+  if (existing) parts.push(`Ringkasan sebelumnya: ${existing}`);
+  parts.push(...dropped.map(m => `${m.role === 'model' ? 'AI' : 'User'}: ${m.text}`));
+  const convo = parts.join('\n');
+  const prompt = `Buat ringkasan singkat (1-2 kalimat, bahasa yang sama) untuk konteks AI:\n\n${convo}`;
+  try {
+    const result = await tryAllCombinations(
+      GROQ_KEYS.length ? GROQ_KEYS : GEMINI_KEYS,
+      GROQ_KEYS.length ? GROQ_MODELS : GEMINI_MODELS,
+      (model) => [
+        { role: 'system', content: 'Kamu asisten. Buat ringkasan percakapan menjadi 1-2 kalimat.' },
+        { role: 'user', content: prompt },
+      ],
+      GROQ_KEYS.length ? 'groq' : 'gemini', 8000
+    );
+    if (result) summaries.set(channelId, result.replace(/\n+/g, ' ').trim().slice(0, 300));
+  } catch { /* fallback: tetap pakai summary lama */ }
 }
 
-function historyToGroq(h) {
-  return h.map(m => ({
+async function pushHistory(channelId, role, text) {
+  const h = getHistory(channelId);
+  h.push({ role, text: truncate(text) });
+  if (h.length > MAX_HISTORY) {
+    const dropped = h.splice(0, h.length - MAX_HISTORY);
+    await summarizeDropped(channelId, dropped);
+  }
+}
+
+function historyToGroq(h, summary) {
+  const msgs = h.map(m => ({
     role: m.role === 'model' ? 'assistant' : 'user',
     content: m.text,
   }));
+  if (summary) {
+    return [
+      { role: 'user', content: `[Ringkasan percakapan sebelumnya: ${summary}]` },
+      { role: 'assistant', content: 'Baik, sudah saya pahami.' },
+      ...msgs,
+    ];
+  }
+  return msgs;
 }
 
-function historyToGemini(h) {
-  return h.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+function historyToGemini(h, summary) {
+  const msgs = h.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+  if (summary) {
+    return [
+      { role: 'user', parts: [{ text: `[Ringkasan percakapan sebelumnya: ${summary}]` }] },
+      { role: 'model', parts: [{ text: 'Baik, sudah saya pahami.' }] },
+      ...msgs,
+    ];
+  }
+  return msgs;
 }
 
 async function bootstrapHistory(channel, selfId) {
@@ -210,6 +252,7 @@ async function tryAllCombinations(keys, models, buildMessages, providerName, tim
 
 async function replyAsHuman(channelId, authorName, question) {
   const h = getHistory(channelId);
+  const summary = summaries.get(channelId) || null;
   const userText = truncate(`${authorName}: ${question}`);
   let text = null;
   let usedProvider = '';
@@ -220,7 +263,7 @@ async function replyAsHuman(channelId, authorName, question) {
       GROQ_KEYS, GROQ_MODELS,
       (model) => [
         { role: 'system', content: PERSONA_PROMPT },
-        ...historyToGroq(h),
+        ...historyToGroq(h, summary),
         { role: 'user', content: userText },
       ],
       'groq', 15000
@@ -230,7 +273,7 @@ async function replyAsHuman(channelId, authorName, question) {
 
   // ── 2. Semua Groq habis → coba semua Gemini key × model ───────────────────
   if (!text && GEMINI_KEYS.length > 0) {
-    const geminiHistory = historyToGemini(h);
+    const geminiHistory = historyToGemini(h, summary);
     text = await tryAllCombinations(
       GEMINI_KEYS, GEMINI_MODELS,
       (model, key) => ({
@@ -249,9 +292,9 @@ async function replyAsHuman(channelId, authorName, question) {
   }
 
   console.log(`[userbot] provider=${usedProvider}`);
-  pushHistory(channelId, 'user', userText);
+  await pushHistory(channelId, 'user', userText);
   const cleanText = stripThinking(text);
-  pushHistory(channelId, 'model', cleanText);
+  await pushHistory(channelId, 'model', cleanText);
   return stripLinks(cleanText);
 }
 

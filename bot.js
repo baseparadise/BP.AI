@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const axios = require('axios');
-const { Client, GatewayIntentBits, Partials, AttachmentBuilder, MessageFlags } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, AttachmentBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const {
   isImageRequest,
   askGemini,
@@ -547,6 +547,16 @@ function parseConvAmount(raw) {
   return parseFloat(s) * mult;
 }
 
+// Buat tombol delete (hanya pemilik pesan yang bisa klik)
+function makeDeleteRow(userId) {
+  const btn = new ButtonBuilder()
+    .setCustomId('del_' + userId)
+    .setLabel('Hapus')
+    .setEmoji('🗑️')
+    .setStyle(ButtonStyle.Danger);
+  return new ActionRowBuilder().addComponents(btn);
+}
+
 async function detectCryptoConversion(question) {
   var m = question.match(/^([\d.,]+[kmb]?)\s+([a-zA-Z]+)\s+(?:to|ke)\s+([a-zA-Z]+)$/i);
   if (!m) return null;
@@ -828,7 +838,11 @@ client.on('messageCreate', async (message) => {
           var noTagResult = noTagConv
             ? await fetchCryptoConversion(noTagConv)
             : await fetchCoinPrice(noTagPrice);
-          await message.reply({ content: noTagResult, flags: MessageFlags.SuppressEmbeds });
+          await message.reply({
+            content: noTagResult,
+            components: [makeDeleteRow(message.author.id)],
+            flags: MessageFlags.SuppressEmbeds,
+          });
         } catch (e) {
           await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
@@ -901,7 +915,11 @@ client.on('messageCreate', async (message) => {
       await message.channel.sendTyping().catch(() => {});
       try {
         var convResult = await fetchCryptoConversion(cryptoConv);
-        await message.reply({ content: convResult, flags: MessageFlags.SuppressEmbeds });
+        await message.reply({
+          content: convResult,
+          components: [makeDeleteRow(message.author.id)],
+          flags: MessageFlags.SuppressEmbeds,
+        });
       } catch (e) {
         await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
       }
@@ -1073,5 +1091,34 @@ if (!token) {
   console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
   process.exit(1);
 }
+
+// ============================================================
+// TOMBOL DELETE — hanya user pengirim yang bisa klik
+// ============================================================
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+  // customId format: "del_{userId}"
+  const parts = interaction.customId.split('_');
+  if (parts[0] !== 'del') return;
+  const ownerId = parts.slice(1).join('_'); // support userId dengan underscore
+  if (interaction.user.id !== ownerId) {
+    await interaction.reply({
+      content: '⛔ Hanya pengirim pesan asli yang bisa menghapus ini.',
+      ephemeral: true,
+    });
+    return;
+  }
+  try {
+    await interaction.message.delete();
+    // Konfirmasi ephemeral (hanya kelihatan ke yg klik, lalu hilang sendiri)
+    await interaction.reply({ content: '✅ Pesan dihapus.', ephemeral: true });
+  } catch (e) {
+    await interaction.reply({
+      content: '⚠️ Gagal menghapus pesan: ' + e.message,
+      ephemeral: true,
+    });
+  }
+});
+
 
 client.login(token);

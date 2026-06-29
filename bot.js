@@ -827,26 +827,30 @@ async function detectCryptoConversion(question) {
 
 // Deteksi: "price btc" atau "p eth" (tanpa tag bot)
 function detectPriceQuery(text) {
-  var m = text.match(/^(?:price|p)\s+([a-zA-Z]+)$/i);
+  var m = text.match(/^(?:price|p)\s+([a-zA-Z0-9]+)$/i);
   if (!m) return null;
   var sym = m[1].toLowerCase();
-  var coinId = COIN_ID_MAP[sym];
-  if (!coinId) return null;
-  return { sym: sym, coinId: coinId };
+  return { sym: sym, coinId: COIN_ID_MAP[sym] || null };
 }
 
 async function fetchCoinPrice(pq) {
   var cgKey = process.env.COINGECKO_API_KEY || '';
   var headers = { 'Accept': 'application/json' };
   if (cgKey) headers['x-cg-demo-api-key'] = cgKey;
+  // Resolve coinId dinamis jika tidak ada di COIN_ID_MAP
+  var coinId = pq.coinId;
+  if (!coinId) {
+    coinId = await resolveCoinId(pq.sym);
+    if (!coinId) throw new Error('Token **' + pq.sym.toUpperCase() + '** tidak ditemukan di CoinGecko.');
+  }
   var url = 'https://api.coingecko.com/api/v3/simple/price'
-    + '?ids=' + pq.coinId
+    + '?ids=' + coinId
     + '&vs_currencies=usd,idr,btc'
     + '&include_24hr_change=true'
     + '&include_market_cap=true'
     + '&precision=8';
   var resp = await axios.get(url, { headers: headers, timeout: 8000 });
-  var d = resp.data[pq.coinId];
+  var d = resp.data[coinId];
   if (!d) throw new Error('Data tidak ditemukan');
   var sym = pq.sym.toUpperCase();
   var usd = d.usd;

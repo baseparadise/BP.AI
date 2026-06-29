@@ -1322,6 +1322,17 @@ client.on('messageCreate', async (message) => {
           `${medals[w.position - 1] || '🏅'} **${w.winner}** — [Verifikasi TX #${w.raffleId}](${w.txUrl})`
         );
 
+        // Buat daftar peserta berurutan untuk verifikasi on-chain
+        // winnerIndex di basescan = posisi di list ini (mulai dari 0)
+        const MAX_DISPLAY = 30; // hindari melebihi batas Discord 1024 char per field
+        const participantLines = participants
+          .map((name, idx) => `\`${idx}\` ${name}`)
+          .slice(0, MAX_DISPLAY);
+        if (participants.length > MAX_DISPLAY) {
+          participantLines.push(`... dan ${participants.length - MAX_DISPLAY} lainnya`);
+        }
+        const participantField = participantLines.join('\n');
+
         const embed = {
           color: 0xf5a623,
           title: `🎉 Hasil Undian On-Chain — ${roleMention.name}`,
@@ -1333,6 +1344,11 @@ client.on('messageCreate', async (message) => {
             {
               name: '🔍 Smart Contract',
               value: `[\`0xfABe...25aE\`](https://basescan.org/address/0xfABe5E941887b490eF6FaC127FD16553656f25aE)`,
+              inline: false,
+            },
+            {
+              name: '📋 Daftar Peserta (urutan acak — cocokkan dengan winnerIndex di Basescan)',
+              value: participantField || '—',
               inline: false,
             },
           ],

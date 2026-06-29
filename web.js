@@ -306,6 +306,126 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+// ── GET /wheel — visual spinning wheel page (no auth, Discord Activity) ──────
+if (req.method === 'GET' && url.pathname === '/wheel') {
+  const n = Math.max(2, Math.min(200, parseInt(url.searchParams.get('n') || '8', 10)));
+  const w = Math.max(0, Math.min(n - 1, parseInt(url.searchParams.get('w') || '0', 10)));
+  const title = (url.searchParams.get('title') || 'Wheel Undian').slice(0, 40).replace(/[<>]/g, '');
+  const names = (url.searchParams.get('names') || '').split(',').map(s => decodeURIComponent(s.trim()).slice(0, 20)).filter(Boolean);
+
+  const labels = [];
+  for (let i = 0; i < n; i++) labels.push(names[i] || ('Peserta ' + (i + 1)));
+
+  const html = `<!DOCTYPE html>
+<html lang=id>
+<head>
+<meta charset=UTF-8>
+<meta name=viewport content=width=device-width,initial-scale=1>
+<title>${title}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#e6edf3;font-family:'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+h1{font-size:1.3rem;margin-bottom:12px;color:#58a6ff;letter-spacing:1px;text-align:center}
+.wheel-wrap{position:relative;width:min(90vw,420px);height:min(90vw,420px);margin-bottom:20px}
+canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 40px #58a6ff55}
+.pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:2rem;filter:drop-shadow(0 0 8px #ff9800)}
+#result{font-size:1.5rem;font-weight:700;color:#ffd700;text-align:center;min-height:2em;padding:10px;text-shadow:0 0 16px #ffd70088}
+.confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+</style>
+</head>
+<body>
+<h1>${title}</h1>
+<div class=wheel-wrap>
+  <div class=pointer>▼</div>
+  <canvas id=wc width=420 height=420></canvas>
+</div>
+<div id=result>Siap memutar...</div>
+<div class=confetti-wrap id=cf></div>
+<script>
+const LABELS=${JSON.stringify(labels)};
+const WINNER=${w};
+const N=LABELS.length;
+const COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f43','#00d2d3','#ff6b81','#54a0ff','#5f27cd','#48dbfb','#ff9ff3','#ffeaa7','#dfe6e9','#fd79a8'];
+const canvas=document.getElementById('wc');
+const ctx=canvas.getContext('2d');
+const cx=210,cy=210,r=200;
+
+function drawWheel(rot){
+  ctx.clearRect(0,0,420,420);
+  const arc=2*Math.PI/N;
+  for(let i=0;i<N;i++){
+    const start=rot+i*arc;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+arc);
+    ctx.closePath();
+    ctx.fillStyle=COLORS[i%COLORS.length];ctx.fill();
+    ctx.strokeStyle='#0d1117';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();
+    ctx.translate(cx,cy);ctx.rotate(start+arc/2);
+    ctx.textAlign='right';ctx.fillStyle='#fff';
+    ctx.font='bold '+Math.max(10,Math.min(16,280/N))+'px Segoe UI';
+    ctx.shadowColor='#0008';ctx.shadowBlur=4;
+    ctx.fillText(LABELS[i].length>12?LABELS[i].slice(0,11)+'…':LABELS[i],r-8,5);
+    ctx.restore();
+  }
+  // center circle
+  ctx.beginPath();ctx.arc(cx,cy,28,0,2*Math.PI);
+  ctx.fillStyle='#0d1117';ctx.fill();
+  ctx.strokeStyle='#58a6ff';ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle='#58a6ff';ctx.font='bold 13px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('BP.AI',cx,cy);
+}
+
+// Pointer is at top (angle = -PI/2 from 0)
+// Segment i starts at rot + i * arc
+// We want winner segment center to be at top: rot + WINNER*arc + arc/2 = -PI/2 + 2k*PI
+const arc=2*Math.PI/N;
+const targetRot = -Math.PI/2 - WINNER*arc - arc/2;
+const totalSpin = 6*2*Math.PI + ((targetRot%(2*Math.PI)+2*Math.PI)%(2*Math.PI));
+let startRot=0, startTime=null;
+const duration=5000;
+
+function easeOut(t){return 1-Math.pow(1-t,4);}
+
+function animate(ts){
+  if(!startTime)startTime=ts;
+  const t=Math.min((ts-startTime)/duration,1);
+  const rot=startRot+totalSpin*easeOut(t);
+  drawWheel(rot);
+  if(t<1){requestAnimationFrame(animate);}
+  else{
+    drawWheel(targetRot+6*2*Math.PI);
+    document.getElementById('result').innerHTML='🏆 <b>PEMENANG: '+LABELS[WINNER]+'</b> 🎉';
+    launchConfetti();
+  }
+}
+
+drawWheel(0);
+setTimeout(()=>requestAnimationFrame(animate),800);
+
+function launchConfetti(){
+  const cf=document.getElementById('cf');
+  const colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');
+    const size=6+Math.random()*8;
+    el.style.cssText='position:absolute;width:'+size+'px;height:'+size+'px;background:'+colors[i%5]+';border-radius:'+(Math.random()>0.5?'50%':'2px')+';left:'+Math.random()*100+'%;top:-10px;opacity:1;transition:none';
+    cf.appendChild(el);
+    const tx=(Math.random()-0.5)*300;
+    const ty=window.innerHeight+20;
+    const rot=Math.random()*720;
+    const delay=Math.random()*1500;
+    setTimeout(()=>{el.style.transition='transform '+(2+Math.random()*2)+'s ease-out, opacity 1s ease-in '+(2.5+Math.random())+'s';el.style.transform='translate('+tx+'px,'+ty+'px) rotate('+rot+'deg)';el.style.opacity='0';},delay);
+  }
+}
+</script>
+</body>
+</html>`;
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(html);
+  return;
+}
+
   // ── Auth guard: semua route di bawah butuh login ──────────
   if (!isAuthenticated(req)) {
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
@@ -454,126 +574,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-
-// ── GET /wheel — visual spinning wheel page (no auth, Discord Activity) ──────
-if (req.method === 'GET' && url.pathname === '/wheel') {
-  const n = Math.max(2, Math.min(200, parseInt(url.searchParams.get('n') || '8', 10)));
-  const w = Math.max(0, Math.min(n - 1, parseInt(url.searchParams.get('w') || '0', 10)));
-  const title = (url.searchParams.get('title') || 'Wheel Undian').slice(0, 40).replace(/[<>]/g, '');
-  const names = (url.searchParams.get('names') || '').split(',').map(s => decodeURIComponent(s.trim()).slice(0, 20)).filter(Boolean);
-
-  const labels = [];
-  for (let i = 0; i < n; i++) labels.push(names[i] || ('Peserta ' + (i + 1)));
-
-  const html = `<!DOCTYPE html>
-<html lang=id>
-<head>
-<meta charset=UTF-8>
-<meta name=viewport content=width=device-width,initial-scale=1>
-<title>${title}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#e6edf3;font-family:'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
-h1{font-size:1.3rem;margin-bottom:12px;color:#58a6ff;letter-spacing:1px;text-align:center}
-.wheel-wrap{position:relative;width:min(90vw,420px);height:min(90vw,420px);margin-bottom:20px}
-canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 40px #58a6ff55}
-.pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:2rem;filter:drop-shadow(0 0 8px #ff9800)}
-#result{font-size:1.5rem;font-weight:700;color:#ffd700;text-align:center;min-height:2em;padding:10px;text-shadow:0 0 16px #ffd70088}
-.confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
-</style>
-</head>
-<body>
-<h1>${title}</h1>
-<div class=wheel-wrap>
-  <div class=pointer>▼</div>
-  <canvas id=wc width=420 height=420></canvas>
-</div>
-<div id=result>Siap memutar...</div>
-<div class=confetti-wrap id=cf></div>
-<script>
-const LABELS=${JSON.stringify(labels)};
-const WINNER=${w};
-const N=LABELS.length;
-const COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f43','#00d2d3','#ff6b81','#54a0ff','#5f27cd','#48dbfb','#ff9ff3','#ffeaa7','#dfe6e9','#fd79a8'];
-const canvas=document.getElementById('wc');
-const ctx=canvas.getContext('2d');
-const cx=210,cy=210,r=200;
-
-function drawWheel(rot){
-  ctx.clearRect(0,0,420,420);
-  const arc=2*Math.PI/N;
-  for(let i=0;i<N;i++){
-    const start=rot+i*arc;
-    ctx.beginPath();ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,start+arc);
-    ctx.closePath();
-    ctx.fillStyle=COLORS[i%COLORS.length];ctx.fill();
-    ctx.strokeStyle='#0d1117';ctx.lineWidth=2;ctx.stroke();
-    ctx.save();
-    ctx.translate(cx,cy);ctx.rotate(start+arc/2);
-    ctx.textAlign='right';ctx.fillStyle='#fff';
-    ctx.font='bold '+Math.max(10,Math.min(16,280/N))+'px Segoe UI';
-    ctx.shadowColor='#0008';ctx.shadowBlur=4;
-    ctx.fillText(LABELS[i].length>12?LABELS[i].slice(0,11)+'…':LABELS[i],r-8,5);
-    ctx.restore();
-  }
-  // center circle
-  ctx.beginPath();ctx.arc(cx,cy,28,0,2*Math.PI);
-  ctx.fillStyle='#0d1117';ctx.fill();
-  ctx.strokeStyle='#58a6ff';ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle='#58a6ff';ctx.font='bold 13px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('BP.AI',cx,cy);
-}
-
-// Pointer is at top (angle = -PI/2 from 0)
-// Segment i starts at rot + i * arc
-// We want winner segment center to be at top: rot + WINNER*arc + arc/2 = -PI/2 + 2k*PI
-const arc=2*Math.PI/N;
-const targetRot = -Math.PI/2 - WINNER*arc - arc/2;
-const totalSpin = 6*2*Math.PI + ((targetRot%(2*Math.PI)+2*Math.PI)%(2*Math.PI));
-let startRot=0, startTime=null;
-const duration=5000;
-
-function easeOut(t){return 1-Math.pow(1-t,4);}
-
-function animate(ts){
-  if(!startTime)startTime=ts;
-  const t=Math.min((ts-startTime)/duration,1);
-  const rot=startRot+totalSpin*easeOut(t);
-  drawWheel(rot);
-  if(t<1){requestAnimationFrame(animate);}
-  else{
-    drawWheel(targetRot+6*2*Math.PI);
-    document.getElementById('result').innerHTML='🏆 <b>PEMENANG: '+LABELS[WINNER]+'</b> 🎉';
-    launchConfetti();
-  }
-}
-
-drawWheel(0);
-setTimeout(()=>requestAnimationFrame(animate),800);
-
-function launchConfetti(){
-  const cf=document.getElementById('cf');
-  const colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
-  for(let i=0;i<80;i++){
-    const el=document.createElement('div');
-    const size=6+Math.random()*8;
-    el.style.cssText='position:absolute;width:'+size+'px;height:'+size+'px;background:'+colors[i%5]+';border-radius:'+(Math.random()>0.5?'50%':'2px')+';left:'+Math.random()*100+'%;top:-10px;opacity:1;transition:none';
-    cf.appendChild(el);
-    const tx=(Math.random()-0.5)*300;
-    const ty=window.innerHeight+20;
-    const rot=Math.random()*720;
-    const delay=Math.random()*1500;
-    setTimeout(()=>{el.style.transition='transform '+(2+Math.random()*2)+'s ease-out, opacity 1s ease-in '+(2.5+Math.random())+'s';el.style.transform='translate('+tx+'px,'+ty+'px) rotate('+rot+'deg)';el.style.opacity='0';},delay);
-  }
-}
-</script>
-</body>
-</html>`;
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-  res.end(html);
-  return;
-}
 
   res.writeHead(404);
   res.end('Not found');

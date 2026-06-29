@@ -1143,6 +1143,23 @@ client.on('messageCreate', async (message) => {
         }
         return;
       }
+
+      // === Wheel game: !wheel 5m ===
+      var wheelMatch = rawText.match(/^!wheel(?:\s+(\d+)m)?$/i);
+      if (wheelMatch) {
+        var wheelMins = wheelMatch[1] ? parseInt(wheelMatch[1]) : 5;
+        if (wheelMins < 1 || wheelMins > 60) {
+          await message.reply('⚠️ Durasi harus antara **1m** sampai **60m**. Contoh: `!wheel 5m`').catch(() => {});
+          return;
+        }
+        if (activeWheels.has(message.channelId)) {
+          await message.reply('⚠️ Sudah ada wheel yang berjalan di channel ini! Tunggu sampai selesai.').catch(() => {});
+          return;
+        }
+        await startWheelGame(message, wheelMins);
+        return;
+      }
+
       return;
     }
 
@@ -1505,6 +1522,173 @@ if (!token) {
   console.error('[bot] DISCORD_TOKEN belum di-set. Set env DISCORD_TOKEN dengan Bot Token dari Developer Portal.');
   process.exit(1);
 }
+
+// ============================================================
+// WHEEL GAME — undian acak dari peserta yang klik reaksi 🎯
+// ============================================================
+const activeWheels = new Map(); // channelId → wheel state
+
+function wheelCountdown(ms) {
+  const s = Math.ceil(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m > 0 && sec > 0) return `${m}m ${sec}d`;
+  if (m > 0) return `${m}m`;
+  return `${sec}d`;
+}
+
+function wheelStatusMsg(state) {
+  const remaining = state.endsAt - Date.now();
+  const count = state.participants.size;
+  const names = [...state.participants].slice(0, 12).map(id => `<@${id}>`).join(', ')
+    + (count > 12 ? ` +${count - 12} lainnya` : '');
+  return (
+    `🎡 **WHEEL UNDIAN** — sedang berjalan\n\n` +
+    `Klik **🎯** di bawah untuk ikut undian!\n` +
+    `⏱️ Berakhir dalam: **${wheelCountdown(Math.max(remaining, 0))}**\n` +
+    `👥 Peserta: **${count} orang**` +
+    (count > 0 ? `\n> ${names}` : '') +
+    `\n\n_Digagas oleh <@${state.starterId}>_`
+  );
+}
+
+async function runWheelSpin(wheelMsg, participants, starterId) {
+  const ids = [...participants];
+
+  if (ids.length === 0) {
+    await wheelMsg.edit(
+      `🎡 **WHEEL UNDIAN** — Selesai\n\n` +
+      `😢 Tidak ada yang ikut. Wheel dibatalkan.\n\n` +
+      `_Digagas oleh <@${starterId}>_`
+    ).catch(() => {});
+    return;
+  }
+
+  if (ids.length === 1) {
+    await wheelMsg.edit(
+      `🎡 **WHEEL UNDIAN** — Selesai\n\n` +
+      `🏆 **PEMENANG: <@${ids[0]}>**\n` +
+      `_(hanya 1 peserta)_\n\n` +
+      `_Digagas oleh <@${starterId}>_`
+    ).catch(() => {});
+    return;
+  }
+
+  // Spin animation — slot machine gaya teks
+  const allMentions = ids.map(id => `<@${id}>`);
+  const delays = [250, 250, 300, 400, 500, 700, 900, 1100];
+  for (let i = 0; i < delays.length; i++) {
+    const shuffled = [...allMentions].sort(() => Math.random() - 0.5).slice(0, Math.min(5, allMentions.length));
+    const bar = shuffled.join(' ➜ ');
+    await wheelMsg.edit(`🎡 **WHEEL SEDANG BERPUTAR...**\n\n🎰 ${bar} 🎰`).catch(() => {});
+    await new Promise(r => setTimeout(r, delays[i]));
+  }
+
+  // Slow down — tampilkan kandidat satu per satu
+  const candidates = [...allMentions].sort(() => Math.random() - 0.5).slice(0, 3);
+  for (const c of candidates) {
+    await wheelMsg.edit(`🎡 **HAMPIR...**\n\n▶️  ${c}  ◀️`).catch(() => {});
+    await new Promise(r => setTimeout(r, 900));
+  }
+
+  // Pilih pemenang
+  const winnerId = ids[Math.floor(Math.random() * ids.length)];
+  const participantList = allMentions.slice(0, 20).join(', ')
+    + (allMentions.length > 20 ? ` +${allMentions.length - 20} lainnya` : '');
+
+  await new Promise(r => setTimeout(r, 600));
+  await wheelMsg.edit(
+    `🎡 **WHEEL UNDIAN** — SELESAI! 🎉\n\n` +
+    `🏆 **PEMENANG: <@${winnerId}>** 🎊\n\n` +
+    `👥 Total peserta: **${ids.length} orang**\n` +
+    `Peserta: ${participantList}\n\n` +
+    `_Digagas oleh <@${starterId}>_`
+  ).catch(() => {});
+}
+
+async function startWheelGame(message, durationMins) {
+  const durMs = durationMins * 60 * 1000;
+  const endsAt = Date.now() + durMs;
+  const participants = new Set();
+
+  const state = {
+    messageId: null,
+    channelId: message.channelId,
+    starterId: message.author.id,
+    participants,
+    endsAt,
+    updateInterval: null,
+  };
+
+  // Post pesan awal
+  const wheelMsg = await message.channel.send(
+    `🎡 **WHEEL UNDIAN** — sedang berjalan\n\n` +
+    `Klik **🎯** di bawah untuk ikut undian!\n` +
+    `⏱️ Berakhir dalam: **${wheelCountdown(durMs)}**\n` +
+    `👥 Peserta: **0 orang**\n\n` +
+    `_Digagas oleh <@${message.author.id}>_`
+  );
+  await wheelMsg.react('🎯').catch(() => {});
+
+  state.messageId = wheelMsg.id;
+  activeWheels.set(message.channelId, state);
+
+  // Update countdown tiap 30 detik
+  state.updateInterval = setInterval(async () => {
+    const left = state.endsAt - Date.now();
+    if (left <= 0) { clearInterval(state.updateInterval); return; }
+    await wheelMsg.edit(wheelStatusMsg(state)).catch(() => {});
+  }, 30000);
+
+  // Setelah durasi habis — jalankan spin
+  setTimeout(async () => {
+    clearInterval(state.updateInterval);
+    activeWheels.delete(message.channelId);
+
+    // Fetch reaksi final dari Discord (backup jika event terlewat)
+    try {
+      const fresh = await message.channel.messages.fetch(wheelMsg.id);
+      const rxn = fresh.reactions.cache.get('🎯');
+      if (rxn) {
+        const users = await rxn.users.fetch();
+        users.forEach(u => { if (!u.bot) state.participants.add(u.id); });
+      }
+    } catch (_) {}
+
+    await runWheelSpin(wheelMsg, state.participants, state.starterId);
+  }, durMs);
+}
+
+// Tangkap reaksi 🎯 dari user
+client.on('messageReactionAdd', async (reaction, user) => {
+  try {
+    if (user.bot) return;
+    if (reaction.emoji.name !== '🎯') return;
+    // Partial reaction — fetch dulu
+    if (reaction.partial) { try { await reaction.fetch(); } catch (_) { return; } }
+    const wheel = activeWheels.get(reaction.message.channelId);
+    if (!wheel || wheel.messageId !== reaction.message.id) return;
+    wheel.participants.add(user.id);
+    console.log(`[wheel] ${user.tag} bergabung — total: ${wheel.participants.size}`);
+  } catch (e) {
+    console.warn('[wheel] reactionAdd error:', e.message);
+  }
+});
+
+// Tangkap jika user batalkan reaksi 🎯
+client.on('messageReactionRemove', async (reaction, user) => {
+  try {
+    if (user.bot) return;
+    if (reaction.emoji.name !== '🎯') return;
+    if (reaction.partial) { try { await reaction.fetch(); } catch (_) { return; } }
+    const wheel = activeWheels.get(reaction.message.channelId);
+    if (!wheel || wheel.messageId !== reaction.message.id) return;
+    wheel.participants.delete(user.id);
+    console.log(`[wheel] ${user.tag} keluar — total: ${wheel.participants.size}`);
+  } catch (e) {
+    console.warn('[wheel] reactionRemove error:', e.message);
+  }
+});
 
 // ============================================================
 // TOMBOL DELETE — hanya user pengirim yang bisa klik

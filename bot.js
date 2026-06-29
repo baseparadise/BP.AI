@@ -1287,15 +1287,12 @@ client.on('messageCreate', async (message) => {
         return;
       }
 
-      // Fisher-Yates shuffle lokal sebelum kirim ke contract
+      // Kumpulkan peserta — urutan dikirim ke contract v2 as-is
+      // Randomness sepenuhnya dari entropy on-chain (blockhash + timestamp + caller)
       let participants = members.map(m =>
         m.user.username + (m.user.discriminator && m.user.discriminator !== '0'
           ? '#' + m.user.discriminator : '')
       );
-      for (let i = participants.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [participants[i], participants[j]] = [participants[j], participants[i]];
-      }
 
       await statusMsg.edit(
         `⛓️ Memanggil smart contract di Base...\n` +
@@ -1322,17 +1319,6 @@ client.on('messageCreate', async (message) => {
           `${medals[w.position - 1] || '🏅'} **${w.winner}** — [Verifikasi TX #${w.raffleId}](${w.txUrl})`
         );
 
-        // Buat daftar peserta berurutan untuk verifikasi on-chain
-        // winnerIndex di basescan = posisi di list ini (mulai dari 0)
-        const MAX_DISPLAY = 30; // hindari melebihi batas Discord 1024 char per field
-        const participantLines = participants
-          .map((name, idx) => `\`${idx}\` ${name}`)
-          .slice(0, MAX_DISPLAY);
-        if (participants.length > MAX_DISPLAY) {
-          participantLines.push(`... dan ${participants.length - MAX_DISPLAY} lainnya`);
-        }
-        const participantField = participantLines.join('\n');
-
         const embed = {
           color: 0xf5a623,
           title: `🎉 Hasil Undian On-Chain — ${roleMention.name}`,
@@ -1347,8 +1333,8 @@ client.on('messageCreate', async (message) => {
               inline: false,
             },
             {
-              name: '📋 Daftar Peserta (urutan acak — cocokkan dengan winnerIndex di Basescan)',
-              value: participantField || '—',
+              name: '📋 Semua Peserta & Pemenang',
+              value: `Tersimpan permanen on-chain di [Basescan Logs](https://basescan.org/address/0xfABe5E941887b490eF6FaC127FD16553656f25aE#events) — nama pemenang & daftar peserta bisa dibaca langsung tanpa decoding.`,
               inline: false,
             },
           ],

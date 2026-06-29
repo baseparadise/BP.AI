@@ -555,6 +555,59 @@ function parseConvAmount(raw) {
   return parseFloat(s) * mult;
 }
 
+
+// ============================================================
+// TWITTER USERNAME HISTORY -- menggunakan memory.lol API
+// Contoh: "twit monad" atau "twit elonmusk,vitalik"
+// ============================================================
+function detectTwitterQuery(text) {
+  const m = text.match(/^twit\s+([a-zA-Z0-9_]+(?:,[a-zA-Z0-9_]+)*)$/i);
+  if (!m) return null;
+  return { usernames: m[1].split(',').map(u => u.trim()) };
+}
+
+async function fetchTwitterHistory(usernames) {
+  const query = usernames.join(',');
+  const url = 'https://api.memory.lol/v1/tw/' + encodeURIComponent(query);
+  const resp = await axios.get(url, { timeout: 10000 });
+  const accounts = (resp.data && resp.data.accounts) ? resp.data.accounts : [];
+
+  if (accounts.length === 0) {
+    return '\u274C Tidak ada data history Twitter untuk **@' + usernames.join(', @') + '**\n_(Akun tidak dikenali atau tidak ada dalam database memory.lol)_';
+  }
+
+  const lines = [];
+  for (const acc of accounts) {
+    const accId = acc.id_str || String(acc.id);
+    const screenNames = acc['screen_names'] || acc['screen-names'] || {};
+    const entries = Object.keys(screenNames).map(sn => {
+      const dates = screenNames[sn];
+      if (!dates || (Array.isArray(dates) && dates.length === 0)) {
+        return { sn, label: '_(tanggal tidak diketahui)_' };
+      }
+      if (Array.isArray(dates) && dates.length === 1) {
+        return { sn, label: 'terlihat: ' + dates[0] };
+      }
+      if (Array.isArray(dates) && dates.length === 2) {
+        return { sn, label: dates[0] + ' \u2192 ' + dates[1] };
+      }
+      return { sn, label: String(dates) };
+    });
+    // Urutkan: yang punya tanggal dulu
+    entries.sort((a, b) => {
+      const aHas = !a.label.includes('tanggal tidak diketahui') ? 1 : 0;
+      const bHas = !b.label.includes('tanggal tidak diketahui') ? 1 : 0;
+      return bHas - aHas;
+    });
+    const nameList = entries.map(e => '  \u2022 **@' + e.sn + '** \u2014 ' + e.label).join('\n');
+    lines.push('\uD83C\uDD94 ID: ' + accId + '\n' + nameList);
+  }
+
+  const header = '\uD83D\uDC26 **Twitter/X Username History** untuk **@' + usernames.join(', @') + '**\n'
+    + '_(data dari memory.lol \u2014 akses publik terbatas 60 hari terakhir)_\n\n';
+  return header + lines.join('\n\n');
+}
+
 // Buat tombol delete (hanya pemilik pesan yang bisa klik)
 function makeDeleteRow(userId) {
   const btn = new ButtonBuilder()
@@ -855,7 +908,24 @@ client.on('messageCreate', async (message) => {
           await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
       }
-      // === Chart command tanpa tag: C BTC / C ETH 4h / C ETH 4h 30 ===
+      // === Twitter history tanpa tag: "twit monad" ===
+      var noTagTwit = detectTwitterQuery(rawText);
+      if (noTagTwit) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var noTagTwitResult = await fetchTwitterHistory(noTagTwit.usernames);
+          await message.reply({
+            content: noTagTwitResult.slice(0, 2000),
+            components: [makeDeleteRow(message.author.id)],
+            flags: MessageFlags.SuppressEmbeds,
+          });
+        } catch (e) {
+          await message.reply('Gagal ambil data Twitter: ' + e.message).catch(() => {});
+        }
+        return;
+      }
+
+            // === Chart command tanpa tag: C BTC / C ETH 4h / C ETH 4h 30 ===
       var chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
       if (chartRawMatch) {
         await message.channel.sendTyping().catch(() => {});
@@ -958,7 +1028,24 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h / @bot C ETH 4h 30 ===
+    // === Twitter history dengan mention: "@bot twit monad" ===
+    var twitQ = detectTwitterQuery(question);
+    if (twitQ) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var twitResult = await fetchTwitterHistory(twitQ.usernames);
+        await message.reply({
+          content: twitResult.slice(0, 2000),
+          components: [makeDeleteRow(message.author.id)],
+          flags: MessageFlags.SuppressEmbeds,
+        });
+      } catch (e) {
+        await message.reply('Gagal ambil data Twitter: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+        // === Chart command dengan mention: @bot C BTC / @bot C ETH 4h / @bot C ETH 4h 30 ===
     const chartM = question.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
     if (chartM) {
       await message.channel.sendTyping().catch(() => {});

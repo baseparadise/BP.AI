@@ -1592,18 +1592,36 @@ async function runWheelSpin(wheelMsg, participants, starterId) {
   }
 
   // Pilih pemenang
-  const winnerId = ids[Math.floor(Math.random() * ids.length)];
+  const winnerIdx = Math.floor(Math.random() * ids.length);
+  const winnerId = ids[winnerIdx];
   const participantList = allMentions.slice(0, 20).join(', ')
     + (allMentions.length > 20 ? ` +${allMentions.length - 20} lainnya` : '');
 
+  // Bangun URL wheel visual (untuk Discord Activity iframe)
+  const baseUrl = process.env.RAILWAY_STATIC_URL || process.env.BASE_URL || '';
+  const wheelUrl = baseUrl
+    ? `${baseUrl.replace(/\\/+$/, '')}/wheel?n=${ids.length}&w=${winnerIdx}&title=Wheel+Undian`
+    : null;
+
+  const components = wheelUrl
+    ? [new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setLabel('🎡 Lihat Wheel Visual')
+          .setStyle(ButtonStyle.Link)
+          .setURL(wheelUrl)
+      )]
+    : [];
+
   await new Promise(r => setTimeout(r, 600));
-  await wheelMsg.edit(
-    `🎡 **WHEEL UNDIAN** — SELESAI! 🎉\n\n` +
-    `🏆 **PEMENANG: <@${winnerId}>** 🎊\n\n` +
-    `👥 Total peserta: **${ids.length} orang**\n` +
-    `Peserta: ${participantList}\n\n` +
-    `_Digagas oleh <@${starterId}>_`
-  ).catch(() => {});
+  await wheelMsg.edit({
+    content:
+      `🎡 **WHEEL UNDIAN** — SELESAI! 🎉\n\n` +
+      `🏆 **PEMENANG: <@${winnerId}>** 🎊\n\n` +
+      `👥 Total peserta: **${ids.length} orang**\n` +
+      `Peserta: ${participantList}\n\n` +
+      `_Digagas oleh <@${starterId}>_`,
+    components,
+  }).catch(() => {});
 }
 
 async function startWheelGame(message, durationMins) {

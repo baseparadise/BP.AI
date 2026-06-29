@@ -1,5 +1,6 @@
 [build]
 buildCommand = "echo 'skip build'"
+installCommand = "pnpm install --no-frozen-lockfile --prefer-offline"
 
 [deploy]
 startCommand = "node start.js"

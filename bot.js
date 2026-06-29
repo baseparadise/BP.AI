@@ -568,43 +568,102 @@ function detectTwitterQuery(text) {
 
 async function fetchTwitterHistory(usernames) {
   const query = usernames.join(',');
-  const url = 'https://api.memory.lol/v1/tw/' + encodeURIComponent(query);
-  const resp = await axios.get(url, { timeout: 10000 });
-  const accounts = (resp.data && resp.data.accounts) ? resp.data.accounts : [];
 
-  if (accounts.length === 0) {
-    return '\u274C Tidak ada data history Twitter untuk **@' + usernames.join(', @') + '**\n_(Akun tidak dikenali atau tidak ada dalam database memory.lol)_';
+  // Jika MEMORYLOL_TOKEN diset → pakai POST untuk akses penuh (jika akun diapprove).
+  // Cara dapat token: jalankan "twit login" di DM bot, lalu simpan token ke env MEMORYLOL_TOKEN.
+  const mlToken = process.env.MEMORYLOL_TOKEN;
+  let resp;
+  if (mlToken) {
+    resp = await axios.post(
+      'https://api.memory.lol/v1/tw/' + encodeURIComponent(query),
+      'token=' + encodeURIComponent(mlToken),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 12000 }
+    );
+  } else {
+    resp = await axios.get(
+      'https://api.memory.lol/v1/tw/' + encodeURIComponent(query),
+      { timeout: 10000 }
+    );
   }
 
+  const accounts = (resp.data && resp.data.accounts) ? resp.data.accounts : [];
+
+  // Coba Wayback Machine sebagai sumber tambahan (earliest known snapshot)
+  let wbEarliest = {};
+  if (usernames.length <= 2) {
+    for (const uname of usernames) {
+      try {
+        const wbResp = await axios.get('https://web.archive.org/cdx/search/cdx', {
+          params: {
+            url: 'twitter.com/' + uname,
+            output: 'json',
+            fl: 'timestamp',
+            filter: 'statuscode:200',
+            limit: 1,
+            from: '20060101',
+          },
+          timeout: 7000,
+        });
+        const rows = wbResp.data;
+        // rows[0] = header ["timestamp"], rows[1] = first match
+        if (Array.isArray(rows) && rows.length >= 2) {
+          const ts = rows[1][0]; // "20110401120000"
+          const y = ts.slice(0,4), mo = ts.slice(4,6), d = ts.slice(6,8);
+          wbEarliest[uname.toLowerCase()] = y + '-' + mo + '-' + d;
+        }
+      } catch (_) { /* Wayback timeout — skip */ }
+    }
+  }
+
+  if (accounts.length === 0) {
+    let msg = '\u274C Tidak ada data history Twitter untuk **@' + usernames.join(', @') + '**\n';
+    msg += '_(Akun tidak dikenali dalam database memory.lol)_';
+    // Tambahkan info Wayback Machine jika ada
+    for (const [uname, date] of Object.entries(wbEarliest)) {
+      msg += '\n\n\uD83D\uDDC4\uFE0F **Wayback Machine**: username @' + uname + ' pertama diarsipkan sekitar **' + date + '**';
+    }
+    return msg;
+  }
+
+  const isFullAccess = !!mlToken;
   const lines = [];
+
   for (const acc of accounts) {
     const accId = acc.id_str || String(acc.id);
     const screenNames = acc['screen_names'] || acc['screen-names'] || {};
     const entries = Object.keys(screenNames).map(sn => {
       const dates = screenNames[sn];
       if (!dates || (Array.isArray(dates) && dates.length === 0)) {
-        return { sn, label: '_(tanggal tidak diketahui)_' };
+        return { sn, label: '_(tanggal tidak diketahui)_', hasDate: false };
       }
       if (Array.isArray(dates) && dates.length === 1) {
-        return { sn, label: 'terlihat: ' + dates[0] };
+        return { sn, label: 'terlihat: ' + dates[0], hasDate: true };
       }
       if (Array.isArray(dates) && dates.length === 2) {
-        return { sn, label: dates[0] + ' \u2192 ' + dates[1] };
+        return { sn, label: dates[0] + ' \u2192 ' + dates[1], hasDate: true };
       }
-      return { sn, label: String(dates) };
+      return { sn, label: String(dates), hasDate: false };
     });
-    // Urutkan: yang punya tanggal dulu
-    entries.sort((a, b) => {
-      const aHas = !a.label.includes('tanggal tidak diketahui') ? 1 : 0;
-      const bHas = !b.label.includes('tanggal tidak diketahui') ? 1 : 0;
-      return bHas - aHas;
-    });
+    entries.sort((a, b) => (b.hasDate ? 1 : 0) - (a.hasDate ? 1 : 0));
     const nameList = entries.map(e => '  \u2022 **@' + e.sn + '** \u2014 ' + e.label).join('\n');
-    lines.push('\uD83C\uDD94 ID: ' + accId + '\n' + nameList);
+    let block = '\uD83C\uDD94 ID: ' + accId + '\n' + nameList;
+
+    // Tambahkan Wayback info jika relevan
+    for (const [uname, date] of Object.entries(wbEarliest)) {
+      const matchedHere = Object.keys(screenNames).some(sn => sn.toLowerCase() === uname.toLowerCase());
+      if (matchedHere) {
+        block += '\n  \uD83D\uDDC4\uFE0F Wayback: username @' + uname + ' diarsipkan pertama ~**' + date + '**';
+      }
+    }
+    lines.push(block);
   }
 
+  const accessNote = isFullAccess
+    ? '_(akses penuh \u2014 full history 12 tahun)_'
+    : '_(akses publik \u2014 60 hari terakhir | ketik **twit login** di DM untuk akses penuh)_';
+
   const header = '\uD83D\uDC26 **Twitter/X Username History** untuk **@' + usernames.join(', @') + '**\n'
-    + '_(data dari memory.lol \u2014 akses publik terbatas 60 hari terakhir)_\n\n';
+    + accessNote + '\n\n';
   return header + lines.join('\n\n');
 }
 
@@ -1028,7 +1087,79 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // === Twitter history dengan mention: "@bot twit monad" ===
+    // === Twitter login: "twit login" di DM untuk dapatkan token memory.lol ===
+    if (isDMOwner && question.toLowerCase() === 'twit login') {
+      try {
+        const codeResp = await axios.post(
+          'https://github.com/login/device/code',
+          'client_id=b8ab5a8c1a2745d514b7',
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' }, timeout: 10000 }
+        );
+        const { device_code, user_code, verification_uri, expires_in, interval } = codeResp.data;
+        await message.reply(
+          '\uD83D\uDD12 **Login ke memory.lol untuk akses full history**\n\n'
+          + '1. Buka: **' + verification_uri + '**\n'
+          + '2. Masukkan kode: **' + user_code + '**\n'
+          + '3. Klik Authorize\n'
+          + '4. Balik ke sini dan ketik **twit token** (bot akan cek otomatis)\n\n'
+          + '_(Kode berlaku ' + Math.round(expires_in / 60) + ' menit)_'
+        );
+        // Simpan device_code sementara di memory untuk polling
+        if (!global._twitDeviceFlow) global._twitDeviceFlow = {};
+        global._twitDeviceFlow[message.author.id] = { device_code, interval: interval || 5, expires: Date.now() + expires_in * 1000 };
+      } catch (e) {
+        await message.reply('\u274C Gagal mulai login: ' + e.message);
+      }
+      return;
+    }
+
+    // === Twitter token poll: "twit token" setelah authorize ===
+    if (isDMOwner && question.toLowerCase() === 'twit token') {
+      const flow = global._twitDeviceFlow && global._twitDeviceFlow[message.author.id];
+      if (!flow) {
+        await message.reply('\u274C Tidak ada sesi login aktif. Ketik **twit login** terlebih dahulu.');
+        return;
+      }
+      if (Date.now() > flow.expires) {
+        await message.reply('\u23F0 Kode sudah kedaluwarsa. Ketik **twit login** untuk mulai ulang.');
+        return;
+      }
+      try {
+        const tokenResp = await axios.post(
+          'https://github.com/login/oauth/access_token',
+          'device_code=' + flow.device_code + '&client_id=b8ab5a8c1a2745d514b7&grant_type=urn:ietf:params:oauth:grant-type:device_code',
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' }, timeout: 10000 }
+        );
+        const { access_token, error } = tokenResp.data;
+        if (error === 'authorization_pending') {
+          await message.reply('\u23F3 Belum diauthorize. Selesaikan langkah di browser dulu, lalu ketik **twit token** lagi.');
+          return;
+        }
+        if (!access_token) {
+          await message.reply('\u274C Gagal ambil token: ' + (error || 'unknown error'));
+          return;
+        }
+        // Coba autentikasi ke memory.lol
+        const mlResp = await axios.post(
+          'https://api.memory.lol/v1/login/status',
+          'token=' + encodeURIComponent(access_token),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 10000 }
+        ).catch(() => null);
+        delete global._twitDeviceFlow[message.author.id];
+        await message.reply(
+          '\u2705 Token berhasil didapat!\n\n'
+          + 'Set environment variable berikut di Railway/Fly.io/host kamu:\n'
+          + '```\nMEMORYLOL_TOKEN=' + access_token + '\n```\n'
+          + '\u26A0\uFE0F Jika akunmu **belum diapprove** oleh pemilik memory.lol, akses tetap terbatas 60 hari.\n'
+          + 'Hubungi [@travisbrown](https://twitter.com/travisbrown) untuk minta full access.'
+        );
+      } catch (e) {
+        await message.reply('\u274C Error: ' + e.message);
+      }
+      return;
+    }
+
+        // === Twitter history dengan mention: "@bot twit monad" ===
     var twitQ = detectTwitterQuery(question);
     if (twitQ) {
       await message.channel.sendTyping().catch(() => {});

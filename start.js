@@ -6,6 +6,20 @@
 //   PORT + 1   → bot.js   (health check internal, tidak perlu di-expose)
 //   PORT + 2   → userbot.js (internal)
 
+// [FIX] Auto-install ethers jika belum ada (terjadi saat Railway pakai build cache lama)
+const { execSync } = require('child_process');
+try {
+  require.resolve('ethers');
+} catch (_) {
+  console.log('[start] ethers belum terinstall, installing...');
+  try {
+    execSync('npm install ethers --no-save --quiet', { stdio: 'inherit' });
+    console.log('[start] ✅ ethers berhasil diinstall');
+  } catch (e) {
+    console.warn('[start] ⚠️  Gagal install ethers:', e.message, '— fitur !shuffle tidak akan berfungsi');
+  }
+}
+
 const { spawn } = require('child_process');
 
 function run(script, name, env = {}) {

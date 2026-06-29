@@ -1598,7 +1598,7 @@ async function runWheelSpin(wheelMsg, participants, starterId) {
     + (allMentions.length > 20 ? ` +${allMentions.length - 20} lainnya` : '');
 
   // Bangun URL wheel visual (untuk Discord Activity iframe)
-  const baseUrl = process.env.RAILWAY_STATIC_URL || process.env.BASE_URL || '';
+  const baseUrl = process.env.BASE_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? 'https://' + process.env.RAILWAY_PUBLIC_DOMAIN : '') || '';
   const wheelUrl = baseUrl
     ? `${baseUrl.replace(/\/+$/, '')}/wheel?n=${ids.length}&w=${winnerIdx}&title=Wheel+Undian`
     : null;

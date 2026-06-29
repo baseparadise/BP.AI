@@ -28,6 +28,7 @@ const {
   commitGitHubFile,
 } = require('./lib/ai');
 const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
+const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
 
 // ============================================================
 // KONFIGURASI
@@ -1198,6 +1199,148 @@ client.on('messageCreate', async (message) => {
       await message.reply(hadHistory
         ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
         : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === Perintah !shuffle role @Role [jumlah] ===
+    if (question.trim().toLowerCase().startsWith('!shuffle')) {
+      const isAdmin = message.member?.permissions?.has('ManageRoles')
+        || message.author.id === OWNER_ID;
+      if (!isAdmin) {
+        await message.reply('❌ Hanya admin/owner yang bisa pakai `!shuffle`.');
+        return;
+      }
+
+      const parts = question.trim().split(/s+/);
+
+      // !shuffle info — cek wallet bot
+      if (parts[1] === 'info') {
+        if (!isShuffleConfigured()) {
+          await message.reply('⚙️ Set `BOT_PRIVATE_KEY` dan `SHUFFLE_CONTRACT` di Railway env dulu.');
+          return;
+        }
+        try {
+          const info = await getWalletInfo();
+          await message.reply(
+            `🤖 **Wallet Bot (Base)**\n` +
+            `• \`${info.address}\`\n` +
+            `• Balance: ${info.balanceEth} ETH\n` +
+            `• [Lihat di Basescan](${info.explorerUrl})`
+          );
+        } catch (e) {
+          await message.reply(`❌ Error: ${e.message}`);
+        }
+        return;
+      }
+
+      // !shuffle help atau salah syntax
+      if (parts[1] !== 'role') {
+        await message.reply(
+          '📖 **Cara pakai !shuffle:**\n' +
+          '`!shuffle role @NamaRole` — undian 1 pemenang\n' +
+          '`!shuffle role @NamaRole 3` — undian 3 pemenang\n' +
+          '`!shuffle info` — cek wallet & saldo bot'
+        );
+        return;
+      }
+
+      // !shuffle role @Role [count]
+      const roleMention = message.mentions.roles.first();
+      if (!roleMention) {
+        await message.reply('❌ Mention role dulu. Contoh: `!shuffle role @Member`');
+        return;
+      }
+      const numWinners = Math.min(parseInt(parts[3]) || 1, 10);
+
+      if (!isShuffleConfigured()) {
+        await message.reply(
+          '⚙️ Set `BOT_PRIVATE_KEY` dan `SHUFFLE_CONTRACT` di Railway env dulu.\n' +
+          'Contract yang dipakai: `0xfABe5E941887b490eF6FaC127FD16553656f25aE` (Base)'
+        );
+        return;
+      }
+
+      const statusMsg = await message.reply(`⏳ Mengambil daftar member role **${roleMention.name}**...`);
+      try {
+        await message.guild.members.fetch();
+      } catch (e) {
+        console.warn('[shuffle] guild.members.fetch error:', e.message);
+      }
+
+      const members = message.guild.members.cache.filter(m =>
+        m.roles.cache.has(roleMention.id) && !m.user.bot
+      );
+
+      if (members.size === 0) {
+        await statusMsg.edit(`❌ Tidak ada member non-bot dengan role **${roleMention.name}**.`);
+        return;
+      }
+
+      // Fisher-Yates shuffle lokal sebelum kirim ke contract
+      let participants = members.map(m =>
+        m.user.username + (m.user.discriminator && m.user.discriminator !== '0'
+          ? '#' + m.user.discriminator : '')
+      );
+      for (let i = participants.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [participants[i], participants[j]] = [participants[j], participants[i]];
+      }
+
+      await statusMsg.edit(
+        `⛓️ Memanggil smart contract di Base...\n` +
+        `📋 **${members.size}** peserta | 🏆 **${numWinners}** pemenang`
+      );
+
+      try {
+        const winners = [];
+        const picked  = new Set();
+
+        for (let i = 0; i < numWinners; i++) {
+          const available = participants.filter((_, idx) => !picked.has(idx));
+          if (!available.length) break;
+
+          const result = await pickWinnerOnChain(available, message.guild.id, roleMention.name);
+          winners.push({ ...result, position: i + 1 });
+
+          const origIdx = participants.indexOf(result.winner);
+          if (origIdx !== -1) picked.add(origIdx);
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const lines  = winners.map(w =>
+          `${medals[w.position - 1] || '🏅'} **${w.winner}** — [Verifikasi TX #${w.raffleId}](${w.txUrl})`
+        );
+
+        const embed = {
+          color: 0xf5a623,
+          title: `🎉 Hasil Undian On-Chain — ${roleMention.name}`,
+          description: lines.join('\n'),
+          fields: [
+            { name: '👥 Total Peserta', value: `${members.size}`, inline: true },
+            { name: '🏆 Pemenang',      value: `${winners.length}`, inline: true },
+            { name: '⛓️ Network',       value: 'Base Mainnet', inline: true },
+            {
+              name: '🔍 Smart Contract',
+              value: `[\`0xfABe...25aE\`](https://basescan.org/address/0xfABe5E941887b490eF6FaC127FD16553656f25aE)`,
+              inline: false,
+            },
+          ],
+          footer: {
+            text: `Block #${winners.at(-1).blockNumber} • Dipilih secara transparan di blockchain Base`,
+          },
+          timestamp: new Date().toISOString(),
+        };
+
+        console.log(`[shuffle] ✅ Raffle selesai: role=${roleMention.name} peserta=${members.size} pemenang=${winners.length}`);
+        await statusMsg.edit({ content: '', embeds: [embed] });
+      } catch (err) {
+        console.error('[shuffle] Error:', err.message);
+        await statusMsg.edit(
+          `❌ **Gagal memanggil smart contract:**\n\`${err.message}\`\n\n` +
+          `• Cek saldo ETH: \`!shuffle info\`\n` +
+          `• Pastikan \`BOT_PRIVATE_KEY\` & \`SHUFFLE_CONTRACT\` sudah diset di Railway`
+        );
+      }
       return;
     }
 

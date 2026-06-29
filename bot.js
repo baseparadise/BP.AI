@@ -1600,7 +1600,7 @@ async function runWheelSpin(wheelMsg, participants, starterId) {
   // Bangun URL wheel visual (untuk Discord Activity iframe)
   const baseUrl = process.env.RAILWAY_STATIC_URL || process.env.BASE_URL || '';
   const wheelUrl = baseUrl
-    ? `${baseUrl.replace(/\\/+$/, '')}/wheel?n=${ids.length}&w=${winnerIdx}&title=Wheel+Undian`
+    ? `${baseUrl.replace(/\/+$/, '')}/wheel?n=${ids.length}&w=${winnerIdx}&title=Wheel+Undian`
     : null;
 
   const components = wheelUrl

@@ -226,6 +226,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.GuildMembers, // wajib untuk !shuffle — aktifkan juga di Discord Dev Portal
   ],
   // Partials.Message + Partials.Interaction wajib agar interactionCreate
   // tetap terpicu pada pesan yang belum di-cache (termasuk tombol di guild channel).
@@ -1263,9 +1264,18 @@ client.on('messageCreate', async (message) => {
 
       const statusMsg = await message.reply(`⏳ Mengambil daftar member role **${roleMention.name}**...`);
       try {
-        await message.guild.members.fetch();
+        // Fetch hanya member yang punya role ini — jauh lebih cepat dari fetch semua member
+        // Timeout 20 detik agar tidak hang selamanya jika GuildMembers intent belum aktif
+        await Promise.race([
+          message.guild.members.fetch({ withPresences: false }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000)),
+        ]);
       } catch (e) {
-        console.warn('[shuffle] guild.members.fetch error:', e.message);
+        if (e.message === 'timeout') {
+          console.warn('[shuffle] guild.members.fetch timeout — pastikan Server Members Intent aktif di Discord Dev Portal');
+        } else {
+          console.warn('[shuffle] guild.members.fetch error:', e.message);
+        }
       }
 
       const members = message.guild.members.cache.filter(m =>

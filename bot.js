@@ -1144,7 +1144,8 @@ client.on('messageCreate', async (message) => {
         }
         return;
       }
-      return;
+      // !shuffle bisa dipakai tanpa mention — lanjut ke handler utama
+      if (!rawText.toLowerCase().startsWith('!shuffle')) return;
     }
 
     if (isDM && message.author.id !== OWNER_ID) {
@@ -1211,7 +1212,7 @@ client.on('messageCreate', async (message) => {
         return;
       }
 
-      const parts = question.trim().split(/s+/);
+      const parts = question.trim().split(/\s+/);
 
       // !shuffle info — cek wallet bot
       if (parts[1] === 'info') {

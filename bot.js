@@ -1130,11 +1130,9 @@ client.on('messageCreate', async (message) => {
           reply = '✅ **Claude API ON** mulai sekarang di channel ini.';
         } else if (!wantOn && wasOn) {
           conduitDisabledChannels.add(message.channelId);
-          reply = '🔴 **Claude API OFF** mulai sekarang di channel ini.
-_DM owner tetap aktif._';
+          reply = '🔴 **Claude API OFF** mulai sekarang di channel ini.\n_DM owner tetap aktif._';
         } else {
-          reply = '🔴 **Claude API sudah OFF** di channel ini.
-_DM owner tetap aktif._';
+          reply = '🔴 **Claude API sudah OFF** di channel ini.\n_DM owner tetap aktif._';
         }
         await message.reply({ content: reply, components: [row] }).catch(() => {});
         return;

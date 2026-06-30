@@ -26,6 +26,8 @@ const {
   getDefaultBranch,
   getGitHubFileContent,
   commitGitHubFile,
+  PROVIDERS,
+  PROVIDER_ORDER,
 } = require('./lib/ai');
 const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
 const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
@@ -50,6 +52,10 @@ const MAX_TOTAL_BYTES_COMBINED = 30 * 1024; // 30KB total sebelum split satu-per
 
 // Discord membatasi maks 10 file per reply.
 const DISCORD_MAX_FILES = 10;
+
+// Channel ID yang conduit-nya di-OFF-kan owner via !claude off.
+// DM owner selalu menggunakan urutan provider default (conduit tetap aktif).
+const conduitDisabledChannels = new Set();
 
 // Pola yang mengindikasikan AI memberikan respons palsu/hallusinasi.
 // [FIX BARU] Deteksi konten yang tidak berguna agar bisa di-retry.
@@ -273,11 +279,13 @@ function makeFile(content, filename) {
   return new AttachmentBuilder(buffer, { name: filename });
 }
 
-async function downloadAttachmentText(attachment) {
-  if (attachment.size > MAX_FILE_BYTES) {
+async function downloadAttachmentText(attachment, isOwner = false) {
+  // Owner: tidak ada batas ukuran, timeout 120 detik untuk file besar
+  if (!isOwner && attachment.size > MAX_FILE_BYTES) {
     throw new Error(`"${attachment.name}" terlalu besar (${Math.round(attachment.size / 1024)}KB, maks ${MAX_FILE_BYTES / 1024}KB).`);
   }
-  const { data } = await axios.get(attachment.url, { responseType: 'text', timeout: 15000 });
+  const timeout = isOwner ? 120000 : 15000;
+  const { data } = await axios.get(attachment.url, { responseType: 'text', timeout });
   return String(data);
 }
 
@@ -405,27 +413,27 @@ function splitMessage(text, maxLen = DISCORD_MAX_CHARS) {
   return chunks.filter(c => c.length > 0);
 }
 
-async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
-  // HARD CAP: max 2 pesan Discord = 3900 karakter
-  var MAX_REPLY = 3900;
-  var safe = text;
-  if (safe.length > MAX_REPLY) {
-    var cut = safe.lastIndexOf('\n', MAX_REPLY - 1);
-    safe = safe.slice(0, cut > 2000 ? cut : MAX_REPLY - 1) + '\n…';
-  }
-  // 1960 agar prefix "*(lanjutan X/Y)*\n" tidak dorong total > 2000
-  const chunks = splitMessage(safe, 1960);
-  if (chunks.length === 0) return;
+async async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
+    // Max 4 pesan Discord × 1950 karakter = 7800 karakter total
+    const MAX_REPLY = 7800;
+    const CHUNK_SIZE = 1950;
+    var safe = (text || '').trim();
+    if (safe.length > MAX_REPLY) {
+      var cut = safe.lastIndexOf('\n', MAX_REPLY - 1);
+      safe = safe.slice(0, cut > 5000 ? cut : MAX_REPLY - 1) + '\n…';
+    }
+    const chunks = splitMessage(safe, CHUNK_SIZE);
+    if (chunks.length === 0) return;
 
-  await message.reply({ content: chunks[0].slice(0, 2000), flags });
+    await message.reply({ content: chunks[0].slice(0, 2000), flags });
 
-  for (let i = 1; i < chunks.length; i++) {
-    await new Promise(r => setTimeout(r, 300));
-    const prefix = '*(lanjutan ' + (i + 1) + '/' + chunks.length + ')*\n';
-    const body = chunks[i].slice(0, 2000 - prefix.length);
-    await message.channel.send({ content: prefix + body, flags });
+    for (let i = 1; i < chunks.length; i++) {
+      await new Promise(r => setTimeout(r, 300));
+      const prefix = `*(lanjutan ${i + 1}/${chunks.length})*\n`;
+      const body = chunks[i].slice(0, 2000 - prefix.length);
+      await message.channel.send({ content: prefix + body, flags });
+    }
   }
-}
 
 // ============================================================
 // CRYPTO CONVERSION -- menggunakan CoinGecko API
@@ -996,7 +1004,7 @@ async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
       + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
       + `\`\`\`\n${oldContent}\n\`\`\``;
 
-    const { text } = await askGemini(prompt, history, isDMOwner);
+    const { text } = await askGemini(prompt, history, isDMOwner, skipProviders);
 
     // [FIX] Deteksi hallusinasi di respons GitHub edit
     if (containsHallucination(text)) {
@@ -1050,7 +1058,7 @@ async function processSingleFile(message, att, content, question, history, isDMO
 
   const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
 
-  const { text } = await askGemini(finalQuestion, history, isDMOwner);
+  const { text } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
 
   // Deteksi hallusinasi
   if (containsHallucination(text)) {
@@ -1095,6 +1103,75 @@ client.on('messageCreate', async (message) => {
 
     const isDM = !message.guild;
     const mentioned = message.mentions.users.has(client.user.id);
+
+    // === Owner commands tanpa tag (no @mention) ===
+    if (!mentioned && !isDM && message.author.id === OWNER_ID) {
+      const rawCmd = message.content.trim().toLowerCase();
+
+      // !claude on / !claude off
+      if (rawCmd === '!claude on' || rawCmd === '!claude off') {
+        const wantOn = rawCmd === '!claude on';
+        const wasOn  = !conduitDisabledChannels.has(message.channelId);
+        const conduitReady = !!(PROVIDERS && PROVIDERS.conduit && PROVIDERS.conduit.keys && PROVIDERS.conduit.keys.length
+          && PROVIDERS.conduit.models && PROVIDERS.conduit.models.length);
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('del_' + message.author.id)
+            .setLabel('🗑️ Hapus')
+            .setStyle(ButtonStyle.Danger)
+        );
+        let reply;
+        if (!conduitReady) {
+          reply = '⚠️ **Conduit API belum dikonfigurasi.** Set CONDUIT_API_KEY dan CONDUIT_MODELS di Railway.';
+        } else if (wantOn && wasOn) {
+          reply = '⚡ **Claude API sudah ON** di channel ini.';
+        } else if (wantOn && !wasOn) {
+          conduitDisabledChannels.delete(message.channelId);
+          reply = '✅ **Claude API ON** mulai sekarang di channel ini.';
+        } else if (!wantOn && wasOn) {
+          conduitDisabledChannels.add(message.channelId);
+          reply = '🔴 **Claude API OFF** mulai sekarang di channel ini.
+_DM owner tetap aktif._';
+        } else {
+          reply = '🔴 **Claude API sudah OFF** di channel ini.
+_DM owner tetap aktif._';
+        }
+        await message.reply({ content: reply, components: [row] }).catch(() => {});
+        return;
+      }
+
+      // !provider — tampilkan status semua provider
+      if (rawCmd === '!provider') {
+        const providerStatus = ['conduit', 'groq', 'gemini', 'openai'].map((p) => {
+          const cfg = PROVIDERS && PROVIDERS[p];
+          const ready = !!(cfg && cfg.keys && cfg.keys.length && cfg.models && cfg.models.length);
+          const offNote = (p === 'conduit' && conduitDisabledChannels.has(message.channelId)) ? ' _(off di channel ini)_' : '';
+          return ready
+            ? '✅ **' + p + '**' + offNote
+            : '❌ **' + p + '** _(belum dikonfigurasi)_';
+        });
+        const activeOrder = PROVIDER_ORDER.filter((p) => {
+          const cfg = PROVIDERS && PROVIDERS[p];
+          return cfg && cfg.keys && cfg.keys.length && cfg.models && cfg.models.length;
+        }).join(' → ');
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('del_' + message.author.id)
+            .setLabel('🗑️ Hapus')
+            .setStyle(ButtonStyle.Danger)
+        );
+        await message.reply({
+          content: '**📡 Status Provider AI**
+' + providerStatus.join('
+')
+            + '
+
+**Urutan fallback aktif:** ' + (activeOrder || '_(tidak ada provider aktif)_'),
+          components: [row],
+        }).catch(() => {});
+        return;
+      }
+    }
 
     // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
     if (!mentioned && !isDM) {
@@ -1172,6 +1249,8 @@ client.on('messageCreate', async (message) => {
 
     const isDMOwner = isDM && message.author.id === OWNER_ID;
     const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
+    // Conduit dinonaktifkan di channel ini? (via !claude off) — DM owner selalu pakai default
+    const skipProviders = (!isDMOwner && conduitDisabledChannels.has(message.channelId)) ? ['conduit'] : [];
 
     // Bootstrap history dari Discord saat pertama kali aktif setelah restart
     await bootstrapHistory(historyKey, message.channel, isDMOwner);
@@ -1560,7 +1639,7 @@ client.on('messageCreate', async (message) => {
       const loadedFiles = [];
       for (const att of fileAttachments) {
         try {
-          const content = await downloadAttachmentText(att);
+          const content = await downloadAttachmentText(att, isDMOwner);
           loadedFiles.push({ att, content });
         } catch (e) {
           await message.reply(`⚠️ Gagal membaca **${att.name}**: ${e.message}`).catch(() => {});
@@ -1573,8 +1652,9 @@ client.on('messageCreate', async (message) => {
 
       // Jika total file > 30KB ATAU ada lebih dari 1 file yang masing-masing > 15KB,
       // proses satu per satu untuk hindari context overflow
-      const shouldSplitProcess = totalSize > MAX_TOTAL_BYTES_COMBINED
-        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024));
+      // Owner tidak ada batas — proses gabung selalu
+      const shouldSplitProcess = !isDMOwner && (totalSize > MAX_TOTAL_BYTES_COMBINED
+        || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024)));
 
       if (shouldSplitProcess && isDMOwner) {
         // Mode split: proses tiap file terpisah
@@ -1610,7 +1690,7 @@ client.on('messageCreate', async (message) => {
       const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
       const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
 
-      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
 
       // [FIX] Deteksi hallusinasi sebelum proses respons
       if (containsHallucination(text)) {
@@ -1650,7 +1730,7 @@ client.on('messageCreate', async (message) => {
     }
 
     const history = getHistoryForAI(historyKey, isDMOwner);
-    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
 
     await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 

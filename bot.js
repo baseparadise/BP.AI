@@ -1159,12 +1159,12 @@ client.on('messageCreate', async (message) => {
             .setStyle(ButtonStyle.Danger)
         );
         await message.reply({
-          content: '**📡 Status Provider AI**
-' + providerStatus.join('
-')
-            + '
+          content: `**📡 Status Provider AI**
+` + providerStatus.join(`
+`)
+            + `
 
-**Urutan fallback aktif:** ' + (activeOrder || '_(tidak ada provider aktif)_'),
+**Urutan fallback aktif:** ` + (activeOrder || '_(tidak ada provider aktif)_'),
           components: [row],
         }).catch(() => {});
         return;

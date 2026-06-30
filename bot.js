@@ -413,7 +413,7 @@ function splitMessage(text, maxLen = DISCORD_MAX_CHARS) {
   return chunks.filter(c => c.length > 0);
 }
 
-async async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
+async function sendLongReply(message, text, flags = MessageFlags.SuppressEmbeds) {
     // Max 4 pesan Discord × 1950 karakter = 7800 karakter total
     const MAX_REPLY = 7800;
     const CHUNK_SIZE = 1950;

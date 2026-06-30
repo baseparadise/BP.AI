@@ -877,16 +877,29 @@ async function fetchCoinPrice(pq) {
     + '&precision=8';
   var resp = await axios.get(url, { headers: headers, timeout: 8000 });
   var d = resp.data[coinId];
-  if (!d) throw new Error('Data tidak ditemukan');
   var sym = pq.sym.toUpperCase();
+  // Jika CoinGecko return kosong (token ada tapi tanpa data harga), fallback ke DexScreener
+  if (!d || d.usd == null) {
+    var dexInfo = await resolveDexPrice(pq.sym);
+    if (!dexInfo) throw new Error('Harga **' + sym + '** tidak tersedia di CoinGecko maupun DexScreener.');
+    var dexUsd = dexInfo.priceUsd;
+    var dexUsdStr = dexUsd >= 1
+      ? dexUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })
+      : dexUsd.toPrecision(6);
+    return '**$' + sym + '**\n'
+      + 'USD: $' + dexUsdStr + '\n'
+      + 'Pair: ' + dexInfo.pair + ' (' + dexInfo.dex + '/' + dexInfo.chain + ')\n'
+      + '_(via DexScreener)_';
+  }
   var usd = d.usd;
   var idr = d.idr;
   var chg = d.usd_24h_change;
   var mcap = d.usd_market_cap;
   var chgStr = chg != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%' : 'N/A';
-  var usdStr = usd >= 1 ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : usd.toPrecision(6);
-  var idrStr = 'Rp ' + Math.round(idr).toLocaleString('id-ID');
+  var usdStr = usd == null ? 'N/A' : (usd >= 1
+    ? usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : usd.toPrecision(6));
+  var idrStr = idr == null ? 'N/A' : 'Rp ' + Math.round(idr).toLocaleString('id-ID');
   var mcapStr = mcap ? '$' + (mcap / 1e9).toFixed(2) + 'B' : 'N/A';
   var arrow = chg != null ? (chg >= 0 ? '**UP**' : '**DOWN**') : '';
   return '**$' + sym + '** ' + arrow + ' ' + chgStr + ' (24 jam)\n'

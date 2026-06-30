@@ -34,7 +34,7 @@ const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib
 // KONFIGURASI
 // ============================================================
 
-const OWNER_ID = '1292088584429637707';
+const OWNER_ID = process.env.OWNER_ID || '1292088584429637707'; // Set OWNER_ID di Railway env
 
 
 const MAX_FILES_DM    = 10;
@@ -54,16 +54,27 @@ const DISCORD_MAX_FILES = 10;
 // Pola yang mengindikasikan AI memberikan respons palsu/hallusinasi.
 // [FIX BARU] Deteksi konten yang tidak berguna agar bisa di-retry.
 const HALLUCINATION_PATTERNS = [
-  /https?:\/\/github\.com\/your[-_]?repo/i,
-  /github\.com\/your[-_]?project/i,
-  /\byour[-_]?repo\b/i,
-  /\[nama[-_ ]?repo\]/i,
-  /silakan\s+kunjungi\s+tautan/i,
-  /karena\s+keterbatasan\s+platform/i,
-  /saya\s+tidak\s+dapat\s+mengirim\s+file/i,
-  /saya\s+tidak\s+bisa\s+mengirim\s+file/i,
-];
-
+    // === Bahasa Indonesia ===
+    /https?:\/\/github\.com\/your[-_]?repo/i,
+    /github\.com\/your[-_]?project/i,
+    /\byour[-_]?repo\b/i,
+    /\[nama[-_ ]?repo\]/i,
+    /silakan\s+kunjungi\s+tautan/i,
+    /karena\s+keterbatasan\s+platform/i,
+    /saya\s+tidak\s+dapat\s+mengirim\s+file/i,
+    /saya\s+tidak\s+bisa\s+mengirim\s+file/i,
+    // === Bahasa Inggris ===
+    /https?:\/\/github\.com\/(user|username|yourusername|owner)\//i,
+    /\byour[_-]?project\b/i,
+    /\[your[-_]?repo(sitory)?\]/i,
+    /due\s+to\s+(platform\s+)?limitations?/i,
+    /i\s+cannot\s+(send|provide|attach)\s+(a\s+)?file/i,
+    /i\s+am\s+unable\s+to\s+(send|provide|attach)/i,
+    /unfortunately[,\s]+i\s+can'?t\s+(send|provide)/i,
+    /please\s+visit\s+the\s+link/i,
+    /as\s+an\s+ai[,\s]+i\s+(don'?t|cannot|can'?t)\s+have\s+access/i,
+  ];
+  
 const HISTORY_FILE = path.join(require('os').tmpdir(), 'bp_ai_history.json');
 
 // ============================================================
@@ -164,14 +175,19 @@ function getHistoryForAI(key, isDMOwner) {
 
 // Bootstrap: muat ulang konteks dari Discord saat restart
 // sehingga history tidak hilang meski /tmp terhapus.
-const bootstrappedChannels = new Set();
+const bootstrapPromises = new Map(); // key → Promise (fix race condition)
 
-async function bootstrapHistory(key, channel, isDMOwner) {
-  if (bootstrappedChannels.has(key)) return;
-  bootstrappedChannels.add(key);
-  if (allHistory[key] && allHistory[key].length > 0) return; // sudah ada dari file
+  async function bootstrapHistory(key, channel, isDMOwner) {
+    if (bootstrapPromises.has(key)) return bootstrapPromises.get(key);
+    const p = _doBootstrap(key, channel, isDMOwner);
+    bootstrapPromises.set(key, p);
+    return p;
+  }
 
-  try {
+  async function _doBootstrap(key, channel, isDMOwner) {
+    if (allHistory[key] && allHistory[key].length > 0) return; // sudah ada dari file
+
+    try {
     const botId = channel.client?.user?.id;
     const fetched = await channel.messages.fetch({ limit: 30 });
     const msgs = [...fetched.values()]

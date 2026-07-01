@@ -8,11 +8,6 @@
 
 const { spawn } = require('child_process');
 
-
-// Daftar proses anak agar bisa dihentikan saat SIGTERM
-const _children = [];
-let _shuttingDown = false;
-
 // Daftar proses anak untuk graceful shutdown
 const _children = [];
 let _shuttingDown = false;
@@ -40,17 +35,6 @@ function run(script, name, env = {}) {
   return proc;
 }
 
-// Graceful shutdown: teruskan SIGTERM/SIGINT ke semua proses anak
-function gracefulShutdown(signal) {
-  if (_shuttingDown) return;
-  _shuttingDown = true;
-  console.log(`[start] Menerima ${signal}, menghentikan semua proses...`);
-  _children.forEach(c => { try { c.kill(signal); } catch (_) {} });
-  setTimeout(() => process.exit(0), 3000);
-}
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
-
 // Graceful shutdown: teruskan signal ke semua proses anak
 function gracefulShutdown(signal) {
   if (_shuttingDown) return;
@@ -62,16 +46,13 @@ function gracefulShutdown(signal) {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
 
-
 const basePort = parseInt(process.env.PORT, 10) || 3000;
 
 // web.js pakai PORT utama — Railway expose ini ke internet.
-// Health check Railway otomatis terpenuhi via GET /health di web.js.
-run('web.js', 'web', { PORT: String(basePort) });
+run('web.js',      'web',     { PORT: String(basePort) });
 
-// bot.js pakai PORT+1 untuk health check internal-nya sendiri.
-// Port ini tidak perlu di-expose ke internet.
-run('bot.js', 'bot', { PORT: String(basePort + 1) });
+// bot.js pakai PORT+1 untuk health check internal.
+run('bot.js',      'bot',     { PORT: String(basePort + 1) });
 
 // userbot.js pakai PORT+2.
-run('userbot.js', 'userbot', { PORT: String(basePort + 2) });
+run('userbot.js',  'userbot', { PORT: String(basePort + 2) });

@@ -6,40 +6,47 @@
 //   PORT + 1   → bot.js   (health check internal, tidak perlu di-expose)
 //   PORT + 2   → userbot.js (internal)
 
-// [FIX] Auto-install ethers jika belum ada (terjadi saat Railway pakai build cache lama)
-const { execSync } = require('child_process');
-try {
-  require.resolve('ethers');
-} catch (_) {
-  console.log('[start] ethers belum terinstall, installing...');
-  try {
-    execSync('npm install ethers --no-save --quiet', { stdio: 'inherit' });
-    console.log('[start] ✅ ethers berhasil diinstall');
-  } catch (e) {
-    console.warn('[start] ⚠️  Gagal install ethers:', e.message, '— fitur !shuffle tidak akan berfungsi');
-  }
-}
-
 const { spawn } = require('child_process');
+
+
+// Daftar proses anak agar bisa dihentikan saat SIGTERM
+const _children = [];
+let _shuttingDown = false;
 
 function run(script, name, env = {}) {
   const proc = spawn('node', [script], {
     stdio: 'inherit',
     env: { ...process.env, ...env },
   });
+  _children.push(proc);
 
   proc.on('close', (code) => {
-    console.error(`[${name}] proses mati (code ${code}), restart dalam 5 detik...`);
-    setTimeout(() => run(script, name, env), 5000);
+    if (!_shuttingDown) {
+      console.error(`[${name}] proses mati (code ${code}), restart dalam 5 detik...`);
+      setTimeout(() => run(script, name, env), 5000);
+    }
   });
 
   proc.on('error', (err) => {
     console.error(`[${name}] gagal spawn:`, err.message);
-    setTimeout(() => run(script, name, env), 5000);
+    if (!_shuttingDown) setTimeout(() => run(script, name, env), 5000);
   });
 
   console.log(`[start] Menjalankan ${name} (${script})`);
+  return proc;
 }
+
+// Graceful shutdown: teruskan signal ke semua proses anak
+function gracefulShutdown(signal) {
+  if (_shuttingDown) return;
+  _shuttingDown = true;
+  console.log(`[start] Menerima ${signal}, menghentikan semua proses...`);
+  _children.forEach(c => { try { c.kill(signal); } catch (_) {} });
+  setTimeout(() => process.exit(0), 3000);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+
 
 const basePort = parseInt(process.env.PORT, 10) || 3000;
 

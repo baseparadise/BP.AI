@@ -133,15 +133,29 @@ async function summarizeDropped(channelId, dropped) {
   const convo = parts.join('\n');
   const prompt = `Buat ringkasan singkat (1-2 kalimat, bahasa yang sama) untuk konteks AI:\n\n${convo}`;
   try {
-    const result = await tryAllCombinations(
-      GROQ_KEYS.length ? GROQ_KEYS : GEMINI_KEYS,
-      GROQ_KEYS.length ? GROQ_MODELS : GEMINI_MODELS,
-      (model) => [
-        { role: 'system', content: 'Kamu asisten. Buat ringkasan percakapan menjadi 1-2 kalimat.' },
-        { role: 'user', content: prompt },
-      ],
-      GROQ_KEYS.length ? 'groq' : 'gemini', 8000
-    );
+    // Coba Groq dulu, lalu fallback ke Gemini (konsisten dengan replyAsHuman)
+    let result = null;
+    if (GROQ_KEYS.length > 0) {
+      result = await tryAllCombinations(
+        GROQ_KEYS, GROQ_MODELS,
+        (model) => [
+          { role: 'system', content: 'Kamu asisten. Buat ringkasan percakapan menjadi 1-2 kalimat.' },
+          { role: 'user', content: prompt },
+        ],
+        'groq', 8000
+      );
+    }
+    if (!result && GEMINI_KEYS.length > 0) {
+      result = await tryAllCombinations(
+        GEMINI_KEYS, GEMINI_MODELS,
+        (model, key) => ({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          systemInstruction: { parts: [{ text: 'Kamu asisten. Buat ringkasan percakapan menjadi 1-2 kalimat.' }] },
+          generationConfig: { temperature: 0.5, maxOutputTokens: 100, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+        'gemini', 15000
+      );
+    }
     if (result) summaries.set(channelId, result.replace(/\n+/g, ' ').trim().slice(0, 300));
   } catch { /* fallback: tetap pakai summary lama */ }
 }

@@ -1174,6 +1174,22 @@ client.on('messageCreate', async (message) => {
       }
 
             // !provider — tampilkan status semua provider
+      // === !delete [n] tanpa mention — hapus n pesan bot (hanya owner) ===
+      if (/^!delete\s+\d+$/i.test(rawCmd)) {
+        const n = Math.min(parseInt(message.content.trim().split(/\s+/)[1], 10), 100);
+        message.delete().catch(() => {});
+        const fetched = await message.channel.messages.fetch({ limit: 100 });
+        const mine = [...fetched.values()]
+          .filter(m => m.author.id === client.user.id)
+          .sort((a, b) => b.createdTimestamp - a.createdTimestamp)
+          .slice(0, n);
+        for (const m of mine) {
+          await m.delete().catch(() => {});
+          await new Promise(r => setTimeout(r, 500));
+        }
+        return;
+      }
+
       if (rawCmd === '!provider') {
         const providerStatus = ['groq', 'gemini', 'openai'].map((p) => {
           const cfg = PROVIDERS && PROVIDERS[p];
@@ -1345,61 +1361,39 @@ client.on('messageCreate', async (message) => {
       return;
     }
 
-    // === !balance — cek saldo ETH & USDC wallet bot (hanya owner, via mention) ===
+    // === !balance via mention — hanya owner ===
     if (message.author.id === OWNER_ID && question.trim().toLowerCase() === '!balance') {
       await message.channel.sendTyping().catch(() => {});
       try {
-        const _bal2 = await getBalance();
-        const _balReply2 =
-          '💰 **Saldo Wallet Bot (Base Mainnet)**\n' +
-          '```\n' +
-          'Alamat : ' + _bal2.address + '\n' +
-          'ETH    : ' + _bal2.eth + ' ETH\n' +
-          'USDC   : ' + _bal2.usdc + ' USDC\n' +
-          '```' +
-          '🔗 [Basescan](<https://basescan.org/address/' + _bal2.address + '>)';
+        const _balM = await getBalance();
         await message.reply({
-          content: _balReply2,
+          content: '💰 **Saldo Wallet Bot (Base Mainnet)**\n```\nAlamat : ' + _balM.address + '\nETH    : ' + _balM.eth + ' ETH\nUSCD   : ' + _balM.usdc + ' USDC\n```\n🔗 [Basescan](<https://basescan.org/address/' + _balM.address + '>)',
           components: [makeDeleteRow(message.author.id)],
         });
-      } catch (e) {
-        await message.reply('❌ Gagal cek saldo: ' + e.message).catch(() => {});
-      }
+      } catch (e) { await message.reply('❌ Gagal cek saldo: ' + e.message).catch(() => {}); }
       return;
     }
 
-    // === Perintah send (kirim ETH/USDC) — hanya owner ===
+
+    // === send via mention — hanya owner ===
     if (message.author.id === OWNER_ID) {
-      const _sendOptsB = parseSendCommand(question);
-      if (_sendOptsB) {
+      const _sendOptsM = parseSendCommand(question);
+      if (_sendOptsM) {
         await message.channel.sendTyping().catch(() => {});
-        const _amtLabelB = _sendOptsB.amount + ' ' + _sendOptsB.token.toUpperCase();
-        const _waitMsgB = await message.reply(
-          '⏳ Mengirim **' + _amtLabelB + '** ke `' + _sendOptsB.to + '`...' +
-          '\n_Tunggu konfirmasi blockchain Base..._'
-        ).catch(() => null);
+        const _lblM = _sendOptsM.amount + ' ' + _sendOptsM.token.toUpperCase();
+        const _wM = await message.reply('⏳ Mengirim **' + _lblM + '** ke `' + _sendOptsM.to + '`...\n_Tunggu konfirmasi blockchain Base..._').catch(() => null);
         try {
-          const _resB = await sendToken(_sendOptsB);
-          const _replyB =
-            '✅ **Transfer berhasil!**\n' +
-            '```\n' +
-            'Token   : ' + _resB.token + '\n' +
-            'Nominal : ' + _resB.amount + ' ' + _resB.token + '\n' +
-            'Dari    : ' + _resB.from + '\n' +
-            'Ke      : ' + _resB.to + '\n' +
-            'Block   : #' + _resB.blockNumber + '\n' +
-            '```\n' +
-            '🔗 [Lihat di Basescan](<' + _resB.txUrl + '>)';
-          if (_waitMsgB) await _waitMsgB.edit({ content: _replyB }).catch(() => {});
-          else await message.reply(_replyB).catch(() => {});
+          const _rM = await sendToken(_sendOptsM);
+          const _okM = '✅ **Transfer berhasil!**\n```\nToken   : ' + _rM.token + '\nNominal : ' + _rM.amount + ' ' + _rM.token + '\nDari    : ' + _rM.from + '\nKe      : ' + _rM.to + '\nBlock   : #' + _rM.blockNumber + '\n```\n🔗 [Lihat di Basescan](<' + _rM.txUrl + '>)';
+          if (_wM) await _wM.edit({ content: _okM }).catch(() => {}); else await message.reply(_okM).catch(() => {});
         } catch (e) {
-          const _errB = '❌ **Gagal kirim:** ' + e.message;
-          if (_waitMsgB) await _waitMsgB.edit({ content: _errB }).catch(() => {});
-          else await message.reply(_errB).catch(() => {});
+          const _eM = '❌ **Gagal kirim:** ' + e.message;
+          if (_wM) await _wM.edit({ content: _eM }).catch(() => {}); else await message.reply(_eM).catch(() => {});
         }
         return;
       }
     }
+
 
         // === Perintah !shuffle role @Role [jumlah] ===
     if (question.trim().toLowerCase().startsWith('!shuffle')) {

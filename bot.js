@@ -31,6 +31,7 @@ const {
 } = require('./lib/ai');
 const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
 const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
+const { parseSendCommand, sendToken } = require('./lib/send');
 
 // ============================================================
 // KONFIGURASI
@@ -1117,6 +1118,44 @@ client.on('messageCreate', async (message) => {
     if (!mentioned && !isDM && message.author.id === OWNER_ID) {
       const rawCmd = message.content.trim().toLowerCase();
 
+      // === send <nominal> <token> to <alamat> — kirim ETH/USDC (hanya owner) ===
+      const _sendOptsA = parseSendCommand(message.content.trim());
+      if (_sendOptsA) {
+        await message.channel.sendTyping().catch(() => {});
+        const _amtLabelA = _sendOptsA.amount + ' ' + _sendOptsA.token.toUpperCase();
+        const _waitMsgA = await message.reply(
+          '⏳ Mengirim **' + _amtLabelA + '** ke `' + _sendOptsA.to + '`...
+_Tunggu konfirmasi blockchain Base..._'
+        ).catch(() => null);
+        try {
+          const _resA = await sendToken(_sendOptsA);
+          const _replyA =
+            '✅ **Transfer berhasil!**
+' +
+            '```
+' +
+            'Token   : ' + _resA.token + '
+' +
+            'Nominal : ' + _resA.amount + ' ' + _resA.token + '
+' +
+            'Dari    : ' + _resA.from + '
+' +
+            'Ke      : ' + _resA.to + '
+' +
+            'Block   : #' + _resA.blockNumber + '
+' +
+            '```' +
+            '🔗 [Lihat di Basescan](<' + _resA.txUrl + '>)';
+          if (_waitMsgA) await _waitMsgA.edit({ content: _replyA }).catch(() => {});
+          else await message.reply(_replyA).catch(() => {});
+        } catch (e) {
+          const _errA = '❌ **Gagal kirim:** ' + e.message;
+          if (_waitMsgA) await _waitMsgA.edit({ content: _errA }).catch(() => {});
+          else await message.reply(_errA).catch(() => {});
+        }
+        return;
+      }
+
       // !provider — tampilkan status semua provider
       if (rawCmd === '!provider') {
         const providerStatus = ['groq', 'gemini', 'openai'].map((p) => {
@@ -1270,6 +1309,46 @@ client.on('messageCreate', async (message) => {
         ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
         : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
       return;
+    }
+
+    // === Perintah send (kirim ETH/USDC) — hanya owner ===
+    if (message.author.id === OWNER_ID) {
+      const _sendOptsB = parseSendCommand(question);
+      if (_sendOptsB) {
+        await message.channel.sendTyping().catch(() => {});
+        const _amtLabelB = _sendOptsB.amount + ' ' + _sendOptsB.token.toUpperCase();
+        const _waitMsgB = await message.reply(
+          '⏳ Mengirim **' + _amtLabelB + '** ke `' + _sendOptsB.to + '`...
+_Tunggu konfirmasi blockchain Base..._'
+        ).catch(() => null);
+        try {
+          const _resB = await sendToken(_sendOptsB);
+          const _replyB =
+            '✅ **Transfer berhasil!**
+' +
+            '```
+' +
+            'Token   : ' + _resB.token + '
+' +
+            'Nominal : ' + _resB.amount + ' ' + _resB.token + '
+' +
+            'Dari    : ' + _resB.from + '
+' +
+            'Ke      : ' + _resB.to + '
+' +
+            'Block   : #' + _resB.blockNumber + '
+' +
+            '```' +
+            '🔗 [Lihat di Basescan](<' + _resB.txUrl + '>)';
+          if (_waitMsgB) await _waitMsgB.edit({ content: _replyB }).catch(() => {});
+          else await message.reply(_replyB).catch(() => {});
+        } catch (e) {
+          const _errB = '❌ **Gagal kirim:** ' + e.message;
+          if (_waitMsgB) await _waitMsgB.edit({ content: _errB }).catch(() => {});
+          else await message.reply(_errB).catch(() => {});
+        }
+        return;
+      }
     }
 
     // === Perintah !shuffle role @Role [jumlah] ===

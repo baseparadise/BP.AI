@@ -53,10 +53,6 @@ const MAX_TOTAL_BYTES_COMBINED = 30 * 1024; // 30KB total sebelum split satu-per
 // Discord membatasi maks 10 file per reply.
 const DISCORD_MAX_FILES = 10;
 
-// Channel ID yang conduit-nya di-OFF-kan owner via !claude off.
-// DM owner selalu menggunakan urutan provider default (conduit tetap aktif).
-const conduitDisabledChannels = new Set();
-
 // Pola yang mengindikasikan AI memberikan respons palsu/hallusinasi.
 // [FIX BARU] Deteksi konten yang tidak berguna agar bisa di-retry.
 const HALLUCINATION_PATTERNS = [
@@ -1017,7 +1013,7 @@ async function handleGitHubEdit(message, ref, question, history, isDMOwner) {
       + `Berikan versi LENGKAP file yang sudah diperbaiki dalam SATU code block saja — jangan dipotong, jangan ada penjelasan di luar code block selain ringkasan singkat 1-2 kalimat sebelum code block:\n\n`
       + `\`\`\`\n${oldContent}\n\`\`\``;
 
-    const { text } = await askGemini(prompt, history, isDMOwner, skipProviders);
+    const { text } = await askGemini(prompt, history, isDMOwner);
 
     // [FIX] Deteksi hallusinasi di respons GitHub edit
     if (containsHallucination(text)) {
@@ -1071,7 +1067,7 @@ async function processSingleFile(message, att, content, question, history, isDMO
 
   const finalQuestion = `${instruction}\n\n// === File: ${att.name} ===\n${content}`;
 
-  const { text } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
+  const { text } = await askGemini(finalQuestion, history, isDMOwner);
 
   // Deteksi hallusinasi
   if (containsHallucination(text)) {
@@ -1121,44 +1117,13 @@ client.on('messageCreate', async (message) => {
     if (!mentioned && !isDM && message.author.id === OWNER_ID) {
       const rawCmd = message.content.trim().toLowerCase();
 
-      // !claude on / !claude off
-      if (rawCmd === '!claude on' || rawCmd === '!claude off') {
-        const wantOn = rawCmd === '!claude on';
-        const wasOn  = !conduitDisabledChannels.has(message.channelId);
-        const conduitReady = !!(PROVIDERS && PROVIDERS.conduit && PROVIDERS.conduit.keys && PROVIDERS.conduit.keys.length
-          && PROVIDERS.conduit.models && PROVIDERS.conduit.models.length);
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId('del_' + message.author.id)
-            .setLabel('🗑️ Hapus')
-            .setStyle(ButtonStyle.Danger)
-        );
-        let reply;
-        if (!conduitReady) {
-          reply = '⚠️ **Conduit API belum dikonfigurasi.** Set CONDUIT_API_KEY dan CONDUIT_MODELS di Railway.';
-        } else if (wantOn && wasOn) {
-          reply = '⚡ **Claude API sudah ON** di channel ini.';
-        } else if (wantOn && !wasOn) {
-          conduitDisabledChannels.delete(message.channelId);
-          reply = '✅ **Claude API ON** mulai sekarang di channel ini.';
-        } else if (!wantOn && wasOn) {
-          conduitDisabledChannels.add(message.channelId);
-          reply = '🔴 **Claude API OFF** mulai sekarang di channel ini.\n_DM owner tetap aktif._';
-        } else {
-          reply = '🔴 **Claude API sudah OFF** di channel ini.\n_DM owner tetap aktif._';
-        }
-        await message.reply({ content: reply, components: [row] }).catch(() => {});
-        return;
-      }
-
       // !provider — tampilkan status semua provider
       if (rawCmd === '!provider') {
-        const providerStatus = ['conduit', 'groq', 'gemini', 'openai'].map((p) => {
+        const providerStatus = ['groq', 'gemini', 'openai'].map((p) => {
           const cfg = PROVIDERS && PROVIDERS[p];
           const ready = !!(cfg && cfg.keys && cfg.keys.length && cfg.models && cfg.models.length);
-          const offNote = (p === 'conduit' && conduitDisabledChannels.has(message.channelId)) ? ' _(off di channel ini)_' : '';
           return ready
-            ? '✅ **' + p + '**' + offNote
+            ? '✅ **' + p + '**'
             : '❌ **' + p + '** _(belum dikonfigurasi)_';
         });
         const activeOrder = PROVIDER_ORDER.filter((p) => {
@@ -1260,9 +1225,6 @@ client.on('messageCreate', async (message) => {
 
     const isDMOwner = isDM && message.author.id === OWNER_ID;
     const historyKey = isDMOwner ? `dm-${message.author.id}` : `ch-${message.channelId}`;
-    // Conduit dinonaktifkan di channel ini? (via !claude off) — DM owner selalu pakai default
-    const skipProviders = (!isDMOwner && conduitDisabledChannels.has(message.channelId)) ? ['conduit'] : [];
-
     // Bootstrap history dari Discord saat pertama kali aktif setelah restart
     await bootstrapHistory(historyKey, message.channel, isDMOwner);
 
@@ -1701,7 +1663,7 @@ client.on('messageCreate', async (message) => {
       const finalQuestion = `${instruction}\n\n${fileParts.join('\n\n')}`;
       const historyUserContent = `${instruction} [File: ${fileNames.join(', ')}]`;
 
-      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
+      const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
 
       // [FIX] Deteksi hallusinasi sebelum proses respons
       if (containsHallucination(text)) {
@@ -1741,7 +1703,7 @@ client.on('messageCreate', async (message) => {
     }
 
     const history = getHistoryForAI(historyKey, isDMOwner);
-    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner, skipProviders);
+    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
 
     await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 

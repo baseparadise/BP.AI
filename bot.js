@@ -33,6 +33,7 @@ const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnaly
 const { detectBalanceQuery, fetchZerionPortfolio } = require('./lib/zerion');
 const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
 const { parseSendCommand, sendToken, getBalance } = require('./lib/send');
+const { detectGmgnQuery, handleGmgnCommand } = require('./lib/gmgn');
 
 // ============================================================
 // KONFIGURASI
@@ -1210,6 +1211,15 @@ client.on('messageCreate', async (message) => {
             '!shuffle role @Role 3  Undian 3 pemenang',
             '!shuffle info          Cek wallet & saldo bot',
             '```',
+            '**📡 GMGN (tanpa tag):**',
+            '```',
+            'gmgn <CA>              Info & security token',
+            'gmgn smart [CA]        Top smart wallet / smart money token',
+            'gmgn new [chain]       Token baru 1h',
+            'gmgn trending [chain]  Token trending 1h',
+            'gmgn wallet <address>  Analisis wallet',
+            'gmgn holder <CA>       Top holder token',
+            '```',
             '**💬 Dengan Tag @bot:**',
             '```',
             '@bot [pertanyaan]      Chat AI (analisa, coding, dll)',
@@ -1332,6 +1342,23 @@ client.on('messageCreate', async (message) => {
           });
         } catch (e) {
           await message.reply('❌ Gagal ambil data Zerion: ' + e.message).catch(() => {});
+        }
+        return;
+      }
+
+      // === GMGN commands: gmgn <CA> | gmgn smart | gmgn new | gmgn trending | gmgn wallet | gmgn holder ===
+      var gmgnQuery = detectGmgnQuery(rawText);
+      if (gmgnQuery) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var gmgnResult = await handleGmgnCommand(gmgnQuery);
+          await message.reply({
+            content: gmgnResult.slice(0, 2000),
+            components: [makeDeleteRow(message.author.id)],
+            flags: MessageFlags.SuppressEmbeds,
+          });
+        } catch (e) {
+          await message.reply('❌ Gagal ambil data GMGN: ' + e.message).catch(() => {});
         }
         return;
       }

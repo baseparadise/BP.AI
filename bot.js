@@ -1190,6 +1190,38 @@ client.on('messageCreate', async (message) => {
         return;
       }
 
+      // === !help — daftar command (semua user) ===
+      if (rawCmd === '!help') {
+        await message.reply({
+          content: [
+            '📖 **Daftar Command BP.AI Bot**',
+            '',
+            '**⚡ Tanpa Tag Bot:**',
+            '```',
+            'balance [wallet/ENS]   Cek portfolio wallet',
+            'c [COIN] [timeframe]   Chart teknikal (1m 5m 15m 1h 4h 1d 1w)',
+            'harga [COIN]           Cek harga kripto',
+            '[X] [COIN] to [COIN]   Konversi harga (1 ETH to USDT)',
+            'cr [COIN]              Data CryptoRank token',
+            'gainers / losers       Top gainer & loser hari ini',
+            'market                 Overview market kripto',
+            'twit [username]        Riwayat tweet akun kripto',
+            '!shuffle role @Role    Undian pemenang dari role',
+            '!shuffle role @Role 3  Undian 3 pemenang',
+            '!shuffle info          Cek wallet & saldo bot',
+            '```',
+            '**💬 Dengan Tag @bot:**',
+            '```',
+            '@bot [pertanyaan]      Chat AI (analisa, coding, dll)',
+            '@bot !clearhistory     Hapus riwayat chat AI sesi ini',
+            '```',
+            '_Kirim file + pertanyaan ke bot untuk analisa dokumen/kode._',
+          ].join('\n'),
+          components: [makeDeleteRow(message.author.id)],
+        });
+        return;
+      }
+
       if (rawCmd === '!provider') {
         const providerStatus = ['groq', 'gemini', 'openai'].map((p) => {
           const cfg = PROVIDERS && PROVIDERS[p];
@@ -1348,6 +1380,38 @@ client.on('messageCreate', async (message) => {
         await new Promise(r => setTimeout(r, 500));
       }
       console.log(`[bot] !delete: selesai hapus ${mine.length} pesan`);
+      return;
+    }
+
+    // === !help via mention — daftar command (semua user) ===
+    if (question.trim().toLowerCase() === '!help') {
+      await message.reply({
+        content: [
+          '📖 **Daftar Command BP.AI Bot**',
+          '',
+          '**⚡ Tanpa Tag Bot:**',
+          '```',
+          'balance [wallet/ENS]   Cek portfolio wallet',
+          'c [COIN] [timeframe]   Chart teknikal (1m 5m 15m 1h 4h 1d 1w)',
+          'harga [COIN]           Cek harga kripto',
+          '[X] [COIN] to [COIN]   Konversi harga (1 ETH to USDT)',
+          'cr [COIN]              Data CryptoRank token',
+          'gainers / losers       Top gainer & loser hari ini',
+          'market                 Overview market kripto',
+          'twit [username]        Riwayat tweet akun kripto',
+          '!shuffle role @Role    Undian pemenang dari role',
+          '!shuffle role @Role 3  Undian 3 pemenang',
+          '!shuffle info          Cek wallet & saldo bot',
+          '```',
+          '**💬 Dengan Tag @bot:**',
+          '```',
+          '@bot [pertanyaan]      Chat AI (analisa, coding, dll)',
+          '@bot !clearhistory     Hapus riwayat chat AI sesi ini',
+          '```',
+          '_Kirim file + pertanyaan ke bot untuk analisa dokumen/kode._',
+        ].join('\n'),
+        components: [makeDeleteRow(message.author.id)],
+      });
       return;
     }
 

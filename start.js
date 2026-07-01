@@ -13,6 +13,10 @@ const { spawn } = require('child_process');
 const _children = [];
 let _shuttingDown = false;
 
+// Daftar proses anak untuk graceful shutdown
+const _children = [];
+let _shuttingDown = false;
+
 function run(script, name, env = {}) {
   const proc = spawn('node', [script], {
     stdio: 'inherit',
@@ -35,6 +39,17 @@ function run(script, name, env = {}) {
   console.log(`[start] Menjalankan ${name} (${script})`);
   return proc;
 }
+
+// Graceful shutdown: teruskan SIGTERM/SIGINT ke semua proses anak
+function gracefulShutdown(signal) {
+  if (_shuttingDown) return;
+  _shuttingDown = true;
+  console.log(`[start] Menerima ${signal}, menghentikan semua proses...`);
+  _children.forEach(c => { try { c.kill(signal); } catch (_) {} });
+  setTimeout(() => process.exit(0), 3000);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
 
 // Graceful shutdown: teruskan signal ke semua proses anak
 function gracefulShutdown(signal) {

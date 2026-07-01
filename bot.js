@@ -1265,6 +1265,9 @@ client.on('messageCreate', async (message) => {
 
     // === Crypto/price tanpa tag: "5k usdc to idr" atau "price btc" ===
     if (!mentioned && !isDM) {
+      // [SAFETY GUARD] Wrap seluruh blok dalam try-catch agar jika ada library
+      // yg rusak/tidak ada, bot TIDAK merespons pesan random di server.
+      try {
       var rawText = message.content.trim();
       var noTagConv = await detectCryptoConversion(rawText);
       var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
@@ -1364,6 +1367,11 @@ client.on('messageCreate', async (message) => {
       }
 
       if (!rawText.toLowerCase().startsWith('!shuffle')) return;
+      } catch (_noMentionErr) {
+        // Library error di blok non-mention — jangan balas pesan, cukup log.
+        console.error('[bot] Non-mention handler error (silent):', _noMentionErr.message);
+        return;
+      }
     }
 
     if (isDM && message.author.id !== OWNER_ID) {

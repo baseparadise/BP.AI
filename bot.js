@@ -1147,27 +1147,20 @@ client.on('messageCreate', async (message) => {
         await message.channel.sendTyping().catch(() => {});
         const _amtLabelA = _sendOptsA.amount + ' ' + _sendOptsA.token.toUpperCase();
         const _waitMsgA = await message.reply(
-          '⏳ Mengirim **' + _amtLabelA + '** ke `' + _sendOptsA.to + '`...
-_Tunggu konfirmasi blockchain Base..._'
+          '⏳ Mengirim **' + _amtLabelA + '** ke `' + _sendOptsA.to + '`...' +
+          '\n_Tunggu konfirmasi blockchain Base..._'
         ).catch(() => null);
         try {
           const _resA = await sendToken(_sendOptsA);
           const _replyA =
-            '✅ **Transfer berhasil!**
-' +
-            '```
-' +
-            'Token   : ' + _resA.token + '
-' +
-            'Nominal : ' + _resA.amount + ' ' + _resA.token + '
-' +
-            'Dari    : ' + _resA.from + '
-' +
-            'Ke      : ' + _resA.to + '
-' +
-            'Block   : #' + _resA.blockNumber + '
-' +
-            '```' +
+            '✅ **Transfer berhasil!**\n' +
+            '```\n' +
+            'Token   : ' + _resA.token + '\n' +
+            'Nominal : ' + _resA.amount + ' ' + _resA.token + '\n' +
+            'Dari    : ' + _resA.from + '\n' +
+            'Ke      : ' + _resA.to + '\n' +
+            'Block   : #' + _resA.blockNumber + '\n' +
+            '```\n' +
             '🔗 [Lihat di Basescan](<' + _resA.txUrl + '>)';
           if (_waitMsgA) await _waitMsgA.edit({ content: _replyA }).catch(() => {});
           else await message.reply(_replyA).catch(() => {});
@@ -1179,7 +1172,7 @@ _Tunggu konfirmasi blockchain Base..._'
         return;
       }
 
-      // !provider — tampilkan status semua provider
+            // !provider — tampilkan status semua provider
       if (rawCmd === '!provider') {
         const providerStatus = ['groq', 'gemini', 'openai'].map((p) => {
           const cfg = PROVIDERS && PROVIDERS[p];
@@ -1364,27 +1357,20 @@ _Tunggu konfirmasi blockchain Base..._'
         await message.channel.sendTyping().catch(() => {});
         const _amtLabelB = _sendOptsB.amount + ' ' + _sendOptsB.token.toUpperCase();
         const _waitMsgB = await message.reply(
-          '⏳ Mengirim **' + _amtLabelB + '** ke `' + _sendOptsB.to + '`...
-_Tunggu konfirmasi blockchain Base..._'
+          '⏳ Mengirim **' + _amtLabelB + '** ke `' + _sendOptsB.to + '`...' +
+          '\n_Tunggu konfirmasi blockchain Base..._'
         ).catch(() => null);
         try {
           const _resB = await sendToken(_sendOptsB);
           const _replyB =
-            '✅ **Transfer berhasil!**
-' +
-            '```
-' +
-            'Token   : ' + _resB.token + '
-' +
-            'Nominal : ' + _resB.amount + ' ' + _resB.token + '
-' +
-            'Dari    : ' + _resB.from + '
-' +
-            'Ke      : ' + _resB.to + '
-' +
-            'Block   : #' + _resB.blockNumber + '
-' +
-            '```' +
+            '✅ **Transfer berhasil!**\n' +
+            '```\n' +
+            'Token   : ' + _resB.token + '\n' +
+            'Nominal : ' + _resB.amount + ' ' + _resB.token + '\n' +
+            'Dari    : ' + _resB.from + '\n' +
+            'Ke      : ' + _resB.to + '\n' +
+            'Block   : #' + _resB.blockNumber + '\n' +
+            '```\n' +
             '🔗 [Lihat di Basescan](<' + _resB.txUrl + '>)';
           if (_waitMsgB) await _waitMsgB.edit({ content: _replyB }).catch(() => {});
           else await message.reply(_replyB).catch(() => {});
@@ -1397,7 +1383,7 @@ _Tunggu konfirmasi blockchain Base..._'
       }
     }
 
-    // === Perintah !shuffle role @Role [jumlah] ===
+        // === Perintah !shuffle role @Role [jumlah] ===
     if (question.trim().toLowerCase().startsWith('!shuffle')) {
       const isAdmin = message.member?.permissions?.has('ManageRoles')
         || message.author.id === OWNER_ID;

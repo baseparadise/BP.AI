@@ -1272,13 +1272,13 @@ client.on('messageCreate', async (message) => {
       // [SAFETY GUARD] Wrap seluruh blok dalam try-catch agar jika ada library
       // yg rusak/tidak ada, bot TIDAK merespons pesan random di server.
       try {
-      var rawText = message.content.trim();
-      var noTagConv = await detectCryptoConversion(rawText);
-      var noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
+      const rawText = message.content.trim();
+      const noTagConv = await detectCryptoConversion(rawText);
+      const noTagPrice = !noTagConv ? detectPriceQuery(rawText) : null;
       if (noTagConv || noTagPrice) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var noTagResult = noTagConv
+          const noTagResult = noTagConv
             ? await fetchCryptoConversion(noTagConv)
             : await fetchCoinPrice(noTagPrice);
           await message.reply({
@@ -1292,11 +1292,11 @@ client.on('messageCreate', async (message) => {
         return; // ← pastikan tidak lanjut ke handler lain setelah harga ditangani
       }
       // === CryptoRank tanpa tag: cr BTC | gainers | losers | market ===
-      var noTagCr = detectCrQuery(rawText);
+      const noTagCr = detectCrQuery(rawText);
       if (noTagCr) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var noTagCrResult = await handleCrCommand(noTagCr.type, noTagCr.symbol);
+          const noTagCrResult = await handleCrCommand(noTagCr.type, noTagCr.symbol);
           await message.reply({
             content: noTagCrResult.slice(0, 2000),
             components: [makeDeleteRow(message.author.id)],
@@ -1309,11 +1309,11 @@ client.on('messageCreate', async (message) => {
       }
 
             // === Twitter history tanpa tag: "twit monad" ===
-      var noTagTwit = detectTwitterQuery(rawText);
+      const noTagTwit = detectTwitterQuery(rawText);
       if (noTagTwit) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var noTagTwitResult = await fetchTwitterHistory(noTagTwit.usernames);
+          const noTagTwitResult = await fetchTwitterHistory(noTagTwit.usernames);
           await message.reply({
             content: noTagTwitResult.slice(0, 2000),
             components: [makeDeleteRow(message.author.id)],
@@ -1326,7 +1326,7 @@ client.on('messageCreate', async (message) => {
       }
 
             // === Chart command tanpa tag: C BTC / C ETH 4h / C ETH 4h 30 ===
-      var chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
+      const chartRawMatch = rawText.match(/^c\s+([a-zA-Z]+)(?:\s+(1m|5m|15m|30m|1h|2h|4h|6h|1d|1w))?(?:\s+(\d+))?$/i);
       if (chartRawMatch) {
         await message.channel.sendTyping().catch(() => {});
         try {
@@ -1338,11 +1338,11 @@ client.on('messageCreate', async (message) => {
       }
       // !shuffle bisa dipakai tanpa mention — lanjut ke handler utama
       // === Zerion portfolio: "balance 0xABC" tanpa mention ===
-      var balAddr = detectBalanceQuery(rawText);
+      const balAddr = detectBalanceQuery(rawText);
       if (balAddr) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var balResult = await fetchZerionPortfolio(balAddr);
+          const balResult = await fetchZerionPortfolio(balAddr);
           await message.reply({
             content: balResult,
             components: [makeDeleteRow(message.author.id)],
@@ -1355,11 +1355,11 @@ client.on('messageCreate', async (message) => {
       }
 
       // === GMGN commands: gmgn <CA> | gmgn smart | gmgn new | gmgn trending | gmgn wallet | gmgn holder ===
-      var gmgnQuery = detectGmgnQuery(rawText);
+      const gmgnQuery = detectGmgnQuery(rawText);
       if (gmgnQuery) {
         await message.channel.sendTyping().catch(() => {});
         try {
-          var gmgnResult = await handleGmgnCommand(gmgnQuery);
+          const gmgnResult = await handleGmgnCommand(gmgnQuery);
           await message.reply({
             content: gmgnResult.slice(0, 2000),
             components: [makeDeleteRow(message.author.id)],
@@ -1471,7 +1471,7 @@ client.on('messageCreate', async (message) => {
       try {
         const _balM = await getBalance();
         await message.reply({
-          content: '💰 **Saldo Wallet Bot (Base Mainnet)**\n```\nAlamat : ' + _balM.address + '\nETH    : ' + _balM.eth + ' ETH\nUSCD   : ' + _balM.usdc + ' USDC\n```\n🔗 [Basescan](<https://basescan.org/address/' + _balM.address + '>)',
+          content: '💰 **Saldo Wallet Bot (Base Mainnet)**\n```\nAlamat : ' + _balM.address + '\nETH    : ' + _balM.eth + ' ETH\nUSDC : ' + _balM.usdc + ' USDC\n```\n🔗 [Basescan](<https://basescan.org/address/' + _balM.address + '>)',
           components: [makeDeleteRow(message.author.id)],
         });
       } catch (e) { await message.reply('❌ Gagal cek saldo: ' + e.message).catch(() => {}); }

@@ -31,7 +31,7 @@ const {
 } = require('./lib/ai');
 const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
 const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
-const { parseSendCommand, sendToken } = require('./lib/send');
+const { parseSendCommand, sendToken, getBalance } = require('./lib/send');
 
 // ============================================================
 // KONFIGURASI
@@ -1118,6 +1118,29 @@ client.on('messageCreate', async (message) => {
     if (!mentioned && !isDM && message.author.id === OWNER_ID) {
       const rawCmd = message.content.trim().toLowerCase();
 
+      // === !balance — cek saldo ETH & USDC wallet bot (hanya owner) ===
+      if (rawCmd === '!balance') {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          const _bal = await getBalance();
+          const _balReply =
+            '💰 **Saldo Wallet Bot (Base Mainnet)**\n' +
+            '```\n' +
+            'Alamat : ' + _bal.address + '\n' +
+            'ETH    : ' + _bal.eth + ' ETH\n' +
+            'USDC   : ' + _bal.usdc + ' USDC\n' +
+            '```' +
+            '🔗 [Basescan](<https://basescan.org/address/' + _bal.address + '>)';
+          await message.reply({
+            content: _balReply,
+            components: [makeDeleteRow(message.author.id)],
+          });
+        } catch (e) {
+          await message.reply('❌ Gagal cek saldo: ' + e.message).catch(() => {});
+        }
+        return;
+      }
+
       // === send <nominal> <token> to <alamat> — kirim ETH/USDC (hanya owner) ===
       const _sendOptsA = parseSendCommand(message.content.trim());
       if (_sendOptsA) {
@@ -1308,6 +1331,29 @@ _Tunggu konfirmasi blockchain Base..._'
       await message.reply(hadHistory
         ? '🗑️ Riwayat percakapan sesi ini sudah dihapus. Kita mulai dari awal!'
         : '✅ Tidak ada riwayat yang perlu dihapus untuk sesi ini.');
+      return;
+    }
+
+    // === !balance — cek saldo ETH & USDC wallet bot (hanya owner, via mention) ===
+    if (message.author.id === OWNER_ID && question.trim().toLowerCase() === '!balance') {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        const _bal2 = await getBalance();
+        const _balReply2 =
+          '💰 **Saldo Wallet Bot (Base Mainnet)**\n' +
+          '```\n' +
+          'Alamat : ' + _bal2.address + '\n' +
+          'ETH    : ' + _bal2.eth + ' ETH\n' +
+          'USDC   : ' + _bal2.usdc + ' USDC\n' +
+          '```' +
+          '🔗 [Basescan](<https://basescan.org/address/' + _bal2.address + '>)';
+        await message.reply({
+          content: _balReply2,
+          components: [makeDeleteRow(message.author.id)],
+        });
+      } catch (e) {
+        await message.reply('❌ Gagal cek saldo: ' + e.message).catch(() => {});
+      }
       return;
     }
 

@@ -1109,9 +1109,15 @@ async function processSingleFile(message, att, content, question, history, isDMO
 // HANDLER UTAMA
 // ============================================================
 
+const _PROCESSED_MSG_IDS = new Set();
 client.on('messageCreate', async (message) => {
   try {
     if (message.author.bot) return;
+
+    // ── Deduplicate: cegah double-response saat 2 instance bot berjalan bersamaan ──
+    if (_PROCESSED_MSG_IDS.has(message.id)) return;
+    _PROCESSED_MSG_IDS.add(message.id);
+    setTimeout(() => _PROCESSED_MSG_IDS.delete(message.id), 30000);
 
     const isDM = !message.guild;
     const mentioned = message.mentions.users.has(client.user.id);
@@ -1215,11 +1221,9 @@ client.on('messageCreate', async (message) => {
             '```',
             'gmgn <CA>              Info & security token',
             'gmgn smart [CA]        Top smart wallet / smart money token',
-            'gmgn new [chain]       Token baru 1h',
-            'gmgn trending [chain]  Token trending 1h',
+                        'gmgn trending [chain]  Token trending 1h',
             'gmgn wallet <address>  Analisis wallet',
-            'gmgn holder <CA>       Top holder token',
-            '```',
+                        '```',
             '**💬 Dengan Tag @bot:**',
             '```',
             '@bot [pertanyaan]      Chat AI (analisa, coding, dll)',
@@ -1285,6 +1289,7 @@ client.on('messageCreate', async (message) => {
         } catch (e) {
           await message.reply('Gagal ambil data: ' + e.message).catch(() => {});
         }
+        return; // ← pastikan tidak lanjut ke handler lain setelah harga ditangani
       }
       // === CryptoRank tanpa tag: cr BTC | gainers | losers | market ===
       var noTagCr = detectCrQuery(rawText);

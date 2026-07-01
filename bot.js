@@ -30,6 +30,7 @@ const {
   PROVIDER_ORDER,
 } = require('./lib/ai');
 const { isScamAnalysisRequest, runScamAnalysis } = require('./lib/tokenScamAnalysis');
+const { detectBalanceQuery, fetchZerionPortfolio } = require('./lib/zerion');
 const { pickWinnerOnChain, isShuffleConfigured, getWalletInfo } = require('./lib/shuffle');
 const { parseSendCommand, sendToken, getBalance } = require('./lib/send');
 
@@ -1270,6 +1271,23 @@ client.on('messageCreate', async (message) => {
         return;
       }
       // !shuffle bisa dipakai tanpa mention — lanjut ke handler utama
+      // === Zerion portfolio: "balance 0xABC" tanpa mention ===
+      var balAddr = detectBalanceQuery(rawText);
+      if (balAddr) {
+        await message.channel.sendTyping().catch(() => {});
+        try {
+          var balResult = await fetchZerionPortfolio(balAddr);
+          await message.reply({
+            content: balResult,
+            components: [makeDeleteRow(message.author.id)],
+            flags: MessageFlags.SuppressEmbeds,
+          });
+        } catch (e) {
+          await message.reply('❌ Gagal ambil data Zerion: ' + e.message).catch(() => {});
+        }
+        return;
+      }
+
       if (!rawText.toLowerCase().startsWith('!shuffle')) return;
     }
 
@@ -1566,6 +1584,23 @@ client.on('messageCreate', async (message) => {
         await message.reply({ content: priceResult, flags: MessageFlags.SuppressEmbeds });
       } catch (e) {
         await message.reply('Gagal ambil harga: ' + e.message).catch(() => {});
+      }
+      return;
+    }
+
+    // === Zerion portfolio: "balance 0xABC" dengan mention ===
+    var balAddr2 = detectBalanceQuery(question);
+    if (balAddr2) {
+      await message.channel.sendTyping().catch(() => {});
+      try {
+        var balResult2 = await fetchZerionPortfolio(balAddr2);
+        await message.reply({
+          content: balResult2,
+          components: [makeDeleteRow(message.author.id)],
+          flags: MessageFlags.SuppressEmbeds,
+        });
+      } catch (e) {
+        await message.reply('❌ Gagal ambil data Zerion: ' + e.message).catch(() => {});
       }
       return;
     }

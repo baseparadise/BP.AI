@@ -14,6 +14,7 @@ const http = require('http');
 const axios = require('axios');
 const { Client, GatewayIntentBits, Partials, AttachmentBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { handleChartCommand } = require('./lib/chartAnalysis');
+const { runAgent } = require('./lib/agent');
 const {
   isImageRequest,
   askGemini,
@@ -1947,7 +1948,12 @@ client.on('messageCreate', async (message) => {
     }
 
     const history = getHistoryForAI(historyKey, isDMOwner);
-    const { text, sources } = await askGemini(finalQuestion, history, isDMOwner);
+    const { text, sources } = await runAgent(finalQuestion, history, isDMOwner, async () => {
+      await message.channel.sendTyping().catch(() => {});
+    }).catch(async (agentErr) => {
+      console.log('[bot] runAgent gagal, fallback ke askGemini:', agentErr.message?.slice(0, 100));
+      return askGemini(finalQuestion, history, isDMOwner);
+    });
 
     await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 

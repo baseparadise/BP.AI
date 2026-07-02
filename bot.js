@@ -1936,11 +1936,13 @@ client.on('messageCreate', async (message) => {
     const historyUserContent = question;
 
     // === Token scam/analisis skill ===
+    let scamSystemPrompt = null;
     if (isScamAnalysisRequest(question)) {
       await message.channel.sendTyping().catch(() => {});
       try {
         const scamResult = await runScamAnalysis(question);
         finalQuestion = scamResult.fullPrompt;
+        scamSystemPrompt = scamResult.skillSystem;
       } catch (e) {
         console.error('[bot] scamAnalysis error:', e.message);
         // fall through to normal AI
@@ -1950,7 +1952,7 @@ client.on('messageCreate', async (message) => {
     const history = getHistoryForAI(historyKey, isDMOwner);
     const { text, sources } = await runAgent(finalQuestion, history, isDMOwner, async () => {
       await message.channel.sendTyping().catch(() => {});
-    }).catch(async (agentErr) => {
+    }, scamSystemPrompt).catch(async (agentErr) => {
       console.log('[bot] runAgent gagal, fallback ke askGemini:', agentErr.message?.slice(0, 100));
       return askGemini(finalQuestion, history, isDMOwner);
     });

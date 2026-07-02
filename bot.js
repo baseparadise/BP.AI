@@ -1874,7 +1874,7 @@ client.on('messageCreate', async (message) => {
       const shouldSplitProcess = !isDMOwner && (totalSize > MAX_TOTAL_BYTES_COMBINED
         || (loadedFiles.length > 1 && loadedFiles.some((f) => f.att.size > 15 * 1024)));
 
-      if (shouldSplitProcess && isDMOwner) {
+      if (shouldSplitProcess) {
         // Mode split: proses tiap file terpisah
         await message.reply(
           `📂 File terlalu besar untuk diproses sekaligus (total ${Math.round(totalSize / 1024)}KB). Memproses **${loadedFiles.length} file satu per satu**...`
@@ -1936,9 +1936,13 @@ client.on('messageCreate', async (message) => {
     const historyUserContent = question;
 
     // === Token scam/analisis skill ===
+    // Ketika scam analysis dijalankan, data on-chain sudah dikumpulkan oleh runScamAnalysis.
+    // Langsung panggil askGemini dengan systemOverride (bypass runAgent + tools) agar AI mengikuti
+    // instruksi SKILL_SYSTEM dengan tepat tanpa distraksi tool-calling tambahan.
     let scamSystemPrompt = null;
     if (isScamAnalysisRequest(question)) {
-      await message.channel.sendTyping().catch(() => {});
+      // Extend typing selama proses pengambilan data on-chain (bisa >10 detik)
+      const typingInterval = setInterval(() => { message.channel.sendTyping().catch(() => {}); }, 8000);
       try {
         const scamResult = await runScamAnalysis(question);
         finalQuestion = scamResult.fullPrompt;
@@ -1946,16 +1950,36 @@ client.on('messageCreate', async (message) => {
       } catch (e) {
         console.error('[bot] scamAnalysis error:', e.message);
         // fall through to normal AI
+      } finally {
+        clearInterval(typingInterval);
       }
     }
 
     const history = getHistoryForAI(historyKey, isDMOwner);
-    const { text, sources } = await runAgent(finalQuestion, history, isDMOwner, async () => {
-      await message.channel.sendTyping().catch(() => {});
-    }, scamSystemPrompt).catch(async (agentErr) => {
-      console.log('[bot] runAgent gagal, fallback ke askGemini:', agentErr.message?.slice(0, 100));
-      return askGemini(finalQuestion, history, isDMOwner);
-    });
+
+    let text, sources;
+    if (scamSystemPrompt) {
+      // Scam analysis: AI langsung tanpa tool loop — data sudah lengkap dari runScamAnalysis
+      const scamResp = await askGemini(finalQuestion, history, isDMOwner, [], scamSystemPrompt)
+        .catch(async (err) => {
+          console.error('[bot] askGemini scam gagal:', err.message?.slice(0, 100));
+          return askGemini(finalQuestion, history, isDMOwner);
+        });
+      text = scamResp.text;
+      sources = scamResp.sources || [];
+    } else {
+      // Pertanyaan biasa: pakai agent dengan tools real-time
+      const agentTyping = setInterval(() => { message.channel.sendTyping().catch(() => {}); }, 8000);
+      const agentResp = await runAgent(finalQuestion, history, isDMOwner, async () => {
+        await message.channel.sendTyping().catch(() => {});
+      }).catch(async (agentErr) => {
+        console.log('[bot] runAgent gagal, fallback ke askGemini:', agentErr.message?.slice(0, 100));
+        return askGemini(finalQuestion, history, isDMOwner);
+      });
+      clearInterval(agentTyping);
+      text = agentResp.text;
+      sources = agentResp.sources || [];
+    }
 
     await pushHistory(historyKey, historyUserContent, text, isDMOwner);
 
